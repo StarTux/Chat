@@ -10,6 +10,12 @@ commands:
     aliases: [ ch ]
     description: Command interface
     permission: chat.chat
+  join:
+    description: Join a channel
+    permission: chat.chat
+  leave:
+    description: Leave a channel
+    permission: chat.chat
   chatadmin:
     aliases: [ chadmin ]
     description: Admin interface

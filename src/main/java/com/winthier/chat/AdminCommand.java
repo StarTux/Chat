@@ -17,8 +17,9 @@ public class AdminCommand implements CommandExecutor {
         if (args.length == 0) return false;
         String firstArg = args[0].toLowerCase();
         if (firstArg.equals("reload") && args.length == 1) {
-            ChatPlugin.getInstance().reloadConfig();
             SQLDB.reload();
+            ChatPlugin.getInstance().reloadConfig();
+            ChatPlugin.getInstance().loadChannels();
             Msg.info(sender, "Configs reloaded");
         } else if (firstArg.equals("debug") && args.length == 1) {
             boolean v = !ChatPlugin.getInstance().debugMode;

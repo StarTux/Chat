@@ -29,6 +29,10 @@ public class Msg {
         to.sendMessage(format("&r[&3Chat&r] ") + format(msg, args));
     }
 
+    public static void warn(CommandSender to, String msg, Object... args) {
+        to.sendMessage(format("&r[&cChat&r] &c") + format(msg, args));
+    }
+
     static void consoleCommand(String cmd, Object... args)
     {
         if (args.length > 0) cmd = String.format(cmd, args);

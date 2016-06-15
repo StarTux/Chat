@@ -65,6 +65,8 @@ public class ChatPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(chatListener, this);
         getCommand("chatadmin").setExecutor(new AdminCommand());
         getCommand("chat").setExecutor(new ChatCommand());
+        getCommand("join").setExecutor(new JoinLeaveCommand(true));
+        getCommand("leave").setExecutor(new JoinLeaveCommand(false));
     }
 
     void loadChannels() {
