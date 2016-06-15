@@ -18,7 +18,7 @@ import org.bukkit.entity.Player;
 public class PublicChannel extends AbstractChannel {
     @Override
     public void playerDidUseCommand(PlayerCommandContext c) {
-        if (!hasPermission(c.player)) return;
+        if (range < 0) return;
         if (!isJoined(c.player.getUniqueId())) {
             joinChannel(c.player.getUniqueId());
         }
@@ -27,13 +27,8 @@ public class PublicChannel extends AbstractChannel {
             Msg.info(c.player, "Now focusing %s&r", getTitle());
         } else {
             SQLLog.store(c.player, this, c.message);
-            Message message = new Message();
-            message.channel = getKey();
-            message.sender = c.player.getUniqueId();
-            message.senderName = c.player.getName();
-            message.message = c.message;
-            fillMessage(message);
-            ChatPlugin.getInstance().didCreateMessage(message);
+            Message message = makeMessage(c.player, c.message);
+            if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
             handleMessage(message);
         }        
     }
@@ -47,20 +42,6 @@ public class PublicChannel extends AbstractChannel {
         }
     }
 
-
-    public List<Option> getOptions() {
-        return Arrays.asList(
-            Option.colorOption("ChannelColor", "Channel Color", "white"),
-            Option.colorOption("TextColor", "Text Color", "white"),
-            Option.colorOption("SenderColor", "Sender Color", "white"),
-            Option.colorOption("BracketColor", "Bracket Color", "white"),
-            Option.bracketOption("BracketType", "Brackets", "angle"),
-            Option.booleanOption("ShowChannelTag", "Show Channel Tag", "1"),
-            Option.booleanOption("ShowPlayerTitle", "Show Player Title", "1"),
-            Option.booleanOption("LanguageFilter", "Language Filter", "1")
-            );
-    }
-
     void send(Message message, Player player) {
         UUID uuid = player.getUniqueId();
         String key = getKey();
@@ -70,32 +51,25 @@ public class PublicChannel extends AbstractChannel {
         ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", ChatColor.WHITE);
         ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", ChatColor.WHITE);
         BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
+        json.add("");
+        // Channel Tag
         if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", true)) {
-            json.add(bracketColor+bracketType.opening+channelColor+getTag()+bracketColor+bracketType.closing);
+            json.add(channelTag(channelColor, bracketColor, bracketType));
         }
-        if (message.senderTitle != null && SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", true)) {
-            json.add(bracketColor+bracketType.opening+Msg.format(message.senderTitle)+bracketColor+bracketType.closing);
+        // Server Tag
+        if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", true)) {
+            json.add(serverTag(message, channelColor, bracketColor, bracketType));
         }
-        json.add(senderColor+message.senderName);
-        json.add(bracketColor+":");
+        // Player Title
+        if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", true)) {
+            json.add(senderTitleTag(message, bracketColor, bracketType));
+        }
+        // Player Name
+        json.add(senderTag(message, senderColor));
+        json.add(Msg.button(bracketColor, ":", null, null));
         json.add(" ");
-        List<Object> sourceList;
-        if (SQLSetting.getBoolean(uuid, key, "LanguageFilter", true)) {
-            sourceList = message.languageFilterJson;
-        } else {
-            sourceList = message.json;
-        }
-        for (Object o: sourceList) {
-            if (o instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> map = (Map<String, Object>)o;
-                map = new HashMap<>(map);
-                map.put("color", textColor.name().toLowerCase());
-                json.add(map);
-            } else {
-                json.add(o);
-            }
-        }
+        // Message
+        appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
         Msg.raw(player, json);
     }
 }

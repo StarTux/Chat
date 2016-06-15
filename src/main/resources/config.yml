@@ -1,3 +1,5 @@
+ServerName: winthier
+ServerDisplayName: Winthier
 channels:
   global:
     tag: G
@@ -10,6 +12,11 @@ channels:
     aliases: [ local, l ]
     description: Local chat
     range: 500
+  pm:
+    tag: PM
+    title: Private
+    aliases: [ pm, tell, msg, w]
+    description: Private messages
 settings:
 - channel: global
   key: SenderColor
@@ -31,8 +38,21 @@ settings:
   key: BracketType
   value: paren
 - channel: local
+  key: ShowServer
+  value: 0
+
+- channel: pm
+  key: ChannelColor
+  value: dark_purple
+- channel: pm
+  key: TextColor
+  value: dark_purple
+- channel: pm
+  key: SenderColor
+  value: dark_purple
+- channel: pm
   key: BracketType
-  value: paren
+  value: angle
 patterns:
   URL:
   - ['\b(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?\b', website]

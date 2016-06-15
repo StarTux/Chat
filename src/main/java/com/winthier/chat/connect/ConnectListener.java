@@ -1,8 +1,10 @@
 package com.winthier.chat.connect;
 
 import com.winthier.chat.ChatPlugin;
+import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
 import com.winthier.connect.Connect;
+import com.winthier.connect.OnlinePlayer;
 import com.winthier.connect.bukkit.event.ConnectMessageEvent;
 import java.util.Map;
 import java.util.UUID;
@@ -10,11 +12,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 public class ConnectListener implements Listener {
-    final static String channel = "Chat";
+    final static String CHANNEL = "Chat";
     
     @EventHandler
     public void onConnectMessage(ConnectMessageEvent event) {
-        if (!event.getMessage().getChannel().equals("Chat")) return;
+        if (!event.getMessage().getChannel().equals(CHANNEL)) return;
         Object o = event.getMessage().getPayload();
         if (o instanceof Map) {
             @SuppressWarnings("unchecked")
@@ -30,7 +32,17 @@ public class ConnectListener implements Listener {
         return Connect.getInstance().getServer().getName();
     }
 
+    public String getServerDisplayName() {
+        return Connect.getInstance().getServer().getDisplayName();
+    }
+
     public void broadcastMessage(Message message) {
-        Connect.getInstance().broadcast("Chat", message.serialize());
+        Connect.getInstance().broadcast(CHANNEL, message.serialize());
+    }
+
+    public Chatter findPlayer(String name) {
+        OnlinePlayer op = Connect.getInstance().findOnlinePlayer(name);
+        if (op == null) return null;
+        return new Chatter(op.getUuid(), op.getName());
     }
 }

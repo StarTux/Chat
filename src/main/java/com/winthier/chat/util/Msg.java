@@ -32,7 +32,9 @@ public class Msg {
     static void consoleCommand(String cmd, Object... args)
     {
         if (args.length > 0) cmd = String.format(cmd, args);
-        // ChatPlugin.getInstance().getLogger().info("Running console command: " + cmd);
+        if (ChatPlugin.getInstance().debugMode) {
+            ChatPlugin.getInstance().getLogger().info("Running console command: " + cmd);
+        }
         Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
     }
 
@@ -46,18 +48,27 @@ public class Msg {
         }
     }
 
-    public static Object button(String chat, String tooltip, String command) {
+    public static Object button(ChatColor color, String chat, String tooltip, String command) {
         Map<String, Object> map = new HashMap<>();
         map.put("text", format(chat));
-        Map<String, Object> map2 = new HashMap<>();
-        map.put("clickEvent", map2);
-        map2.put("action", "run_command");
-        map2.put("value", command);
-        map2 = new HashMap<>();
-        map.put("hoverEvent", map2);
-        map2.put("action", "show_text");
-        map2.put("value", format(tooltip));
+        map.put("color", color.name().toLowerCase());
+        if (command != null) {
+            Map<String, Object> clickEvent = new HashMap<>();
+            map.put("clickEvent", clickEvent);
+            clickEvent.put("action", command.endsWith(" ") ? "suggest_command" : "run_command");
+            clickEvent.put("value", command);
+        }
+        if (tooltip != null) {
+            Map<String, Object> hoverEvent = new HashMap<>();
+            map.put("hoverEvent", hoverEvent);
+            hoverEvent.put("action", "show_text");
+            hoverEvent.put("value", format(tooltip));
+        }
         return map;
+    }
+
+    public static Object button(String chat, String tooltip, String command) {
+        return button(ChatColor.WHITE, chat, tooltip, command);
     }
 
     public static String camelCase(String msg) {

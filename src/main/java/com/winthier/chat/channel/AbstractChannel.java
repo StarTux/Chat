@@ -4,17 +4,23 @@ import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Message;
 import com.winthier.chat.MessageFilter;
 import com.winthier.chat.sql.SQLSetting;
+import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 @Getter @Setter
 public abstract class AbstractChannel implements Channel {
-    String title, key, tag;
+    String title, key, tag, description;
     List<String> aliases = new ArrayList<>();
+    int range = 0;
     public static enum BracketType {
         PAREN("(", ")"),
         BRACKETS("[", "]"),
@@ -62,6 +68,26 @@ public abstract class AbstractChannel implements Channel {
         return SQLSetting.getBoolean(player, getKey(), "Joined", false);
     }
 
+    @Override
+    public List<Option> getOptions() {
+        return Arrays.asList(
+            Option.colorOption("ChannelColor", "Channel Color", "white"),
+            Option.colorOption("TextColor", "Text Color", "white"),
+            Option.colorOption("SenderColor", "Player Color", "white"),
+            Option.colorOption("BracketColor", "Bracket Color", "white"),
+            Option.bracketOption("BracketType", "Brackets", "angle"),
+            Option.booleanOption("ShowChannelTag", "Show Channel Tag", "1"),
+            Option.booleanOption("ShowPlayerTitle", "Show Player Title", "1"),
+            Option.booleanOption("ShowServer", "Show Server", "1"),
+            Option.booleanOption("LanguageFilter", "Language Filter", "1")
+            );
+    }
+
+    @Override
+    public void playerDidUseChat(PlayerCommandContext context) {
+        playerDidUseCommand(context);
+    }
+
     void fillMessage(Message message) {
         if (message.senderTitle == null) {
             ChatPlugin.getInstance().loadTitle(message);
@@ -74,7 +100,62 @@ public abstract class AbstractChannel implements Channel {
         }
     }
 
-    public List<Option> getOptions() {
-        return new ArrayList<>();
+    Message makeMessage(Player player, String text) {
+        Message message = new Message();
+        message.channel = getKey();
+        message.sender = player.getUniqueId();
+        message.senderName = player.getName();
+        message.senderServer = ChatPlugin.getInstance().getServerName();
+        message.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
+        message.message = text;
+        fillMessage(message);
+        return message;
+    }
+
+    Object channelTag(ChatColor channelColor, ChatColor bracketColor, BracketType bracketType) {
+        return Msg.button(channelColor,
+                          bracketColor + bracketType.opening + channelColor + getTag() + bracketColor + bracketType.closing,
+                          getTitle() + "\n&d&o" + getDescription(),
+                          "/" + getKey() + " ");
+    }
+
+    Object serverTag(Message message, ChatColor serverColor, ChatColor bracketColor, BracketType bracketType) {
+        return Msg.button(serverColor,
+                          bracketColor + bracketType.opening + serverColor + message.senderServerDisplayName + bracketColor + bracketType.closing,
+                          null,
+                          null);
+    }
+
+    Object senderTitleTag(Message message, ChatColor bracketColor, BracketType bracketType) {
+        return Msg.button(
+            bracketColor,
+            bracketColor + bracketType.opening + Msg.format(message.senderTitle)+bracketColor + bracketType.closing,
+            Msg.format(message.senderTitle) +
+            (message.senderTitleDescription != null ? "\n&d&o" + message.senderTitleDescription : ""),
+            null);
+    }
+
+    Object senderTag(Message message, ChatColor senderColor) {
+        return Msg.button(senderColor,
+                          message.senderName,
+                          message.senderName +
+                          "\n&d&oTitle&r " + Msg.format(message.senderTitle) +
+                          "\n&d&oServer&r " + message.senderServerDisplayName,
+                          "/tell " + message.senderName + " ");
+    }
+
+    void appendMessage(List<Object> json, Message message, ChatColor textColor, boolean languageFilter) {
+        List<Object> sourceList = languageFilter ? message.languageFilterJson : message.json;
+        for (Object o: sourceList) {
+            if (o instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> map = (Map<String, Object>)o;
+                map = new HashMap<>(map);
+                map.put("color", textColor.name().toLowerCase());
+                json.add(map);
+            } else {
+                json.add(o);
+            }
+        }
     }
 }

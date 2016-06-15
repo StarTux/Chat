@@ -25,7 +25,7 @@ public class ChatListener implements Listener {
         if (!player.isValid()) return;
         Channel channel = ChatPlugin.getInstance().getFocusChannel(player.getUniqueId());
         if (channel == null) return;
-        channel.playerDidUseCommand(new PlayerCommandContext(player, null, message));
+        channel.playerDidUseChat(new PlayerCommandContext(player, null, message));
     }
 
     @EventHandler
@@ -36,8 +36,9 @@ public class ChatListener implements Listener {
         if (firstArg.startsWith("/")) firstArg = firstArg.substring(1);
         CommandResponder cmd = ChatPlugin.getInstance().findCommand(firstArg);
         if (cmd == null) return;
-        String msg = arr.length >= 2 ? arr[1] : null;
         event.setCancelled(true);
+        if (!cmd.hasPermission(event.getPlayer())) return;
+        String msg = arr.length >= 2 ? arr[1] : null;
         cmd.playerDidUseCommand(new PlayerCommandContext(event.getPlayer(), firstArg, msg));
     }
 

@@ -3,7 +3,7 @@ description: Cross server chat plugin for Winthier
 author: StarTux
 version: 0.1
 main: com.winthier.chat.ChatPlugin
-softdepend: [ Connect, Title, Vault ]
+softdepend: [ Connect, Title, Vault, PlayerCache ]
 database: true
 commands:
   chat:
@@ -34,10 +34,10 @@ commands:
   mini:
     permission: chat.channel.mini
   tell:
-    aliases: [ msg, pm, w, xtell, xmsg ]
+    aliases: [ msg, pm, w, tell, msg ]
     permission: chat.pm
   reply:
-    aliases: [ r, xreply, xr ]
+    aliases: [ r, reply ]
     permission: chat.pm
 permissions:
   chat.chat:

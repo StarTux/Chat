@@ -16,10 +16,14 @@ public class AdminCommand implements CommandExecutor {
         Player player = sender instanceof Player ? (Player)sender : null;
         if (args.length == 0) return false;
         String firstArg = args[0].toLowerCase();
-        if (firstArg.equals("reload")) {
+        if (firstArg.equals("reload") && args.length == 1) {
             ChatPlugin.getInstance().reloadConfig();
             SQLDB.reload();
-            Msg.send(sender, "Configs reloaded");
+            Msg.info(sender, "Configs reloaded");
+        } else if (firstArg.equals("debug") && args.length == 1) {
+            boolean v = !ChatPlugin.getInstance().debugMode;
+            ChatPlugin.getInstance().debugMode = v;
+            Msg.info(sender, "Debug mode %s", (v ? "enabled": "disabled"));
         } else if (firstArg.equals("testfilter") && args.length >= 2) {
             StringBuilder sb = new StringBuilder(args[1]);
             for (int i = 2; i < args.length; ++i) {

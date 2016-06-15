@@ -29,6 +29,8 @@ public class ChatPlugin extends JavaPlugin {
     VaultHandler vaultHandler = null;
     TitleHandler titleHandler = null;
     ChatListener chatListener = new ChatListener();
+    PrivateChannel privateChannel = null;
+    public boolean debugMode = false;
 
     @Override
     public void onEnable() {
@@ -67,11 +69,13 @@ public class ChatPlugin extends JavaPlugin {
 
     void loadChannels() {
         commandResponders.clear();
+        commandResponders.add(new ReplyCommand());
         channels.clear();
         for (SQLChannel chan: SQLChannel.fetch()) {
             CommandResponder cmd;
             if ("pm".equals(chan.getChannelKey())) {
-                cmd = new PrivateChannel();
+                privateChannel = new PrivateChannel();
+                cmd = privateChannel;
             } else if ("reply".equals(chan.getChannelKey())) {
                 cmd = new ReplyCommand();
             } else {
@@ -89,6 +93,10 @@ public class ChatPlugin extends JavaPlugin {
                 channel.setTag(chan.getTag());
                 channel.setKey(chan.getChannelKey());
                 channel.setTitle(chan.getTitle());
+                channel.setDescription(chan.getDescription());
+                if (chan.getLocalRange() != null) {
+                    channel.setRange(chan.getLocalRange());
+                }
             }
             commandResponders.add(cmd);
             if (cmd instanceof Channel) {
@@ -203,7 +211,12 @@ public class ChatPlugin extends JavaPlugin {
 
     public String getServerName() {
         if (connectListener != null) return connectListener.getServerName();
-        return getConfig().getString("ServerName", "winthier");
+        return getConfig().getString("ServerName", "N/A");
+    }
+
+    public String getServerDisplayName() {
+        if (connectListener != null) return connectListener.getServerDisplayName();
+        return getConfig().getString("ServerDisplayName", "N/A");
     }
 
     public void loadTitle(Message message) {
@@ -225,5 +238,17 @@ public class ChatPlugin extends JavaPlugin {
         if (channel != null) {
             channel.handleMessage(message);
         }
+    }
+
+    public Chatter findPlayer(String name) {
+        Player player = getServer().getPlayer(name);
+        if (player != null) {
+            return new Chatter(player.getUniqueId(), player.getName());
+        }
+        if (connectListener != null) {
+            Chatter chatter = connectListener.findPlayer(name);
+            if (chatter != null) return chatter;
+        }
+        return null;
     }
 }

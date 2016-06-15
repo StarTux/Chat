@@ -8,11 +8,16 @@ import java.util.UUID;
 
 public class Message {
     public UUID sender;
-    public String channel;
-    public UUID recipient;
     public String senderName;
+    public String channel;
+    public String special;
+    public UUID target;
+    public String targetName;
     public String senderTitle;
     public String senderTitleDescription;
+    public String senderServer;
+    public String senderServerDisplayName;
+    
     public String message;
     public List<Object> json;
     public List<Object> languageFilterJson;
@@ -42,11 +47,15 @@ public class Message {
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         store(map, "sender", sender.toString());
-        store(map, "channel", channel);
-        store(map, "recipient", recipient.toString());
         store(map, "senderName", senderName);
+        store(map, "channel", channel);
+        store(map, "special", special);
+        store(map, "target", target.toString());
+        store(map, "targetName", targetName);
         store(map, "senderTitle", senderTitle);
         store(map, "senderTitleDescription", senderTitleDescription);
+        store(map, "senderServer", senderServer);
+        store(map, "senderServerDisplayName", senderServerDisplayName);
         store(map, "json", json);
         store(map, "languageFilterJson", languageFilterJson);
         return map;
@@ -54,11 +63,15 @@ public class Message {
 
     private void read(Map<String, Object> map) {
         sender = fetchUuid(map, "sender");
-        channel = fetchString(map, "channel");
-        recipient = fetchUuid(map, "recipient");
         senderName = fetchString(map, "senderName");
+        channel = fetchString(map, "channel");
+        special = fetchString(map, "special");
+        target = fetchUuid(map, "target");
+        targetName = fetchString(map, "targetName");
         senderTitle = fetchString(map, "senderTitle");
         senderTitleDescription = fetchString(map, "senderTitleDescription");
+        senderServer = fetchString(map, "senderServer");
+        senderServer = fetchString(map, "senderServerDisplayName");
         message = fetchString(map, "message");
         json = fetchList(map, "json");
         languageFilterJson = fetchList(map, "languageFilterJson");

@@ -3,6 +3,7 @@ package com.winthier.chat.sql;
 import com.avaje.ebean.validation.Length;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
+import com.winthier.chat.ChatPlugin;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
@@ -61,6 +63,8 @@ public class SQLSetting {
     void setGenericValue(Object value) {
         if (value == null) {
             setSettingValue(null);
+        } else if (value instanceof String) {
+            setSettingValue((String)value);
         } else if (value instanceof Boolean) {
             Boolean bv = (Boolean)value;
             setSettingValue(bv ? "1" : "0");
@@ -102,15 +106,33 @@ public class SQLSetting {
         return findSettings(uuid).map.get(new Key(uuid, channel, key));
     }
 
+    private static void clearCache(UUID uuid) {
+        if (uuid == null) {
+            defaultSettings = null;
+        } else {
+            cache.remove(uuid);
+        }
+    }
+
     public static SQLSetting set(UUID uuid, String channel, String key, Object value) {
         SQLSetting result = find(uuid, channel, key);
         if (result == null) {
             result = new SQLSetting(uuid, channel, key, value);
             findSettings(uuid).map.put(new Key(uuid, channel, key), result);
-            SQLDB.get().save(result);
+            try {
+                SQLDB.get().save(result);
+            } catch (PersistenceException pe) {
+                clearCache(uuid);
+                ChatPlugin.getInstance().getLogger().warning(String.format("SQLSetting: Persistence Exception while storing %s,%s,%s. Clearing cache.", uuid, channel, key));
+            }
         } else {
             result.setGenericValue(value);
-            SQLDB.get().save(result);
+            try {
+                SQLDB.get().save(result);
+            } catch (PersistenceException pe) {
+                clearCache(uuid);
+                ChatPlugin.getInstance().getLogger().warning(String.format("SQLSetting: Persistence Exception while storing %s,%s,%s. Clearing cache.", uuid, channel, key));
+            }
         }
         return result;
     }
@@ -135,6 +157,15 @@ public class SQLSetting {
         if (v == null) return null;
         try {
             return ChatColor.valueOf(v.toUpperCase());
+        } catch (IllegalArgumentException iae) {}
+        return null;
+    }
+
+    UUID getSettingUuid() {
+        String v = getSettingValue();
+        if (v == null) return null;
+        try {
+            return UUID.fromString(v);
         } catch (IllegalArgumentException iae) {}
         return null;
     }
@@ -180,6 +211,17 @@ public class SQLSetting {
         }
         setting = find(null, channel, key);
         if (setting != null && setting.getChatColor() != null) return setting.getChatColor();
+        return dfl;
+    }
+
+    public static UUID getUuid(UUID uuid, String channel, String key, UUID dfl) {
+        SQLSetting setting;
+        if (uuid != null) {
+            setting = find(uuid, channel, key);
+            if (setting != null && setting.getSettingUuid() != null) return setting.getSettingUuid();
+        }
+        setting = find(null, channel, key);
+        if (setting != null && setting.getSettingUuid() != null) return setting.getSettingUuid();
         return dfl;
     }
 }
