@@ -4,6 +4,7 @@ import com.avaje.ebean.EbeanServer;
 import com.winthier.chat.ChatPlugin;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import javax.persistence.PersistenceException;
 
 public class SQLDB {
@@ -37,5 +38,10 @@ public class SQLDB {
         SQLSetting.defaultSettings = null;
         SQLIgnore.cache.clear();
         SQLPattern.cache = null;
+    }
+
+    public static void clear(UUID uuid) {
+        SQLSetting.clearCache(uuid);
+        SQLIgnore.clearCache(uuid);
     }
 }

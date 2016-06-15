@@ -17,7 +17,7 @@ commands:
     description: Leave a channel
     permission: chat.chat
   chatadmin:
-    aliases: [ chadmin ]
+    aliases: [ chadmin, chadm ]
     description: Admin interface
     permission: chat.admin
   global:
@@ -27,7 +27,7 @@ commands:
     aliases: [ l ]
     permission: chat.channel.local
   trusted:
-    aliases: [ tr ]
+    aliases: [ tr, st ]
     permission: chat.channel.trusted
   moderator:
     aliases: [ mc ]

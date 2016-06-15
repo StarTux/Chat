@@ -33,17 +33,17 @@ public class ChatCommand implements CommandExecutor {
             if (player == null) return false;
             UUID uuid = player.getUniqueId();
             if (args.length == 1) {
-                List<Object> json = new ArrayList<>();
-                json.add(Msg.format("&oSettings for Channel"));
-                for (Channel channel: ChatPlugin.getInstance().getChannels()) {
-                    if (!channel.hasPermission(player)) continue;
-                    json.add(" ");
-                    json.add(Msg.button("&r["+SQLSetting.getChatColor(uuid, channel.getKey(), "ChannelColor", ChatColor.WHITE)+channel.getTag()+"&r]", channel.getTitle(), "/ch set "+channel.getKey()));
-                }
-                Msg.raw(player, json);
             } else if (args.length == 2) {
                 Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
                 if (channel == null || !channel.hasPermission(player)) return false;
+                showSettingsMenu(player, channel);
+            } else if (args.length == 3 && args[2].equals("reset")) {
+                Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
+                if (channel == null || !channel.hasPermission(player)) return false;
+                for (Option option: channel.getOptions()) {
+                    SQLSetting.set(uuid, channel.getKey(), option.key, null);
+                }
+                Msg.info(player, "&aSettings reset to default");
                 showSettingsMenu(player, channel);
             } else if (args.length == 4) {
                 Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
@@ -59,6 +59,18 @@ public class ChatCommand implements CommandExecutor {
             } else {
                 return false;
             }
+        } else if (firstArg.equals("list") && args.length == 1) {
+            listChannels(player);
+        } else if (firstArg.equals("join") && args.length == 2) {
+            Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
+            if (channel == null || !channel.hasPermission(player)) return false;
+            channel.joinChannel(player.getUniqueId());
+            listChannels(player);
+        } else if (firstArg.equals("leave") && args.length == 2) {
+            Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
+            if (channel == null || !channel.hasPermission(player)) return false;
+            channel.leaveChannel(player.getUniqueId());
+            listChannels(player);
         }
         return true;
     }
@@ -79,9 +91,18 @@ public class ChatCommand implements CommandExecutor {
 
     void showMenu(Player player) {
         if (player == null) return;
+        Msg.info(player, "&3Menu");
         List<Object> json = new ArrayList<>();
-        json.add(Msg.format("&oChat Menu "));
-        json.add(Msg.button("&r[&9Settings&r]", "Settings Menu", "/ch set"));
+        json.add(Msg.format("&oChannel Settings"));
+        for (Channel channel: ChatPlugin.getInstance().getChannels()) {
+            if (!channel.hasPermission(player)) continue;
+            json.add(" ");
+            json.add(Msg.button("&r["+SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE)+channel.getTag()+"&r]", channel.getTitle(), "/ch set "+channel.getKey()));
+        }
+        Msg.raw(player, json);
+        json.clear();
+        json.add(Msg.format("&oChannel List "));
+        json.add(Msg.button(ChatColor.BLUE, "&r[&9List&r]", "Channel List", "/ch list"));
         Msg.raw(player, json);
     }
 
@@ -103,6 +124,29 @@ public class ChatCommand implements CommandExecutor {
                     json.add(Msg.button(state.color+state.displayName, state.description, "/ch set "+channel.getKey()+" "+option.key+" "+state.value));
                 }
             }
+            Msg.raw(player, json);
+        }
+        json.clear();
+        json.add(Msg.button(ChatColor.DARK_RED, "&r[&4Reset&r]", "&4Reset to channel defaults.", "/ch set "+channel.getKey()+" reset"));
+        Msg.raw(player, json);
+    }
+
+    void listChannels(Player player) {
+        if (player == null) return;
+        Msg.info(player, "3Channel List");
+        for (Channel channel: ChatPlugin.getInstance().getChannels()) {
+            List<Object> json = new ArrayList<>();
+            if (!channel.hasPermission(player)) continue;
+            json.add(" ");
+            if (channel.isJoined(player.getUniqueId())) {
+                json.add(Msg.button(ChatColor.GREEN, "x", "Leave " + channel.getTitle(), "/ch leave " + channel.getKey()));
+            } else {
+                json.add(Msg.button(ChatColor.RED, "o", "Join " + channel.getTitle(), "/ch join " + channel.getKey()));
+            }
+            json.add(" ");
+            json.add(Msg.button(SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE), channel.getTitle(), null, null));
+            json.add(Msg.button(ChatColor.DARK_GRAY, " - ", null, null));
+            json.add(Msg.button(ChatColor.GRAY, channel.getDescription(), null, null));
             Msg.raw(player, json);
         }
     }

@@ -10,13 +10,43 @@ channels:
     tag: L
     title: Local
     aliases: [ local, l ]
-    description: Local chat
+    description: Local chat with limited range
     range: 500
   pm:
     tag: PM
     title: Private
-    aliases: [ pm, tell, msg, w]
+    aliases: [ pm, tell, msg, w ]
     description: Private messages
+  party:
+    tag: P
+    title: Party
+    aliases: [ p ]
+    description: Party chat
+  admin:
+    tag: A
+    title: Admin
+    aliases: [ admin, a ]
+    description: Admin chat
+  moderator:
+    tag: Mc
+    title: Moderator
+    aliases: [ mc ]
+    description: Moderator chat
+  trusted:
+    tag: Tr
+    title: Trusted
+    aliases: [ tr, st ]
+    description: Trusted chat
+  information:
+    tag: Info
+    title: Info
+    aliases: [ info ]
+    description: General information
+  mini:
+    tag: Mini
+    title: Mini
+    aliases: [ mini ]
+    description: Minigames broadcasting
 settings:
 - channel: global
   key: SenderColor
@@ -53,6 +83,106 @@ settings:
 - channel: pm
   key: BracketType
   value: angle
+
+- channel: party
+  key: ChannelColor
+  value: blue
+- channel: party
+  key: TextColor
+  value: blue
+- channel: party
+  key: BracketType
+  value: paren
+- channel: party
+  key: ShowServer
+  value: 0
+
+- channel: admin
+  key: ChannelColor
+  value: aqua
+- channel: admin
+  key: BracketType
+  value: curly
+- channel: admin
+  key: BracketColor
+  value: aqua
+- channel: admin
+  key: SenderColor
+  value: white
+- channel: admin
+  key: TextColor
+  value: aqua
+- channel: admin
+  key: ShowChannelTag
+  value: 0
+- channel: admin
+  key: ShowServer
+  value: 0
+- channel: admin
+  key: ShowPlayerTitle
+  value: 0
+- channel: admin
+  key: TagPlayerName
+  value: 1
+
+- channel: moderator
+  key: ChannelColor
+  value: red
+- channel: moderator
+  key: BracketType
+  value: brackets
+- channel: moderator
+  key: BracketColor
+  value: gray
+- channel: moderator
+  key: SenderColor
+  value: red
+- channel: moderator
+  key: TextColor
+  value: gray
+- channel: moderator
+  key: ShowChannelTag
+  value: 0
+- channel: moderator
+  key: ShowServer
+  value: 0
+- channel: moderator
+  key: ShowPlayerTitle
+  value: 0
+
+- channel: trusted
+  key: ChannelColor
+  value: blue
+- channel: trusted
+  key: BracketType
+  value: brackets
+- channel: trusted
+  key: BracketColor
+  value: gold
+- channel: trusted
+  key: SenderColor
+  value: blue
+- channel: trusted
+  key: TextColor
+  value: gold
+- channel: trusted
+  key: ShowChannelTag
+  value: 0
+- channel: trusted
+  key: ShowServer
+  value: 0
+- channel: trusted
+  key: ShowPlayerTitle
+  value: 0
+
+- channel: information
+  key: ChannelColor
+  value: dark_gray
+
+- channel: mini
+  key: ChannelColor
+  value: gold
+
 patterns:
   URL:
   - ['\b(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?\b', website]

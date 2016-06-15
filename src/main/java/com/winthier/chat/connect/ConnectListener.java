@@ -6,6 +6,8 @@ import com.winthier.chat.Message;
 import com.winthier.connect.Connect;
 import com.winthier.connect.OnlinePlayer;
 import com.winthier.connect.bukkit.event.ConnectMessageEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.event.EventHandler;
@@ -44,5 +46,13 @@ public class ConnectListener implements Listener {
         OnlinePlayer op = Connect.getInstance().findOnlinePlayer(name);
         if (op == null) return null;
         return new Chatter(op.getUuid(), op.getName());
+    }
+
+    public List<Chatter> getOnlinePlayers() {
+        List<Chatter> result = new ArrayList<>();
+        for (OnlinePlayer op: Connect.getInstance().getOnlinePlayers()) {
+            result.add(new Chatter(op.getUuid(), op.getName()));
+        }
+        return result;
     }
 }

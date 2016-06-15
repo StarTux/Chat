@@ -45,7 +45,7 @@ public abstract class AbstractChannel implements Channel {
 
     @Override
     public boolean hasPermission(Player player) {
-        return player.hasPermission("chat.channel." + getKey());
+        return player.hasPermission("chat.channel." + getKey()) || player.hasPermission("chat.channel.*");
     }
 
     @Override
@@ -65,12 +65,13 @@ public abstract class AbstractChannel implements Channel {
     
     @Override
     public boolean isJoined(UUID player) {
-        return SQLSetting.getBoolean(player, getKey(), "Joined", false);
+        return SQLSetting.getBoolean(player, getKey(), "Joined", true);
     }
 
     @Override
     public List<Option> getOptions() {
         return Arrays.asList(
+            Option.booleanOption("Joined", "Listening", "1"),
             Option.colorOption("ChannelColor", "Channel Color", "white"),
             Option.colorOption("TextColor", "Text Color", "white"),
             Option.colorOption("SenderColor", "Player Color", "white"),
@@ -115,7 +116,7 @@ public abstract class AbstractChannel implements Channel {
     Object channelTag(ChatColor channelColor, ChatColor bracketColor, BracketType bracketType) {
         return Msg.button(channelColor,
                           bracketColor + bracketType.opening + channelColor + getTag() + bracketColor + bracketType.closing,
-                          getTitle() + "\n&d&o" + getDescription(),
+                          getTitle() + "\n&5&o" + getDescription(),
                           "/" + getKey() + " ");
     }
 
@@ -129,18 +130,18 @@ public abstract class AbstractChannel implements Channel {
     Object senderTitleTag(Message message, ChatColor bracketColor, BracketType bracketType) {
         return Msg.button(
             bracketColor,
-            bracketColor + bracketType.opening + Msg.format(message.senderTitle)+bracketColor + bracketType.closing,
+            bracketColor + bracketType.opening + Msg.format(message.senderTitle) + bracketColor + bracketType.closing,
             Msg.format(message.senderTitle) +
-            (message.senderTitleDescription != null ? "\n&d&o" + message.senderTitleDescription : ""),
+            (message.senderTitleDescription != null ? "\n&5&o" + message.senderTitleDescription : ""),
             null);
     }
 
-    Object senderTag(Message message, ChatColor senderColor) {
+    Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
         return Msg.button(senderColor,
-                          message.senderName,
+                          useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName,
                           message.senderName +
-                          "\n&d&oTitle&r " + Msg.format(message.senderTitle) +
-                          "\n&d&oServer&r " + message.senderServerDisplayName,
+                          "\n&5&oTitle&r " + Msg.format(message.senderTitle) +
+                          "\n&5&oServer&r " + message.senderServerDisplayName,
                           "/tell " + message.senderName + " ");
     }
 
@@ -149,7 +150,7 @@ public abstract class AbstractChannel implements Channel {
         for (Object o: sourceList) {
             if (o instanceof Map) {
                 @SuppressWarnings("unchecked")
-                Map<String, Object> map = (Map<String, Object>)o;
+                    Map<String, Object> map = (Map<String, Object>)o;
                 map = new HashMap<>(map);
                 map.put("color", textColor.name().toLowerCase());
                 json.add(map);

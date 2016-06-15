@@ -43,7 +43,7 @@ public class SQLIgnore {
 
     public static Ignores findIgnores(UUID player) {
 	Ignores result = cache.get(player);
-	if (result == null) {
+	if (result == null || result.tooOld()) {
             result = new Ignores();
 	    for (SQLIgnore ignore: SQLDB.get().find(SQLIgnore.class).where().eq("player", player).findList()) {
                 result.map.put(ignore.getPlayer(), ignore);
@@ -73,5 +73,9 @@ public class SQLIgnore {
                 return true;
             }
         }
+    }
+
+    static void clearCache(UUID uuid) {
+        cache.remove(uuid);
     }
 }

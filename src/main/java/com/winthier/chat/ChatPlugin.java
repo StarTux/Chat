@@ -30,6 +30,7 @@ public class ChatPlugin extends JavaPlugin {
     TitleHandler titleHandler = null;
     ChatListener chatListener = new ChatListener();
     PrivateChannel privateChannel = null;
+    PartyChannel partyChannel = null;
     public boolean debugMode = false;
 
     @Override
@@ -71,25 +72,25 @@ public class ChatPlugin extends JavaPlugin {
 
     void loadChannels() {
         commandResponders.clear();
-        commandResponders.add(new ReplyCommand());
         channels.clear();
         for (SQLChannel chan: SQLChannel.fetch()) {
             CommandResponder cmd;
             if ("pm".equals(chan.getChannelKey())) {
+                commandResponders.add(new ReplyCommand());
                 privateChannel = new PrivateChannel();
                 cmd = privateChannel;
+            } else if ("party".equals(chan.getChannelKey())) {
+                commandResponders.add(new PartyCommand());
+                partyChannel = new PartyChannel();
+                cmd = partyChannel;
             } else if ("reply".equals(chan.getChannelKey())) {
                 cmd = new ReplyCommand();
             } else {
                 cmd = new PublicChannel();
             }
-            Set<String> aliases = new HashSet<>();
-            aliases.add(chan.getChannelKey().toLowerCase());
-            aliases.add(chan.getTag().toLowerCase());
             for (String ali: chan.getAliases().split(",")) {
-                aliases.add(ali.toLowerCase());
+                cmd.getAliases().add(ali.toLowerCase());
             }
-            cmd.getAliases().addAll(aliases);
             if (cmd instanceof AbstractChannel) {
                 AbstractChannel channel = (AbstractChannel)cmd;
                 channel.setTag(chan.getTag());
@@ -252,5 +253,17 @@ public class ChatPlugin extends JavaPlugin {
             if (chatter != null) return chatter;
         }
         return null;
+    }
+
+    public List<Chatter> getOnlinePlayers() {
+        if (connectListener != null) {
+            return connectListener.getOnlinePlayers();
+        } else {
+            List<Chatter> result = new ArrayList<>();
+            for (Player player: getServer().getOnlinePlayers()) {
+                result.add(new Chatter(player.getUniqueId(), player.getName()));
+            }
+            return result;
+        }
     }
 }

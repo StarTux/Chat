@@ -106,7 +106,7 @@ public class SQLSetting {
         return findSettings(uuid).map.get(new Key(uuid, channel, key));
     }
 
-    private static void clearCache(UUID uuid) {
+    static void clearCache(UUID uuid) {
         if (uuid == null) {
             defaultSettings = null;
         } else {

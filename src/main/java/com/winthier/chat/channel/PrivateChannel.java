@@ -36,6 +36,7 @@ public class PrivateChannel extends AbstractChannel {
         ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", ChatColor.WHITE);
         ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", ChatColor.WHITE);
         ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", ChatColor.WHITE);
+        boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
         BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
         json.add("");
         // Channel Tag
@@ -54,7 +55,7 @@ public class PrivateChannel extends AbstractChannel {
             json.add(senderTitleTag(message, bracketColor, bracketType));
         }
         // Player Name
-        json.add(senderTag(message, senderColor));
+        json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
         json.add(Msg.button(bracketColor, ":", null, null));
         json.add(" ");
         // Message
