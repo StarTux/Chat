@@ -58,7 +58,7 @@ public class ChatPlugin extends JavaPlugin {
             titleHandler = new TitleHandler();
             getLogger().warning("Title plugin found!");
         } else {
-            getLogger().warning("Title plugin found!");
+            getLogger().warning("Title plugin NOT found!");
         }
         getServer().getPluginManager().registerEvents(chatListener, this);
         getCommand("chatadmin").setExecutor(new AdminCommand());
