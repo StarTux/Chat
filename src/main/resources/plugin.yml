@@ -1,0 +1,68 @@
+name: Chat
+description: Cross server chat plugin for Winthier
+author: StarTux
+version: 0.1
+main: com.winthier.chat.ChatPlugin
+softdepend: [ Connect, Title, Vault ]
+database: true
+commands:
+  chat:
+    aliases: [ ch ]
+    description: Command interface
+    permission: chat.chat
+  chatadmin:
+    aliases: [ chadmin ]
+    description: Admin interface
+    permission: chat.admin
+  global:
+    aliases: [ g ]
+    permission: chat.channel.global
+  local:
+    aliases: [ l ]
+    permission: chat.channel.local
+  trusted:
+    aliases: [ tr ]
+    permission: chat.channel.trusted
+  moderator:
+    aliases: [ mc ]
+    permission: chat.channel.moderator
+  admin:
+    aliases: [ a ]
+    permission: chat.channel.admin
+  information:
+    permission: chat.channel.information
+  mini:
+    permission: chat.channel.mini
+  tell:
+    aliases: [ msg, pm, w, xtell, xmsg ]
+    permission: chat.pm
+  reply:
+    aliases: [ r, xreply, xr ]
+    permission: chat.pm
+permissions:
+  chat.chat:
+    description: Use /chat
+    default: op
+  chat.pm:
+    default: false
+  chat.url:
+    default: false
+  chat.color:
+    default: false
+  chat.staff:
+    default: false
+  chat.channel.global:
+    default: false
+  chat.channel.local:
+    default: false
+  chat.channel.trusted:
+    default: false
+  chat.channel.moderator:
+    default: false
+  chat.channel.admin:
+    default: false
+  chat.channel.information:
+    default: false
+  chat.channel.mini:
+    default: false
+    
