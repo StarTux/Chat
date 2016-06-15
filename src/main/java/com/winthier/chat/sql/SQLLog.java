@@ -33,9 +33,10 @@ public class SQLLog {
     @NotNull String world;
     @NotNull Integer x, y, z;
     @NotNull String channel;
+    String target;
     @NotNull String message;
 
-    private SQLLog(Player player, Channel channel, String message) {
+    private SQLLog(Player player, Channel channel, String target, String message) {
         setPlayer(player.getUniqueId());
         setTime(new Date());
         setServer(ChatPlugin.getInstance().getServerName());
@@ -45,11 +46,12 @@ public class SQLLog {
         setY(loc.getBlockY());
         setZ(loc.getBlockZ());
         setChannel(channel.getKey());
+        setTarget(target);
         setMessage(message);
     }
 
-    public static void store(Player player, Channel channel, String message) {
-        SQLLog log = new SQLLog(player, channel, message);
+    public static void store(Player player, Channel channel, String target, String message) {
+        SQLLog log = new SQLLog(player, channel, target, message);
         SQLDB.get().save(log);
     }
 }

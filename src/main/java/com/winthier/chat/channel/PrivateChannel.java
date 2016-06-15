@@ -3,6 +3,7 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
+import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
@@ -129,6 +130,7 @@ public class PrivateChannel extends AbstractChannel {
     }
 
     void talk(Player player, Chatter target, String msg) {
+        SQLLog.store(player, this, target.getUuid().toString(), msg);
         Message message = makeMessage(player, msg);
         message.target = target.getUuid();
         message.targetName = target.getName();

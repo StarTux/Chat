@@ -26,7 +26,7 @@ public class PublicChannel extends AbstractChannel {
             setFocusChannel(c.player.getUniqueId());
             Msg.info(c.player, "Now focusing %s&r", getTitle());
         } else {
-            SQLLog.store(c.player, this, c.message);
+            SQLLog.store(c.player, this, null, c.message);
             Message message = makeMessage(c.player, c.message);
             if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
             handleMessage(message);
