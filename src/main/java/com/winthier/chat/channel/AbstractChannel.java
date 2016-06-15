@@ -16,7 +16,7 @@ public abstract class AbstractChannel implements Channel {
     String title, key, tag;
     List<String> aliases = new ArrayList<>();
     public static enum BracketType {
-        ELLIPES("(", ")"),
+        PAREN("(", ")"),
         BRACKETS("[", "]"),
         CURLY("{", "}"),
         ANGLE("<", ">")

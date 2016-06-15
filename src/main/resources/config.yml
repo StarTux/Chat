@@ -20,9 +20,19 @@ settings:
 - channel: global
   key: ChannelColor
   value: white
+
 - channel: local
   key: ChannelColor
   value: dark_aqua
+- channel: local
+  key: TextColor
+  value: dark_aqua
+- channel: local
+  key: BracketType
+  value: paren
+- channel: local
+  key: BracketType
+  value: paren
 patterns:
   URL:
   - ['\b(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?\b', website]

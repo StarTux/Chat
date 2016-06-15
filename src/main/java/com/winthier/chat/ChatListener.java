@@ -21,8 +21,8 @@ public class ChatListener implements Listener {
         }.runTask(ChatPlugin.getInstance());
     }
 
-    @EventHandler
     void onPlayerChat(Player player, String message) {
+        if (!player.isValid()) return;
         Channel channel = ChatPlugin.getInstance().getFocusChannel(player.getUniqueId());
         if (channel == null) return;
         channel.playerDidUseCommand(new PlayerCommandContext(player, null, message));
@@ -30,7 +30,6 @@ public class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        System.out.println("cmd " + event.getPlayer().getName() + " " + event.getMessage());
         final String[] arr = event.getMessage().split("\\s+", 2);
         if (arr.length < 1) return;
         String firstArg = arr[0];

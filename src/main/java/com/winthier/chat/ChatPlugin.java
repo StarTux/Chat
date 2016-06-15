@@ -91,8 +91,6 @@ public class ChatPlugin extends JavaPlugin {
                 channel.setTitle(chan.getTitle());
             }
             commandResponders.add(cmd);
-        }
-        for (CommandResponder cmd: commandResponders) {
             if (cmd instanceof Channel) {
                 channels.add((Channel)cmd);
             }
@@ -200,8 +198,7 @@ public class ChatPlugin extends JavaPlugin {
 
     public Channel getFocusChannel(UUID uuid) {
         String channelName = SQLSetting.getString(uuid, null, "FocusChannel", "g");
-        Channel channel = findChannel(channelName);
-        return null;
+        return findChannel(channelName);
     }
 
     public String getServerName() {
