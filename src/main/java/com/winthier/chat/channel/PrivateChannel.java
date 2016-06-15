@@ -3,6 +3,7 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
+import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
@@ -23,8 +24,18 @@ public class PrivateChannel extends AbstractChannel {
     }
 
     public void handleMessage(Message message) {
-        Player player = Bukkit.getServer().getPlayer(message.sender);
-        if (player != null) sendMessage(message, player, message.special != null);
+        Player player = Bukkit.getServer().getPlayer(message.target);
+        if (player == null) return;
+        if (message.special == null) {
+            if (!hasPermission(player)) return;
+            if (!isJoined(player.getUniqueId())) return;
+        }
+        if (message.special != null || !SQLIgnore.doesIgnore(player.getUniqueId(), message.sender)) {
+            sendMessage(message, player, message.special != null);
+        }
+        if (message.special == null) {
+            sendAck(message, player);
+        }
     }
 
     void sendMessage(Message message, Player player, boolean ack) {
@@ -63,19 +74,21 @@ public class PrivateChannel extends AbstractChannel {
         Msg.raw(player, json);
         // Reply
         SQLSetting.set(uuid, key, "ReplyName", message.senderName);
-        // Ack
-        if (!ack) {
-            message.special = "Ack";
-            message.sender = player.getUniqueId();
-            message.senderName = player.getName();
-            message.senderTitle = null;
-            message.senderTitleDescription = null;
-            message.senderServer = ChatPlugin.getInstance().getServerName();
-            message.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
-            fillMessage(message);
-            ChatPlugin.getInstance().didCreateMessage(message);
-            handleMessage(message);
-        }
+    }
+
+    void sendAck(Message message, Player player) {
+        message.special = "Ack";
+        message.target = message.sender;
+        message.targetName = message.senderName;
+        message.sender = player.getUniqueId();
+        message.senderName = player.getName();
+        message.senderTitle = null;
+        message.senderTitleDescription = null;
+        message.senderServer = ChatPlugin.getInstance().getServerName();
+        message.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
+        fillMessage(message);
+        ChatPlugin.getInstance().didCreateMessage(message);
+        handleMessage(message);
     }
 
     @Override
@@ -86,7 +99,7 @@ public class PrivateChannel extends AbstractChannel {
             return;
         }
         String targetName = arr[0];
-        Chatter target = ChatPlugin.getInstance().findPlayer(targetName);
+        Chatter target = ChatPlugin.getInstance().getOnlinePlayer(targetName);
         if (target == null) {
             Msg.send(context.player, "&cPlayer not found: %s", targetName);
             return;
@@ -104,7 +117,7 @@ public class PrivateChannel extends AbstractChannel {
     public void playerDidUseChat(PlayerCommandContext context) {
         String focusName = SQLSetting.getString(context.player.getUniqueId(), getKey(), "FocusName", null);
         if (focusName == null) return;
-        Chatter target = ChatPlugin.getInstance().findPlayer(focusName);
+        Chatter target = ChatPlugin.getInstance().getOnlinePlayer(focusName);
         if (target == null) {
             Msg.send(context.player, "&cPlayer not found: %s", focusName);
             return;
@@ -115,7 +128,7 @@ public class PrivateChannel extends AbstractChannel {
     void reply(PlayerCommandContext context) {
         String replyName = SQLSetting.getString(context.player.getUniqueId(), getKey(), "ReplyName", null);
         if (replyName == null) return;
-        Chatter target = ChatPlugin.getInstance().findPlayer(replyName);
+        Chatter target = ChatPlugin.getInstance().getOnlinePlayer(replyName);
         if (target == null) {
             Msg.send(context.player, "&cPlayer not found: %s", replyName);
             return;

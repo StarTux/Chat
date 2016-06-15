@@ -57,6 +57,13 @@
       <version>0.1</version>
       <scope>provided</scope>
     </dependency>
+    <!-- PlayerCache -->
+    <dependency>
+      <groupId>com.winthier.playercache</groupId>
+      <artifactId>playercache</artifactId>
+      <version>0.1</version>
+      <scope>provided</scope>
+    </dependency>
     <!-- Vault -->
     <dependency>
       <groupId>net.milkbowl.vault</groupId>

@@ -4,6 +4,7 @@ import com.winthier.chat.MessageFilter;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.Option;
 import com.winthier.chat.sql.SQLDB;
+import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
@@ -71,6 +72,14 @@ public class ChatCommand implements CommandExecutor {
             if (channel == null || !channel.hasPermission(player)) return false;
             channel.leaveChannel(player.getUniqueId());
             listChannels(player);
+        } else if (firstArg.equals("ignore")) {
+            if (args.length == 1) {
+                listIgnores(player);
+            } else if (args.length == 2){
+                toggleIgnore(player, args[1]);
+            } else {
+                return false;
+            }
         }
         return true;
     }
@@ -97,7 +106,7 @@ public class ChatCommand implements CommandExecutor {
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
             if (!channel.hasPermission(player)) continue;
             json.add(" ");
-            json.add(Msg.button("&r["+SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE)+channel.getTag()+"&r]", channel.getTitle(), "/ch set "+channel.getKey()));
+            json.add(Msg.button("&r["+SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE)+channel.getTag()+"&r]", channel.getTitle(), "/ch set "+channel.getAlias()));
         }
         Msg.raw(player, json);
         json.clear();
@@ -119,29 +128,29 @@ public class ChatCommand implements CommandExecutor {
                 boolean active = false;
                 if (current != null && current.equals(state.value)) active = true;
                 if (active) {
-                    json.add(Msg.button("&r["+state.activeColor+state.displayName+"&r]", state.description, "/ch set "+channel.getKey()+" "+option.key+" "+state.value));
+                    json.add(Msg.button("&r["+state.activeColor+state.displayName+"&r]", state.description, "/ch set "+channel.getAlias()+" "+option.key+" "+state.value));
                 } else {
-                    json.add(Msg.button(state.color+state.displayName, state.description, "/ch set "+channel.getKey()+" "+option.key+" "+state.value));
+                    json.add(Msg.button(state.color+state.displayName, state.description, "/ch set "+channel.getAlias()+" "+option.key+" "+state.value));
                 }
             }
             Msg.raw(player, json);
         }
         json.clear();
-        json.add(Msg.button(ChatColor.DARK_RED, "&r[&4Reset&r]", "&4Reset to channel defaults.", "/ch set "+channel.getKey()+" reset"));
+        json.add(Msg.button(ChatColor.DARK_RED, "&r[&4Reset&r]", "&4Reset to channel defaults.", "/ch set "+channel.getAlias()+" reset"));
         Msg.raw(player, json);
     }
 
     void listChannels(Player player) {
         if (player == null) return;
-        Msg.info(player, "3Channel List");
+        Msg.info(player, "Channel List");
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
             List<Object> json = new ArrayList<>();
             if (!channel.hasPermission(player)) continue;
             json.add(" ");
             if (channel.isJoined(player.getUniqueId())) {
-                json.add(Msg.button(ChatColor.GREEN, "x", "Leave " + channel.getTitle(), "/ch leave " + channel.getKey()));
+                json.add(Msg.button(ChatColor.GREEN, "x", "Leave " + channel.getTitle(), "/ch leave " + channel.getAlias()));
             } else {
-                json.add(Msg.button(ChatColor.RED, "o", "Join " + channel.getTitle(), "/ch join " + channel.getKey()));
+                json.add(Msg.button(ChatColor.RED, "o", "Join " + channel.getTitle(), "/ch join " + channel.getAlias()));
             }
             json.add(" ");
             json.add(Msg.button(SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE), channel.getTitle(), null, null));
@@ -149,5 +158,39 @@ public class ChatCommand implements CommandExecutor {
             json.add(Msg.button(ChatColor.GRAY, channel.getDescription(), null, null));
             Msg.raw(player, json);
         }
+    }
+
+    void listIgnores(Player player) {
+        UUID uuid = player.getUniqueId();
+        List<Object> json = new ArrayList<>();
+        json.add(Msg.format("&oIgnoring"));
+        int count = 0;
+        for (UUID ign: SQLIgnore.listIgnores(uuid)) {
+            Chatter chatter = ChatPlugin.getInstance().findOfflinePlayer(ign);
+            if (chatter == null) continue;
+            count += 1;
+            json.add(" ");
+            json.add(Msg.button(ChatColor.RED, chatter.getName(), "Click to unignore " + chatter.getName(), "/ch ignore " + chatter.getName()));
+        }
+        if (count == 0) {
+            json.add(" &anobody");
+        }
+        Msg.raw(player, json);
+    }
+
+    void toggleIgnore(Player player, String name) {
+        Chatter ignoree = ChatPlugin.getInstance().findOfflinePlayer(name);
+        if (ignoree == null) {
+            Msg.warn(player, "Player not found: %s.", name);
+            return;
+        }
+        if (SQLIgnore.doesIgnore(player.getUniqueId(), ignoree.getUuid())) {
+            SQLIgnore.ignore(player.getUniqueId(), ignoree.getUuid(), false);
+            Msg.info(player, "No longer ignoring %s.", ignoree.getName());
+        } else {
+            SQLIgnore.ignore(player.getUniqueId(), ignoree.getUuid(), true);
+            Msg.info(player, "Ignoring %s.", ignoree.getName());
+        }
+        listIgnores(player);
     }
 }

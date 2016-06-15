@@ -16,6 +16,9 @@ commands:
   leave:
     description: Leave a channel
     permission: chat.chat
+  ignore:
+    description: Ignore someone
+    permission: chat.chat
   chatadmin:
     aliases: [ chadmin, chadm ]
     description: Admin interface

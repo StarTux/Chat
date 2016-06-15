@@ -44,6 +44,11 @@ public abstract class AbstractChannel implements Channel {
     }
 
     @Override
+    public String getAlias() {
+        return getAliases().get(0);
+    }
+
+    @Override
     public boolean hasPermission(Player player) {
         return player.hasPermission("chat.channel." + getKey()) || player.hasPermission("chat.channel.*");
     }

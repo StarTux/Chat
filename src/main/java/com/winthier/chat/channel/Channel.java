@@ -10,6 +10,7 @@ public interface Channel extends CommandResponder {
     String getKey();
     String getTag();
     String getDescription();
+    String getAlias();
     void setFocusChannel(UUID player);
     void joinChannel(UUID player);
     void leaveChannel(UUID player);

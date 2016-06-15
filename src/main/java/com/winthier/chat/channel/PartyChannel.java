@@ -3,6 +3,7 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
+import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
@@ -34,7 +35,7 @@ public class PartyChannel extends AbstractChannel {
             setFocusChannel(c.player.getUniqueId());
             Msg.info(c.player, "Now focusing party %s&r", partyName);
         } else {
-            SQLLog.store(c.player, this, null, c.message);
+            SQLLog.store(c.player, this, partyName, c.message);
             Message message = makeMessage(c.player, c.message);
             message.targetName = partyName;
             if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
@@ -47,7 +48,8 @@ public class PartyChannel extends AbstractChannel {
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
-            if (!message.targetName.equals(getPartyName(player.getUniqueId()))) return;
+            if (SQLIgnore.doesIgnore(player.getUniqueId(), message.sender)) continue;
+            if (!message.targetName.equals(getPartyName(player.getUniqueId()))) continue;
             send(message, player);
         }
     }

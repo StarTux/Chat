@@ -3,11 +3,15 @@ package com.winthier.chat.sql;
 import com.avaje.ebean.validation.Length;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
+import com.winthier.chat.ChatPlugin;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.Getter;
@@ -46,7 +50,7 @@ public class SQLIgnore {
 	if (result == null || result.tooOld()) {
             result = new Ignores();
 	    for (SQLIgnore ignore: SQLDB.get().find(SQLIgnore.class).where().eq("player", player).findList()) {
-                result.map.put(ignore.getPlayer(), ignore);
+                result.map.put(ignore.getIgnoree(), ignore);
             }
             cache.put(player, result);
 	}
@@ -60,8 +64,13 @@ public class SQLIgnore {
                 return false;
             } else {
                 SQLIgnore entry = new SQLIgnore(player, ignoree);
-                SQLDB.get().save(entry);
                 ignores.map.put(ignoree, entry);
+                try {
+                    SQLDB.get().save(entry);
+                } catch (PersistenceException pe) {
+                    clearCache(player);
+                    ChatPlugin.getInstance().getLogger().warning(String.format("SQLIgnore: Persistence Exception while storing %s,%s. Clearing cache.", player, ignoree));
+                }
                 return true;
             }
         } else {
@@ -69,10 +78,27 @@ public class SQLIgnore {
             if (entry == null) {
                 return false;
             } else {
-                SQLDB.get().delete(entry);
+                try {
+                    SQLDB.get().delete(entry);
+                } catch (PersistenceException pe) {
+                    clearCache(player);
+                    ChatPlugin.getInstance().getLogger().warning(String.format("SQLIgnore: Persistence Exception while deleting %s,%s. Clearing cache.", player, ignoree));
+                }
                 return true;
             }
         }
+    }
+
+    public static List<UUID> listIgnores(UUID player) {
+        List<UUID> result = new ArrayList<>();
+        for (SQLIgnore ign: findIgnores(player).map.values()) {
+            result.add(ign.getIgnoree());
+        }
+        return result;
+    }
+
+    public static boolean doesIgnore(UUID player, UUID ignoree) {
+        return findIgnores(player).map.get(ignoree) != null;
     }
 
     static void clearCache(UUID uuid) {

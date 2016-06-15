@@ -2,6 +2,7 @@ package com.winthier.chat.channel;
 
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Message;
+import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
@@ -12,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class PublicChannel extends AbstractChannel {
@@ -35,9 +38,22 @@ public class PublicChannel extends AbstractChannel {
 
     public void handleMessage(Message message) {
         fillMessage(message);
+        Location senderLocation;
+        if (range > 0) {
+            Player sender = Bukkit.getServer().getPlayer(message.sender);
+            if (sender == null) return;
+            senderLocation = sender.getLocation();
+        } else {
+            senderLocation = null;
+        }
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
+            if (SQLIgnore.doesIgnore(player.getUniqueId(), message.sender)) continue;
+            if (range > 0) {
+                if (!senderLocation.getWorld().equals(player.getWorld())) continue;
+                if (senderLocation.distanceSquared(player.getLocation()) > range*range) continue;
+            }
             send(message, player);
         }
     }

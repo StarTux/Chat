@@ -2,6 +2,7 @@ package com.winthier.chat;
 
 import com.winthier.chat.channel.*;
 import com.winthier.chat.connect.ConnectListener;
+import com.winthier.chat.playercache.PlayerCacheHandler;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLPattern;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,6 +33,8 @@ public class ChatPlugin extends JavaPlugin {
     ChatListener chatListener = new ChatListener();
     PrivateChannel privateChannel = null;
     PartyChannel partyChannel = null;
+    PlayerCacheHandler playerCacheHandler = null;
+    ChatCommand chatCommand = new ChatCommand();
     public boolean debugMode = false;
 
     @Override
@@ -63,11 +67,18 @@ public class ChatPlugin extends JavaPlugin {
         } else {
             getLogger().warning("Title plugin NOT found!");
         }
+        if (getServer().getPluginManager().getPlugin("PlayerCache") != null) {
+            playerCacheHandler = new PlayerCacheHandler();
+            getLogger().info("PlayerCache plugin found!");
+        } else {
+            getLogger().warning("PlayerCache plugin NOT found!");
+        }
         getServer().getPluginManager().registerEvents(chatListener, this);
         getCommand("chatadmin").setExecutor(new AdminCommand());
-        getCommand("chat").setExecutor(new ChatCommand());
+        getCommand("chat").setExecutor(chatCommand);
         getCommand("join").setExecutor(new JoinLeaveCommand(true));
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
+        getCommand("ignore").setExecutor(new IgnoreCommand());
     }
 
     void loadChannels() {
@@ -243,7 +254,7 @@ public class ChatPlugin extends JavaPlugin {
         }
     }
 
-    public Chatter findPlayer(String name) {
+    public Chatter getOnlinePlayer(String name) {
         Player player = getServer().getPlayer(name);
         if (player != null) {
             return new Chatter(player.getUniqueId(), player.getName());
@@ -265,5 +276,30 @@ public class ChatPlugin extends JavaPlugin {
             }
             return result;
         }
+    }
+
+    public Chatter findOfflinePlayer(UUID uuid) {
+        if (playerCacheHandler != null) {
+            String name = playerCacheHandler.nameForUuid(uuid);
+            if (name == null) return null;
+            return new Chatter(uuid, name);
+        }
+        OfflinePlayer op = getServer().getOfflinePlayer(uuid);
+        if (op == null) return null;
+        return new Chatter(uuid, op.getName());
+    }
+
+    public Chatter findOfflinePlayer(String name) {
+        if (playerCacheHandler != null) {
+            UUID uuid = playerCacheHandler.uuidForName(name);
+            if (uuid == null) return null;
+            String name2 = playerCacheHandler.nameForUuid(uuid);
+            if (name2 != null) name = name2;
+            return new Chatter(uuid, name);
+        }
+        @SuppressWarnings("deprecation")
+        OfflinePlayer op = getServer().getOfflinePlayer(name);
+        if (op == null) return null;
+        return new Chatter(op.getUniqueId(), op.getName());
     }
 }
