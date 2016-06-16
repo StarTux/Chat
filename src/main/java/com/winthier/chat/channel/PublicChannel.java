@@ -38,6 +38,7 @@ public class PublicChannel extends AbstractChannel {
 
     public void handleMessage(Message message) {
         fillMessage(message);
+        ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s: %s", getTag(), message.senderServer, message.senderName, message.message));
         Location senderLocation;
         if (range > 0) {
             Player sender = Bukkit.getServer().getPlayer(message.sender);
@@ -70,11 +71,11 @@ public class PublicChannel extends AbstractChannel {
         BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
         json.add("");
         // Channel Tag
-        if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", true)) {
+        if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false)) {
             json.add(channelTag(channelColor, bracketColor, bracketType));
         }
         // Server Tag
-        if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", true)) {
+        if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", false)) {
             json.add(serverTag(message, channelColor, bracketColor, bracketType));
         }
         // Player Title
@@ -83,7 +84,7 @@ public class PublicChannel extends AbstractChannel {
         }
         // Player Name
         json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
-        json.add(Msg.button(bracketColor, ":", null, null));
+        if (!tagPlayerName) json.add(Msg.button(bracketColor, ":", null, null));
         json.add(" ");
         // Message
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));

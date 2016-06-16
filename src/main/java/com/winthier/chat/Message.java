@@ -24,12 +24,16 @@ public class Message {
 
     private static void store(Map<String, Object> map, String key, Object value) {
         if (value == null) return;
-        map.put(key, value);
+        if (value instanceof UUID) {
+            map.put(key, ((UUID)value).toString());
+        } else {
+            map.put(key, value);
+        }
     }
 
     private static String fetchString(Map<String, Object> map, String key) {
         Object result = map.get(key);
-        return key == null ? null : key.toString();
+        return result == null ? null : result.toString();
     }
 
     private static UUID fetchUuid(Map<String, Object> map, String key) {
@@ -46,11 +50,11 @@ public class Message {
     
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        store(map, "sender", sender.toString());
+        store(map, "sender", sender);
         store(map, "senderName", senderName);
         store(map, "channel", channel);
         store(map, "special", special);
-        store(map, "target", target.toString());
+        store(map, "target", target);
         store(map, "targetName", targetName);
         store(map, "senderTitle", senderTitle);
         store(map, "senderTitleDescription", senderTitleDescription);

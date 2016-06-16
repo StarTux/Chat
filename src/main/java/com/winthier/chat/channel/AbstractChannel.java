@@ -82,9 +82,9 @@ public abstract class AbstractChannel implements Channel {
             Option.colorOption("SenderColor", "Player Color", "white"),
             Option.colorOption("BracketColor", "Bracket Color", "white"),
             Option.bracketOption("BracketType", "Brackets", "angle"),
-            Option.booleanOption("ShowChannelTag", "Show Channel Tag", "1"),
+            Option.booleanOption("ShowChannelTag", "Show Channel Tag", "0"),
             Option.booleanOption("ShowPlayerTitle", "Show Player Title", "1"),
-            Option.booleanOption("ShowServer", "Show Server", "1"),
+            Option.booleanOption("ShowServer", "Show Server", "0"),
             Option.booleanOption("LanguageFilter", "Language Filter", "1")
             );
     }
@@ -146,7 +146,8 @@ public abstract class AbstractChannel implements Channel {
                           useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName,
                           message.senderName +
                           "\n&5&oTitle&r " + Msg.format(message.senderTitle) +
-                          "\n&5&oServer&r " + message.senderServerDisplayName,
+                          "\n&5&oServer&r " + message.senderServerDisplayName +
+                          "\n&5&oChannel&r " + getTitle(),
                           "/tell " + message.senderName + " ");
     }
 

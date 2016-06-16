@@ -96,6 +96,9 @@ settings:
 - channel: party
   key: ShowServer
   value: 0
+- channel: party
+  key: ShowChannelTag
+  value: 1
 
 - channel: admin
   key: ChannelColor

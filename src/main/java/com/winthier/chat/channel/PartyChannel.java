@@ -45,6 +45,7 @@ public class PartyChannel extends AbstractChannel {
 
     public void handleMessage(Message message) {
         fillMessage(message);
+        ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s][%s]%s: %s", getTag(), message.targetName, message.senderServer, message.senderName, message.message));
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
@@ -67,7 +68,7 @@ public class PartyChannel extends AbstractChannel {
         BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
         json.add("");
         // Channel Tag
-        if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", true)) {
+        if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false)) {
             json.add(channelTag(channelColor, bracketColor, bracketType));
         }
         // Party Name Tag
@@ -134,7 +135,7 @@ public class PartyChannel extends AbstractChannel {
 
     void listPlayers(Player player, String partyName) {
         List<Object> json = new ArrayList<>();
-        json.add(Msg.format("&oParty %s", partyName));
+        json.add(Msg.format("&oParty &a%s&r: ", partyName));
         ChatColor senderColor = SQLSetting.getChatColor(player.getUniqueId(), key, "SenderColor", ChatColor.WHITE);
         for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
             String otherPartyName = getPartyName(chatter.getUuid());

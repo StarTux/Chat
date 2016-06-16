@@ -24,6 +24,7 @@ public class PrivateChannel extends AbstractChannel {
     }
 
     public void handleMessage(Message message) {
+        ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s->%s: %s", getTag(), message.senderServer, message.senderName, message.targetName, message.message));
         Player player = Bukkit.getServer().getPlayer(message.target);
         if (player == null) return;
         if (message.special == null) {
@@ -51,18 +52,18 @@ public class PrivateChannel extends AbstractChannel {
         BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
         json.add("");
         // Channel Tag
-        if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", true)) {
+        if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false)) {
             json.add(channelTag(channelColor, bracketColor, bracketType));
         }
         // Server Name
-        if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", true)) {
+        if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", false)) {
             json.add(serverTag(message, channelColor, bracketColor, bracketType));
         }
         // From/To
         json.add(Msg.button(senderColor, ack?"to":"from", null, null));
         json.add(" ");
         // Player Title
-        if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", true)) {
+        if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", false)) {
             json.add(senderTitleTag(message, bracketColor, bracketType));
         }
         // Player Name
