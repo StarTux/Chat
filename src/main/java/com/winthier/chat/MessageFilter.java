@@ -9,7 +9,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import lombok.Getter;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 
 @Getter
 public class MessageFilter {

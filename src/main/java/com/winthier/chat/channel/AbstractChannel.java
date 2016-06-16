@@ -110,8 +110,10 @@ public abstract class AbstractChannel implements Channel {
     Message makeMessage(Player player, String text) {
         Message message = new Message();
         message.channel = getKey();
-        message.sender = player.getUniqueId();
-        message.senderName = player.getName();
+        if (player != null) {
+            message.sender = player.getUniqueId();
+            message.senderName = player.getName();
+        }
         message.senderServer = ChatPlugin.getInstance().getServerName();
         message.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
         message.message = text;
@@ -134,6 +136,7 @@ public abstract class AbstractChannel implements Channel {
     }
 
     Object senderTitleTag(Message message, ChatColor bracketColor, BracketType bracketType) {
+        if (message.senderTitle == null) return "";
         return Msg.button(
             bracketColor,
             bracketColor + bracketType.opening + Msg.format(message.senderTitle) + bracketColor + bracketType.closing,
@@ -143,11 +146,14 @@ public abstract class AbstractChannel implements Channel {
     }
 
     Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
+        if (message.sender == null) {
+            return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName, null, null);
+        }
         return Msg.button(senderColor,
                           useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName,
                           message.senderName +
-                          "\n&5&oTitle&r " + Msg.format(message.senderTitle) +
-                          "\n&5&oServer&r " + message.senderServerDisplayName +
+                          (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "") +
+                          (message.senderServerDisplayName != null ? "\n&5&oServer&r " + message.senderServerDisplayName : "") +
                           "\n&5&oChannel&r " + getTitle(),
                           "/tell " + message.senderName + " ");
     }

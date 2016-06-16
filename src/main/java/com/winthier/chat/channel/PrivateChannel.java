@@ -39,6 +39,11 @@ public class PrivateChannel extends AbstractChannel {
         }
     }
 
+    @Override
+    public void consoleDidUseCommand(String msg) {
+        
+    }
+
     void sendMessage(Message message, Player player, boolean ack) {
         UUID uuid = player.getUniqueId();
         String key = getKey();

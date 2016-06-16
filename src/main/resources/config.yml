@@ -57,6 +57,9 @@ settings:
 - channel: global
   key: ChannelColor
   value: white
+- channel: global
+  key: PostToDynmap
+  value: 1
 
 - channel: local
   key: ChannelColor

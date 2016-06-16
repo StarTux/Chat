@@ -41,4 +41,16 @@ public class ChatListener implements Listener {
         String msg = arr.length >= 2 ? arr[1] : null;
         cmd.playerDidUseCommand(new PlayerCommandContext(event.getPlayer(), firstArg, msg));
     }
+
+    @EventHandler
+    public void onServerCommand(ServerCommandEvent event) {
+        final String[] arr = event.getCommand().split("\\s+", 2);
+        if (arr.length < 2) return;
+        String firstArg = arr[0];
+        if (firstArg.startsWith("/")) firstArg = firstArg.substring(1);
+        CommandResponder cmd = ChatPlugin.getInstance().findCommand(firstArg);
+        if (cmd == null) return;
+        event.setCancelled(true);
+        cmd.consoleDidUseCommand(arr[1]);
+    }
 }

@@ -16,6 +16,11 @@ public class ReplyCommand implements CommandResponder {
     }
 
     @Override
+    public void consoleDidUseCommand(String msg) {
+        
+    }
+
+    @Override
     public boolean hasPermission(Player player) {
         return ChatPlugin.getInstance().getPrivateChannel().hasPermission(player);
     }

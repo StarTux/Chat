@@ -43,6 +43,11 @@ public class PartyChannel extends AbstractChannel {
         }        
     }
 
+    @Override
+    public void consoleDidUseCommand(String msg) {
+        
+    }
+
     public void handleMessage(Message message) {
         fillMessage(message);
         ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s][%s]%s: %s", getTag(), message.targetName, message.senderServer, message.senderName, message.message));

@@ -14,6 +14,7 @@ import org.json.simple.JSONValue;
 
 public class Msg {
     public static String format(String msg, Object... args) {
+        if (msg == null) return "";
         msg = ChatColor.translateAlternateColorCodes('&', msg);
         if (args.length > 0) {
             msg = String.format(msg, args);
