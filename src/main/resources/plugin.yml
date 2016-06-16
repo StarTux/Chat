@@ -60,6 +60,16 @@ permissions:
     default: false
   chat.staff:
     default: false
+  chat.channel.*:
+    default: false
+    children:
+      chat.channel.global: true
+      chat.channel.local: true
+      chat.channel.trusted: true
+      chat.channel.moderator: true
+      chat.channel.admin: true
+      chat.channel.information: true
+      chat.channel.mini: true
   chat.channel.global:
     default: false
   chat.channel.local:

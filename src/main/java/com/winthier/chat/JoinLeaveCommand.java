@@ -6,12 +6,11 @@ import com.winthier.chat.util.Msg;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @AllArgsConstructor
-public class JoinLeaveCommand implements CommandExecutor {
+public class JoinLeaveCommand extends AbstractChatCommand {
     boolean join;
     
     @Override

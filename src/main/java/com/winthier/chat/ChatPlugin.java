@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -79,6 +81,30 @@ public class ChatPlugin extends JavaPlugin {
         getCommand("join").setExecutor(new JoinLeaveCommand(true));
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
         getCommand("ignore").setExecutor(new IgnoreCommand());
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        System.out.println("complete main " + alias + " " + args.length);
+        if (args.length == 0) return null;
+        String arg = args[args.length - 1];
+        return completePlayerName(arg);
+    }
+
+    public List<String> completePlayerName(String name) {
+        List<String> result = new ArrayList<>();
+        name = name.toLowerCase();
+        for (Chatter chatter: getOnlinePlayers()) {
+            if (name.isEmpty()) {
+                result.add(chatter.getName());
+            } else {
+                String name2 = chatter.getName().toLowerCase();
+                if (name2.startsWith(name)) {
+                    result.add(chatter.getName());
+                }
+            }
+        }
+        return result;
     }
 
     void loadChannels() {

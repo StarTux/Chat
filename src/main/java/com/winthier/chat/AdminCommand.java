@@ -6,11 +6,10 @@ import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.util.Msg;
 import java.util.regex.Matcher;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class AdminCommand implements CommandExecutor {
+public class AdminCommand extends AbstractChatCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Player player = sender instanceof Player ? (Player)sender : null;

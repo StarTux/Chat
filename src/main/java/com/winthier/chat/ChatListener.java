@@ -30,6 +30,7 @@ public class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        System.out.println("preproc event " + event.getMessage());
         final String[] arr = event.getMessage().split("\\s+", 2);
         if (arr.length < 1) return;
         String firstArg = arr[0];
@@ -40,9 +41,5 @@ public class ChatListener implements Listener {
         if (!cmd.hasPermission(event.getPlayer())) return;
         String msg = arr.length >= 2 ? arr[1] : null;
         cmd.playerDidUseCommand(new PlayerCommandContext(event.getPlayer(), firstArg, msg));
-    }
-
-    @EventHandler
-    public void onServerCommand(ServerCommandEvent event) {
     }
 }
