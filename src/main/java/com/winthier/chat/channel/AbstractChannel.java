@@ -3,6 +3,7 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Message;
 import com.winthier.chat.MessageFilter;
+import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
@@ -92,6 +93,27 @@ public abstract class AbstractChannel implements Channel {
     @Override
     public void playerDidUseChat(PlayerCommandContext context) {
         playerDidUseCommand(context);
+    }
+
+    @Override
+    public void announce(String sender, String msg) {
+        Message message = makeMessage(null, msg);
+        message.senderName = sender;
+        SQLLog.store(sender, this, null, msg);
+        if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
+        handleMessage(message);
+    }
+    
+    @Override
+    public void announce(String sender, List<Object> json) {
+        String msg = Msg.jsonToString(json);
+        Message message = makeMessage(null, msg);
+        message.senderName = sender;
+        message.json = json;
+        message.languageFilterJson = json;
+        SQLLog.store(sender, this, null, msg);
+        if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
+        handleMessage(message);
     }
 
     void fillMessage(Message message) {

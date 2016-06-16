@@ -18,4 +18,6 @@ public interface Channel extends CommandResponder {
     void handleMessage(Message message);
     List<Option> getOptions();
     void playerDidUseChat(PlayerCommandContext context);
+    void announce(String sender, String msg);
+    void announce(String sender, List<Object> json);
 }

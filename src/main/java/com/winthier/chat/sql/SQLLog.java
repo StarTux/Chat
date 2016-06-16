@@ -28,6 +28,7 @@ import org.bukkit.entity.Player;
 public class SQLLog {
     @Id Integer id;
     UUID player;
+    @NotNull String sender;
     @NotNull Date time;
     @NotNull String server;
     String world;
@@ -36,18 +37,20 @@ public class SQLLog {
     String target;
     @NotNull String message;
 
-    private SQLLog(Channel channel, String target, String message) {
+    private SQLLog(String sender, Channel channel, String target, String message) {
         setTime(new Date());
         setServer(ChatPlugin.getInstance().getServerName());
+        setSender(sender);
         setChannel(channel.getKey());
         setTarget(target);
         setMessage(message);
     }
 
     private SQLLog(Player player, Channel channel, String target, String message) {
-        setPlayer(player.getUniqueId());
         setTime(new Date());
         setServer(ChatPlugin.getInstance().getServerName());
+        setPlayer(player.getUniqueId());
+        setSender(player.getName());
         Location loc = player.getLocation();
         setWorld(loc.getWorld().getName());
         setX(loc.getBlockX());
@@ -58,8 +61,8 @@ public class SQLLog {
         setMessage(message);
     }
 
-    public static void storeConsole(Channel channel, String target, String message) {
-        SQLDB.get().save(new SQLLog(channel, target, message));
+    public static void store(String sender, Channel channel, String target, String message) {
+        SQLDB.get().save(new SQLLog(sender, channel, target, message));
     }
 
     public static void store(Player player, Channel channel, String target, String message) {

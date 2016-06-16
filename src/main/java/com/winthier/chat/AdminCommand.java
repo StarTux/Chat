@@ -91,6 +91,19 @@ public class AdminCommand extends AbstractChatCommand {
             }
             SQLSetting.set(null, channel.getKey(), key, value);
             Msg.info(sender, "Did set %s/%s = '%s'", channel.getKey(), key, value);
+        } else if (firstArg.equals("announce") && args.length >= 3) {
+            String channelArg = args[1];
+            Channel channel = ChatPlugin.getInstance().findChannel(channelArg);
+            if (channel == null) {
+                Msg.warn(sender, "Channel not found: %s", channelArg);
+                return true;
+            }
+            StringBuilder sb = new StringBuilder(args[2]);
+            for (int i = 3; i < args.length; ++i) {
+                sb.append(" ").append(args[i]);
+            }
+            channel.announce(sender.getName(), sb.toString());
+            Msg.info(sender, "Announcement sent to %s", channel.getTitle());
         }
         return true;
     }
@@ -102,5 +115,6 @@ public class AdminCommand extends AbstractChatCommand {
         Msg.send(sender, "&e/chadm InitDB &7- &rInitialize databases");
         Msg.send(sender, "&e/chadm ListDefaults &o<Channel>&7- &rView channel default settings");
         Msg.send(sender, "&e/chadm SetDefault &o<Channel> <Key> <Value> &7- &rChange channel default setting");
+        Msg.send(sender, "&e/chadm Announce &o<Channel> <Message> &7- &rMake an announcement");
     }
 }

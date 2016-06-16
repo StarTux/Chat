@@ -340,4 +340,18 @@ public class ChatPlugin extends JavaPlugin {
         if (op == null) return null;
         return new Chatter(op.getUniqueId(), op.getName());
     }
+
+    public boolean announce(String channel, String sender, String message) {
+        Channel ch = findChannel(channel);
+        if (ch == null) return false;
+        ch.announce(sender, message);
+        return true;
+    }
+
+    public boolean announce(String channel, String sender, List<Object> json) {
+        Channel ch = findChannel(channel);
+        if (ch == null) return false;
+        ch.announce(sender, json);
+        return true;
+    }
 }

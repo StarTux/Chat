@@ -40,7 +40,7 @@ public class PublicChannel extends AbstractChannel {
     public void consoleDidUseCommand(String msg) {
         Message message = makeMessage(null, msg);
         message.senderName = "Console";
-        SQLLog.storeConsole(this, null, msg);
+        SQLLog.store("Console", this, null, msg);
         if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
         handleMessage(message);
     }

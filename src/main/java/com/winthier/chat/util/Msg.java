@@ -85,4 +85,26 @@ public class Msg {
         }
         return sb.toString();
     }
+
+    public static String jsonToString(Object json) {
+        if (json == null) {
+            return "";
+        } else if (json instanceof List) {
+            StringBuilder sb = new StringBuilder();
+            for (Object o: (List)json) {
+                sb.append(jsonToString(o));
+            }
+            return sb.toString();
+        } else if (json instanceof Map) {
+            Map map = (Map)json;
+            StringBuilder sb = new StringBuilder();
+            sb.append(map.get("text"));
+            sb.append(map.get("extra"));
+            return sb.toString();
+        } else if (json instanceof String) {
+            return (String)json;
+        } else {
+            return json.toString();
+        }
+    }
 }
