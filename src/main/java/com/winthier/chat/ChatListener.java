@@ -30,7 +30,6 @@ public class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        System.out.println("preproc event " + event.getMessage());
         final String[] arr = event.getMessage().split("\\s+", 2);
         if (arr.length < 1) return;
         String firstArg = arr[0];

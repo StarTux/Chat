@@ -2,6 +2,7 @@ package com.winthier.chat;
 
 import com.winthier.chat.channel.*;
 import com.winthier.chat.connect.ConnectListener;
+import com.winthier.chat.dynmap.DynmapHandler;
 import com.winthier.chat.playercache.PlayerCacheHandler;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
@@ -36,6 +37,7 @@ public class ChatPlugin extends JavaPlugin {
     PrivateChannel privateChannel = null;
     PartyChannel partyChannel = null;
     PlayerCacheHandler playerCacheHandler = null;
+    DynmapHandler dynmapHandler = null;
     ChatCommand chatCommand = new ChatCommand();
     public boolean debugMode = false;
 
@@ -75,6 +77,13 @@ public class ChatPlugin extends JavaPlugin {
         } else {
             getLogger().warning("PlayerCache plugin NOT found!");
         }
+        if (getServer().getPluginManager().getPlugin("dynmap") != null) {
+            dynmapHandler = new DynmapHandler();
+            getServer().getPluginManager().registerEvents(dynmapHandler, this);
+            getLogger().info("Dynmap plugin found!");
+        } else {
+            getLogger().warning("Dynmap plugin NOT found!");
+        }
         getServer().getPluginManager().registerEvents(chatListener, this);
         getCommand("chatadmin").setExecutor(new AdminCommand());
         getCommand("chat").setExecutor(chatCommand);
@@ -85,7 +94,6 @@ public class ChatPlugin extends JavaPlugin {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        System.out.println("complete main " + alias + " " + args.length);
         if (args.length == 0) return null;
         String arg = args[args.length - 1];
         return completePlayerName(arg);
@@ -270,6 +278,10 @@ public class ChatPlugin extends JavaPlugin {
     public void didCreateMessage(Message message) {
         if (connectListener != null) {
             connectListener.broadcastMessage(message);
+        }
+        if (dynmapHandler != null &&
+            SQLSetting.getBoolean(null, message.channel, "PostToDynmap", false)) {
+            dynmapHandler.postPlayerMessage(message);
         }
     }
 

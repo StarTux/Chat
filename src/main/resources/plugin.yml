@@ -3,7 +3,7 @@ description: Cross server chat plugin for Winthier
 author: StarTux
 version: 0.1
 main: com.winthier.chat.ChatPlugin
-softdepend: [ Connect, Title, Vault, PlayerCache ]
+softdepend: [ Connect, Title, Vault, PlayerCache, dynmap ]
 database: true
 commands:
   chat:

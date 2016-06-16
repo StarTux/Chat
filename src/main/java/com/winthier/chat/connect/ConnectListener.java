@@ -39,7 +39,6 @@ public class ConnectListener implements Listener {
     }
 
     public void broadcastMessage(Message message) {
-        System.out.println("broadcast " + CHANNEL + ": " + message.serialize());
         Connect.getInstance().broadcast(CHANNEL, message.serialize());
     }
 

@@ -35,8 +35,8 @@ public class SQLSetting {
         UUID uuid; String channel; String key;
     }
     @RequiredArgsConstructor
-    static class Settings {
-        final Map<Key, SQLSetting> map = new HashMap<>();
+    public static class Settings {
+        public final Map<Key, SQLSetting> map = new HashMap<>();
         final long created = System.currentTimeMillis();
         boolean tooOld() {
             return System.currentTimeMillis() - created > 1000*60;
@@ -85,7 +85,7 @@ public class SQLSetting {
         return result;
     }
 
-    private static Settings getDefaultSettings() {
+    public static Settings getDefaultSettings() {
         if (defaultSettings == null || defaultSettings.tooOld()) {
 	    defaultSettings = makeSettings(SQLDB.get().find(SQLSetting.class).where().isNull("uuid").findList());
         }

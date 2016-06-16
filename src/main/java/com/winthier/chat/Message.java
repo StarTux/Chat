@@ -19,6 +19,7 @@ public class Message {
     public String senderServerDisplayName;
     
     public String message;
+    public String languageFilterMessage;
     public List<Object> json;
     public List<Object> languageFilterJson;
 
@@ -60,6 +61,8 @@ public class Message {
         store(map, "senderTitleDescription", senderTitleDescription);
         store(map, "senderServer", senderServer);
         store(map, "senderServerDisplayName", senderServerDisplayName);
+        store(map, "message", message);
+        store(map, "languageFilterMessage", languageFilterMessage);
         store(map, "json", json);
         store(map, "languageFilterJson", languageFilterJson);
         return map;
@@ -77,6 +80,7 @@ public class Message {
         senderServer = fetchString(map, "senderServer");
         senderServer = fetchString(map, "senderServerDisplayName");
         message = fetchString(map, "message");
+        languageFilterMessage = fetchString(map, "languageFilterMessage");
         json = fetchList(map, "json");
         languageFilterJson = fetchList(map, "languageFilterJson");
     }
