@@ -154,7 +154,7 @@ public class PartyChannel extends AbstractChannel {
 
     void listPlayers(Player player, String partyName) {
         List<Object> json = new ArrayList<>();
-        json.add(Msg.format("&oParty &a%s&r: ", partyName));
+        json.add(Msg.format("&oParty &a%s&r:", partyName));
         ChatColor senderColor = SQLSetting.getChatColor(player.getUniqueId(), key, "SenderColor", ChatColor.WHITE);
         for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
             String otherPartyName = getPartyName(chatter.getUuid());
