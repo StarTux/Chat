@@ -157,8 +157,16 @@ public abstract class AbstractChannel implements Channel {
     }
 
     Object serverTag(Message message, ChatColor serverColor, ChatColor bracketColor, BracketType bracketType) {
+        String name;
+        if (message.senderServerDisplayName != null) {
+            name = message.senderServerDisplayName;
+        } else if (message.senderServer != null) {
+            name = message.senderServer;
+        } else {
+            return "";
+        }
         return Msg.button(serverColor,
-                          bracketColor + bracketType.opening + serverColor + message.senderServerDisplayName + bracketColor + bracketType.closing,
+                          bracketColor + bracketType.opening + serverColor + name + bracketColor + bracketType.closing,
                           null,
                           null);
     }
