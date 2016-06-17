@@ -24,4 +24,9 @@ public class PartyCommand implements CommandResponder {
     public boolean hasPermission(Player player) {
         return ChatPlugin.getInstance().getPartyChannel().hasPermission(player);
     }
+
+    @Override
+    public Channel getChannel() {
+        return ChatPlugin.getInstance().getPartyChannel();
+    }
 }

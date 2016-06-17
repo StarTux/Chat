@@ -8,4 +8,5 @@ public interface CommandResponder {
     void playerDidUseCommand(PlayerCommandContext context);
     void consoleDidUseCommand(String msg);
     boolean hasPermission(Player player);
+    Channel getChannel();
 }

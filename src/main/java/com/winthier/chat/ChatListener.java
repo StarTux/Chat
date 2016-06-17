@@ -1,6 +1,7 @@
 package com.winthier.chat;
 
 import com.winthier.chat.channel.*;
+import com.winthier.chat.event.ChatPlayerTalkEvent;
 import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,6 +26,7 @@ public class ChatListener implements Listener {
         if (!player.isValid()) return;
         Channel channel = ChatPlugin.getInstance().getFocusChannel(player.getUniqueId());
         if (channel == null) return;
+        if (!ChatPlayerTalkEvent.call(player, channel, message)) return;
         channel.playerDidUseChat(new PlayerCommandContext(player, null, message));
     }
 
@@ -39,6 +41,7 @@ public class ChatListener implements Listener {
         event.setCancelled(true);
         if (!cmd.hasPermission(event.getPlayer())) return;
         String msg = arr.length >= 2 ? arr[1] : null;
+        if (!ChatPlayerTalkEvent.call(event.getPlayer(), cmd.getChannel(), msg)) return;
         cmd.playerDidUseCommand(new PlayerCommandContext(event.getPlayer(), firstArg, msg));
     }
 

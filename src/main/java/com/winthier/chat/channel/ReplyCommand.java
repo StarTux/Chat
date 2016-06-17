@@ -24,4 +24,9 @@ public class ReplyCommand implements CommandResponder {
     public boolean hasPermission(Player player) {
         return ChatPlugin.getInstance().getPrivateChannel().hasPermission(player);
     }
+
+    @Override
+    public Channel getChannel() {
+        return ChatPlugin.getInstance().getPrivateChannel();
+    }
 }

@@ -3,6 +3,7 @@ package com.winthier.chat;
 import com.winthier.chat.channel.*;
 import com.winthier.chat.connect.ConnectListener;
 import com.winthier.chat.dynmap.DynmapHandler;
+import com.winthier.chat.event.ChatMessageEvent;
 import com.winthier.chat.playercache.PlayerCacheHandler;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
@@ -278,6 +279,9 @@ public class ChatPlugin extends JavaPlugin {
     }
 
     public void didCreateMessage(Channel channel, Message message) {
+        if (!ChatMessageEvent.call(channel, message)) {
+            return;
+        }
         if (connectListener != null && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
         }

@@ -63,6 +63,11 @@ public abstract class AbstractChannel implements Channel {
     }
 
     @Override
+    public Channel getChannel() {
+        return this;
+    }
+
+    @Override
     public List<Option> getOptions() {
         return Arrays.asList(
             Option.booleanOption("Joined", "Listening", "Join or leave the channel.", "1"),

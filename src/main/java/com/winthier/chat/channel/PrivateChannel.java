@@ -117,7 +117,11 @@ public class PrivateChannel extends AbstractChannel {
         String targetName = arr[0];
         Chatter target = ChatPlugin.getInstance().getOnlinePlayer(targetName);
         if (target == null) {
-            Msg.send(context.player, "&cPlayer not found: %s", targetName);
+            Msg.warn(context.player, "Player not found: %s.", targetName);
+            return;
+        }
+        if (target.getUniqueId().equals(uuid)) {
+            Msg.warn(context.player, "You cannot message yourself.");
             return;
         }
         if (arr.length == 1) {
