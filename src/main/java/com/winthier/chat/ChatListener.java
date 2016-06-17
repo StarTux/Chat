@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -68,5 +69,14 @@ public class ChatListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onPlayerChatTabComplete(PlayerChatTabCompleteEvent event){
+        for (String name: ChatPlugin.getInstance().completePlayerName(event.getLastToken())) {
+            if (!event.getTabCompletions().contains(name)) {
+                event.getTabCompletions().add(name);
+            }
+        }
     }
 }
