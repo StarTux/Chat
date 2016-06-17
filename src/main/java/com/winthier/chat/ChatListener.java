@@ -2,12 +2,15 @@ package com.winthier.chat;
 
 import com.winthier.chat.channel.*;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
+import com.winthier.chat.sql.SQLDB;
 import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -55,5 +58,15 @@ public class ChatListener implements Listener {
         if (cmd == null) return;
         event.setCancelled(true);
         cmd.consoleDidUseCommand(arr[1]);
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        SQLDB.clear(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        SQLDB.clear(event.getPlayer().getUniqueId());
     }
 }
