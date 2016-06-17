@@ -1,5 +1,6 @@
 package com.winthier.chat;
 
+import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.MessageFilter;
 import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
@@ -32,6 +33,10 @@ public class ChatCommand extends AbstractChatCommand {
         String firstArg = args[0].toLowerCase();
         if (firstArg.equals("set")) {
             if (player == null) return false;
+            if (args.length == 0) {
+                showMenu(player);
+                return true;
+            }
             setOption(player, Arrays.copyOfRange(args, 1, args.length));
         } else if (firstArg.equals("list") && args.length == 1) {
             listChannels(player);
@@ -53,6 +58,31 @@ public class ChatCommand extends AbstractChatCommand {
             } else {
                 return false;
             }
+        } else if (firstArg.equals("who")) {
+            Channel channel;
+            if (args.length == 1) {
+                if (player == null) return false;
+                channel = ChatPlugin.getInstance().getFocusChannel(player.getUniqueId());
+            } else if (args.length == 2) {
+                channel = ChatPlugin.getInstance().findChannel(args[1]);
+            } else {
+                return false;
+            }
+            if (channel == null) return true;
+            StringBuilder sb = new StringBuilder();
+            int count = 0;
+            for (Chatter chatter: channel.getOnlineMembers()) {
+                sb.append(" ").append(chatter.getName());
+                count += 1;
+            }
+            Msg.send(sender, "&oChannel &a%s &r(%d):%s", channel.getTitle(), count, sb.toString());
+        } else if (args.length == 1) {
+            if (player == null) return false;
+            Channel channel = ChatPlugin.getInstance().findChannel(firstArg);
+            if (channel == null || !channel.hasPermission(player)) return false;
+            channel.joinChannel(player.getUniqueId());
+            channel.setFocusChannel(player.getUniqueId());
+            Msg.info(player, "Now focusing %s&r.", channel.getTitle());
         }
         return true;
     }
@@ -112,7 +142,9 @@ public class ChatCommand extends AbstractChatCommand {
         Msg.raw(player, json);
         json.clear();
         json.add(Msg.format("&oChannel List "));
-        json.add(Msg.button(ChatColor.BLUE, "&r[&9List&r]", "Channel List", "/ch list"));
+        json.add(Msg.button(ChatColor.BLUE, "&r[&9List&r]", "/ch list\n&5&oChannel List", "/ch list"));
+        json.add(" ");
+        json.add(Msg.button(ChatColor.BLUE, "&r[&9Who&r]", "/ch who\n&5&oUser List", "/ch who"));
         Msg.raw(player, json);
     }
 
