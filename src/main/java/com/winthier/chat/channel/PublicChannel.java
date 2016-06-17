@@ -21,7 +21,7 @@ import org.bukkit.entity.Player;
 public class PublicChannel extends AbstractChannel {
     @Override
     public void playerDidUseCommand(PlayerCommandContext c) {
-        if (range < 0) return;
+        if (SQLSetting.getBoolean(null, getKey(), "MutePlayers", false)) return;
         if (!isJoined(c.player.getUniqueId())) {
             joinChannel(c.player.getUniqueId());
         }
