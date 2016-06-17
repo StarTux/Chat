@@ -81,7 +81,7 @@ public class Message {
         senderTitle = fetchString(map, "senderTitle");
         senderTitleDescription = fetchString(map, "senderTitleDescription");
         senderServer = fetchString(map, "senderServer");
-        senderServer = fetchString(map, "senderServerDisplayName");
+        senderServerDisplayName = fetchString(map, "senderServerDisplayName");
         message = fetchString(map, "message");
         languageFilterMessage = fetchString(map, "languageFilterMessage");
         json = fetchList(map, "json");
