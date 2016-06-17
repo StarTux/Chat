@@ -45,7 +45,16 @@ public class PartyChannel extends AbstractChannel {
 
     @Override
     public void consoleDidUseCommand(String msg) {
-        
+        String[] arr = msg.split("\\s+", 2);
+        if (arr.length != 2) return;
+        String target = arr[0];
+        msg = arr[1];
+        Message message = makeMessage(null, msg);
+        message.senderName = "Console";
+        message.targetName = target;
+        SQLLog.store("Console", this, target, msg);
+        if (range == 0) ChatPlugin.getInstance().didCreateMessage(message);
+        handleMessage(message);
     }
 
     public void handleMessage(Message message) {
@@ -54,7 +63,7 @@ public class PartyChannel extends AbstractChannel {
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
-            if (SQLIgnore.doesIgnore(player.getUniqueId(), message.sender)) continue;
+            if (shouldIgnore(player.getUniqueId(), message)) continue;
             if (!message.targetName.equals(getPartyName(player.getUniqueId()))) continue;
             send(message, player);
         }

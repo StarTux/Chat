@@ -6,6 +6,7 @@ import com.winthier.chat.dynmap.DynmapHandler;
 import com.winthier.chat.playercache.PlayerCacheHandler;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
+import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.title.TitleHandler;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -341,17 +343,14 @@ public class ChatPlugin extends JavaPlugin {
         return new Chatter(op.getUniqueId(), op.getName());
     }
 
-    public boolean announce(String channel, String sender, String message) {
+    public boolean announce(String channel, String sender, Object message) {
         Channel ch = findChannel(channel);
         if (ch == null) return false;
         ch.announce(sender, message);
         return true;
     }
 
-    public boolean announce(String channel, String sender, List<Object> json) {
-        Channel ch = findChannel(channel);
-        if (ch == null) return false;
-        ch.announce(sender, json);
-        return true;
+    public boolean doesIgnore(UUID player, UUID ignoree) {
+        return SQLIgnore.doesIgnore(player, ignoree);
     }
 }

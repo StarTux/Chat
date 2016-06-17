@@ -66,9 +66,6 @@ public class AdminCommand extends AbstractChatCommand {
                 }
             }
             Msg.send(sender, "%d&8/&r%d&8 Matches", matches, count);
-        } else if (firstArg.equals("initdb")) {
-            ChatPlugin.getInstance().initializeDatabase();
-            Msg.send(sender, "Database initialized");
         } else if (firstArg.equals("listdefaults") && args.length == 2) {
             String channelArg = args[1];
             Channel channel = ChatPlugin.getInstance().findChannel(channelArg);
@@ -112,7 +109,6 @@ public class AdminCommand extends AbstractChatCommand {
         Msg.send(sender, "&e/chadm Debug &7- &rReload configs and databases");
         Msg.send(sender, "&e/chadm TestFilter &o<Message> &7- &rTest all chat filters");
         Msg.send(sender, "&e/chadm TestPattern &o<PatternName> <Message> &7- &rTest a pattern");
-        Msg.send(sender, "&e/chadm InitDB &7- &rInitialize databases");
         Msg.send(sender, "&e/chadm ListDefaults &o<Channel>&7- &rView channel default settings");
         Msg.send(sender, "&e/chadm SetDefault &o<Channel> <Key> <Value> &7- &rChange channel default setting");
         Msg.send(sender, "&e/chadm Announce &o<Channel> <Message> &7- &rMake an announcement");

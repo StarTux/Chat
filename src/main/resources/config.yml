@@ -40,13 +40,15 @@ channels:
   information:
     tag: Info
     title: Info
-    aliases: [ info ]
+    aliases: [ information, info ]
     description: General information
+    range: -1
   mini:
     tag: Mini
     title: Mini
     aliases: [ mini ]
     description: Minigames broadcasting
+    range: -1
 settings:
 - channel: global
   key: SenderColor

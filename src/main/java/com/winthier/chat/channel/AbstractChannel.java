@@ -1,8 +1,10 @@
 package com.winthier.chat.channel;
 
 import com.winthier.chat.ChatPlugin;
+import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
 import com.winthier.chat.MessageFilter;
+import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
@@ -14,7 +16,9 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 @Getter @Setter
@@ -52,6 +56,11 @@ public abstract class AbstractChannel implements Channel {
     @Override
     public boolean hasPermission(Player player) {
         return player.hasPermission("chat.channel." + getKey()) || player.hasPermission("chat.channel.*");
+    }
+
+    @Override
+    public boolean hasPermission(UUID player) {
+        return ChatPlugin.getInstance().hasPermission(player, "chat.channel." + getKey()) || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
     }
 
     @Override
@@ -96,23 +105,28 @@ public abstract class AbstractChannel implements Channel {
     }
 
     @Override
-    public void announce(String sender, String msg) {
-        Message message = makeMessage(null, msg);
+    public void announce(String sender, Object msg) {
+        Message message;
+        if (msg instanceof String) {
+            message = makeMessage(null, (String)msg);
+        } else {
+            List<Object> json;
+            if (msg instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> tmpson = (List<Object>)msg;
+                json = tmpson;
+            } else {
+                json = new ArrayList<>();
+                json.add(msg);
+            }
+            String str = Msg.jsonToString(msg);
+            message = makeMessage(null, str);
+            message.json = json;
+            message.languageFilterJson = json;
+        }
         message.senderName = sender;
-        SQLLog.store(sender, this, null, msg);
-        if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
-        handleMessage(message);
-    }
-    
-    @Override
-    public void announce(String sender, List<Object> json) {
-        String msg = Msg.jsonToString(json);
-        Message message = makeMessage(null, msg);
-        message.senderName = sender;
-        message.json = json;
-        message.languageFilterJson = json;
-        SQLLog.store(sender, this, null, msg);
-        if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
+        message.special = "announcement";
+        if (range == 0) ChatPlugin.getInstance().didCreateMessage(message);
         handleMessage(message);
     }
 
@@ -135,6 +149,7 @@ public abstract class AbstractChannel implements Channel {
         if (player != null) {
             message.sender = player.getUniqueId();
             message.senderName = player.getName();
+            message.location = player.getLocation();
         }
         message.senderServer = ChatPlugin.getInstance().getServerName();
         message.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
@@ -193,5 +208,31 @@ public abstract class AbstractChannel implements Channel {
                 json.add(o);
             }
         }
+    }
+
+    static boolean shouldIgnore(UUID player, Message message) {
+        if (message.sender != null && SQLIgnore.doesIgnore(player, message.sender)) return true;
+        return false;
+    }
+
+
+    public List<Chatter> getOnlineMembers() {
+        List<Chatter> result = new ArrayList<>();
+        for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
+            if (!hasPermission(chatter.getUuid())) continue;
+            if (!isJoined(chatter.getUuid())) continue;
+            result.add(chatter);
+        }
+        return result;
+    }
+
+    public List<Player> getLocalMembers() {
+        List<Player> result = new ArrayList<>();
+        for (Player player: Bukkit.getServer().getOnlinePlayers()) {
+            if (!hasPermission(player)) continue;
+            if (!isJoined(player.getUniqueId())) continue;
+            result.add(player);
+        }
+        return result;
     }
 }

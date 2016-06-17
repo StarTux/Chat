@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.bukkit.Location;
 
 public class Message {
     public UUID sender;
@@ -22,6 +23,8 @@ public class Message {
     public String languageFilterMessage;
     public List<Object> json;
     public List<Object> languageFilterJson;
+
+    transient public Location location;
 
     private static void store(Map<String, Object> map, String key, Object value) {
         if (value == null) return;

@@ -31,7 +31,7 @@ public class PublicChannel extends AbstractChannel {
         } else {
             SQLLog.store(c.player, this, null, c.message);
             Message message = makeMessage(c.player, c.message);
-            if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
+            if (range == 0) ChatPlugin.getInstance().didCreateMessage(message);
             handleMessage(message);
         }        
     }
@@ -41,28 +41,20 @@ public class PublicChannel extends AbstractChannel {
         Message message = makeMessage(null, msg);
         message.senderName = "Console";
         SQLLog.store("Console", this, null, msg);
-        if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
+        if (range == 0) ChatPlugin.getInstance().didCreateMessage(message);
         handleMessage(message);
     }
     
     public void handleMessage(Message message) {
         fillMessage(message);
         ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s: %s", getTag(), message.senderServer, message.senderName, message.message));
-        Location senderLocation;
-        if (range > 0 && message.sender != null) {
-            Player sender = Bukkit.getServer().getPlayer(message.sender);
-            if (sender == null) return;
-            senderLocation = sender.getLocation();
-        } else {
-            senderLocation = null;
-        }
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
-            if (message.sender != null && SQLIgnore.doesIgnore(player.getUniqueId(), message.sender)) continue;
-            if (range > 0 && senderLocation != null) {
-                if (!senderLocation.getWorld().equals(player.getWorld())) continue;
-                if (senderLocation.distanceSquared(player.getLocation()) > range*range) continue;
+            if (shouldIgnore(player.getUniqueId(), message)) continue;
+            if (range != 0 && message.location != null) {
+                if (!message.location.getWorld().equals(player.getWorld())) continue;
+                if (message.location.distanceSquared(player.getLocation()) > range*range) continue;
             }
             send(message, player);
         }

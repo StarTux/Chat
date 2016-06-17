@@ -23,6 +23,11 @@ public class PrivateChannel extends AbstractChannel {
         return player.hasPermission("chat.pm");
     }
 
+    @Override
+    public boolean hasPermission(UUID player) {
+        return ChatPlugin.getInstance().hasPermission(player, "chat.pm");
+    }
+
     public void handleMessage(Message message) {
         ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s->%s: %s", getTag(), message.senderServer, message.senderName, message.targetName, message.message));
         Player player = Bukkit.getServer().getPlayer(message.target);
@@ -31,7 +36,7 @@ public class PrivateChannel extends AbstractChannel {
             if (!hasPermission(player)) return;
             if (!isJoined(player.getUniqueId())) return;
         }
-        if (message.special != null || !SQLIgnore.doesIgnore(player.getUniqueId(), message.sender)) {
+        if (message.special != null || !shouldIgnore(player.getUniqueId(), message)) {
             sendMessage(message, player, message.special != null);
         }
         if (message.special == null) {

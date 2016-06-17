@@ -1,9 +1,12 @@
 package com.winthier.chat.channel;
 
+import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 public interface Channel extends CommandResponder {
     String getTitle();
@@ -15,9 +18,11 @@ public interface Channel extends CommandResponder {
     void joinChannel(UUID player);
     void leaveChannel(UUID player);
     boolean isJoined(UUID player);
+    boolean hasPermission(UUID player);
     void handleMessage(Message message);
     List<Option> getOptions();
     void playerDidUseChat(PlayerCommandContext context);
-    void announce(String sender, String msg);
-    void announce(String sender, List<Object> json);
+    void announce(String sender, Object msg);
+    public List<Chatter> getOnlineMembers();
+    public List<Player> getLocalMembers();
 }
