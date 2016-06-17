@@ -238,6 +238,7 @@ public class ChatPlugin extends JavaPlugin {
 
     public Channel findChannel(String nameOrAlias) {
         for (Channel channel: channels) {
+            if (channel.getKey().equalsIgnoreCase(nameOrAlias)) return channel;
             for (String alias: channel.getAliases()) {
                 if (alias.equalsIgnoreCase(nameOrAlias)) {
                     return channel;
@@ -293,7 +294,9 @@ public class ChatPlugin extends JavaPlugin {
 
     public void didReceiveMessage(Message message) {
         Channel channel = findChannel(message.channel);
-        if (channel != null) {
+        if (channel == null) {
+            getLogger().warning("Could not find message channel: '" + message.channel + "'");
+        } else {
             channel.handleMessage(message);
         }
     }

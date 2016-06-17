@@ -24,7 +24,9 @@ public class ConnectListener implements Listener {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>)o;
             Message message = Message.deserialize(map);
-            if (message != null) {
+            if (message == null) {
+                ChatPlugin.getInstance().getLogger().warning("Failed to deserialize message: " + map);
+            } else {
                 ChatPlugin.getInstance().didReceiveMessage(message);
             }
         }
