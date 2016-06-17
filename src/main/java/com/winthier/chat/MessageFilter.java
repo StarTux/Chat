@@ -163,7 +163,11 @@ public class MessageFilter {
             Map<String, Object> clickEvent = new HashMap<>();
             result.put("clickEvent", clickEvent);
             clickEvent.put("action", "open_url");
-            clickEvent.put("value", url);
+            if (!url.startsWith("http://") && (!url.startsWith("https://"))) {
+                clickEvent.put("value", "http://" + url);
+            } else {
+                clickEvent.put("value", url);
+            }
             Map<String, Object> hoverEvent = new HashMap<>();
             result.put("hoverEvent", hoverEvent);
             hoverEvent.put("action", "show_text");
