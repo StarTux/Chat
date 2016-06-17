@@ -27,7 +27,7 @@ public class PublicChannel extends AbstractChannel {
         }
         if (c.message == null || c.message.isEmpty()) {
             setFocusChannel(c.player.getUniqueId());
-            Msg.info(c.player, "Now focusing %s&r", getTitle());
+            Msg.info(c.player, "Now focusing %s&r.", getTitle());
         } else {
             SQLLog.store(c.player, this, null, c.message);
             Message message = makeMessage(c.player, c.message);
