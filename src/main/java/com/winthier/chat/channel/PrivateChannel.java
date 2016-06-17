@@ -29,7 +29,9 @@ public class PrivateChannel extends AbstractChannel {
     }
 
     public void handleMessage(Message message) {
-        ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s->%s: %s", getTag(), message.senderServer, message.senderName, message.targetName, message.message));
+        if (message.special == null) {
+            ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s->%s: %s", getTag(), message.senderServer, message.senderName, message.targetName, message.message));
+        }
         Player player = Bukkit.getServer().getPlayer(message.target);
         if (player == null) return;
         if (message.special == null) {
