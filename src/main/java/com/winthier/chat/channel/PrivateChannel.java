@@ -84,9 +84,11 @@ public class PrivateChannel extends AbstractChannel {
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
         Msg.raw(player, json);
         // Sound Cue
-        if (!message.message.toLowerCase().contains(player.getName().toLowerCase()) ||
-            !playSoundCue(player, "Name")) {
-            playSoundCue(player, "Chat");
+        if (!ack) {
+            if (!message.message.toLowerCase().contains(player.getName().toLowerCase()) ||
+                !playSoundCue(player, "Name")) {
+                playSoundCue(player, "Chat");
+            }
         }
         // Reply
         SQLSetting.set(uuid, key, "ReplyName", message.senderName);
@@ -120,7 +122,7 @@ public class PrivateChannel extends AbstractChannel {
             Msg.warn(context.player, "Player not found: %s.", targetName);
             return;
         }
-        if (target.getUniqueId().equals(uuid)) {
+        if (target.getUuid().equals(uuid)) {
             Msg.warn(context.player, "You cannot message yourself.");
             return;
         }
