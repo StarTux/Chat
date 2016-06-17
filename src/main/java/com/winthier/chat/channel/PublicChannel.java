@@ -31,7 +31,7 @@ public class PublicChannel extends AbstractChannel {
         } else {
             SQLLog.store(c.player, this, null, c.message);
             Message message = makeMessage(c.player, c.message);
-            if (range == 0) ChatPlugin.getInstance().didCreateMessage(message);
+            ChatPlugin.getInstance().didCreateMessage(this, message);
             handleMessage(message);
         }        
     }
@@ -41,7 +41,7 @@ public class PublicChannel extends AbstractChannel {
         Message message = makeMessage(null, msg);
         message.senderName = "Console";
         SQLLog.store("Console", this, null, msg);
-        if (range == 0) ChatPlugin.getInstance().didCreateMessage(message);
+        ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
     
@@ -90,5 +90,10 @@ public class PublicChannel extends AbstractChannel {
         // Message
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
         Msg.raw(player, json);
+        // Sound Cue
+        if (!message.message.toLowerCase().contains(player.getName().toLowerCase()) ||
+            !playSoundCue(player, "Name")) {
+            playSoundCue(player, "Chat");
+        }
     }
 }

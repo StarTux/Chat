@@ -26,27 +26,6 @@ public abstract class AbstractChannel implements Channel {
     String title, key, tag, description;
     List<String> aliases = new ArrayList<>();
     int range = 0;
-    public static enum BracketType {
-        PAREN("(", ")"),
-        BRACKETS("[", "]"),
-        CURLY("{", "}"),
-        ANGLE("<", ">")
-        ;
-        final String opening;
-        final String closing;
-        BracketType(String opening, String closing) {
-            this.opening = opening;
-            this.closing = closing;
-        }
-        static BracketType of(String val) {
-            if (val == null) return BracketType.BRACKETS;
-            try {
-                return valueOf(val.toUpperCase());
-            } catch (IllegalArgumentException ile) {
-                return BracketType.BRACKETS;
-            }
-        }
-    }
 
     @Override
     public String getAlias() {
@@ -86,16 +65,23 @@ public abstract class AbstractChannel implements Channel {
     @Override
     public List<Option> getOptions() {
         return Arrays.asList(
-            Option.booleanOption("Joined", "Listening", "1"),
-            Option.colorOption("ChannelColor", "Channel Color", "white"),
-            Option.colorOption("TextColor", "Text Color", "white"),
-            Option.colorOption("SenderColor", "Player Color", "white"),
-            Option.colorOption("BracketColor", "Bracket Color", "white"),
-            Option.bracketOption("BracketType", "Brackets", "angle"),
-            Option.booleanOption("ShowChannelTag", "Show Channel Tag", "0"),
-            Option.booleanOption("ShowPlayerTitle", "Show Player Title", "1"),
-            Option.booleanOption("ShowServer", "Show Server", "0"),
-            Option.booleanOption("LanguageFilter", "Language Filter", "1")
+            Option.booleanOption("Joined", "Listening", "Join or leave the channel.", "1"),
+            Option.colorOption("ChannelColor", "Channel Color", "Main channel color", "white"),
+            Option.colorOption("TextColor", "Text Color", "Color of chat messages", "white"),
+            Option.colorOption("SenderColor", "Player Color", "Color of player names", "white"),
+            Option.colorOption("BracketColor", "Bracket Color", "Color of brackets and puncutation", "white"),
+
+            Option.soundOption("SoundCueChat", "Chat Cue", "Sound played when you receive a message", "off"),
+            Option.intOption("SoundCueChatVolume", "Chat Cue Volume", "Sound played when you receive a message", "10", 1, 10),
+
+            Option.soundOption("SoundCueName", "Name Cue", "Sound played when your named is mentioned in chat", "off"),
+            Option.intOption("SoundCueNameVolume", "Name Cue Volume", "Sound played when your name is mentioned in chat", "10", 1, 10),
+
+            Option.bracketOption("BracketType", "Brackets", "Appearance of brackets", "angle"),
+            Option.booleanOption("ShowChannelTag", "Show Channel Tag", "Show the channel tag at the beginning of every message", "0"),
+            Option.booleanOption("ShowPlayerTitle", "Show Player Title", "Show a player's current title in every message", "1"),
+            Option.booleanOption("ShowServer", "Show Server", "Show a player's server in every message", "0"),
+            Option.booleanOption("LanguageFilter", "Language Filter", "Filter out foul language", "1")
             );
     }
 
@@ -126,7 +112,7 @@ public abstract class AbstractChannel implements Channel {
         }
         message.senderName = sender;
         message.special = "announcement";
-        if (range == 0) ChatPlugin.getInstance().didCreateMessage(message);
+        ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -234,5 +220,14 @@ public abstract class AbstractChannel implements Channel {
             result.add(player);
         }
         return result;
+    }
+
+    public boolean playSoundCue(Player player, String skey) {
+        SoundCue soundCue = SoundCue.of(SQLSetting.getString(player.getUniqueId(), getKey(), "SoundCue"+skey, "off"));
+        if (soundCue == null) return false;
+        int volume = SQLSetting.getInt(player.getUniqueId(), getKey(), "SoundCue"+skey+"Volume", 10);
+        float vol = (float)volume / 10.0f;
+        player.playSound(player.getEyeLocation(), soundCue.sound, vol, 1.0f);
+        return true;
     }
 }

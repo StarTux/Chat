@@ -1,6 +1,7 @@
 package com.winthier.chat;
 
 import com.winthier.chat.MessageFilter;
+import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.Option;
 import com.winthier.chat.sql.SQLDB;
@@ -31,34 +32,7 @@ public class ChatCommand extends AbstractChatCommand {
         String firstArg = args[0].toLowerCase();
         if (firstArg.equals("set")) {
             if (player == null) return false;
-            UUID uuid = player.getUniqueId();
-            if (args.length == 1) {
-            } else if (args.length == 2) {
-                Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
-                if (channel == null || !channel.hasPermission(player)) return false;
-                showSettingsMenu(player, channel);
-            } else if (args.length == 3 && args[2].equals("reset")) {
-                Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
-                if (channel == null || !channel.hasPermission(player)) return false;
-                for (Option option: channel.getOptions()) {
-                    SQLSetting.set(uuid, channel.getKey(), option.key, null);
-                }
-                Msg.info(player, "&aSettings reset to default");
-                showSettingsMenu(player, channel);
-            } else if (args.length == 4) {
-                Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
-                if (channel == null || !channel.hasPermission(player)) return false;
-                String key = args[2];
-                String value = args[3];
-                if (!isKeyValuePairValid(channel.getOptions(), key, value)) {
-                    return false;
-                }
-                SQLSetting.set(uuid, channel.getKey(), key, value);
-                Msg.info(player, "&aSettings updated");
-                showSettingsMenu(player, channel);
-            } else {
-                return false;
-            }
+            setOption(player, Arrays.copyOfRange(args, 1, args.length));
         } else if (firstArg.equals("list") && args.length == 1) {
             listChannels(player);
         } else if (firstArg.equals("join") && args.length == 2) {
@@ -97,6 +71,34 @@ public class ChatCommand extends AbstractChatCommand {
         return false;
     }
 
+    void setOption(Player player, String[] args) {
+        UUID uuid = player.getUniqueId();
+        if (args.length == 0) return;
+        Channel channel = ChatPlugin.getInstance().findChannel(args[0]);
+        if (channel == null || !channel.hasPermission(player)) return;
+        if (args.length == 2 && args[1].equals("reset")) {
+            for (Option option: channel.getOptions()) {
+                SQLSetting.set(uuid, channel.getKey(), option.key, null);
+            }
+            Msg.info(player, "&aSettings reset to default");
+        } else if (args.length == 3) {
+            String key = args[1];
+            String value = args[2];
+            if (!isKeyValuePairValid(channel.getOptions(), key, value)) return;
+            SQLSetting.set(uuid, channel.getKey(), key, value);
+            Msg.info(player, "&aSettings updated");
+            if (channel instanceof AbstractChannel) {
+                AbstractChannel ac = (AbstractChannel)channel;
+                if (key.startsWith("SoundCueChat")) {
+                    ac.playSoundCue(player, "Chat");
+                } else if (key.startsWith("SoundCueName")) {
+                    ac.playSoundCue(player, "Name");
+                }
+            }
+        }
+        showSettingsMenu(player, channel);
+    }
+
     void showMenu(Player player) {
         if (player == null) return;
         Msg.info(player, "&3Menu");
@@ -120,7 +122,8 @@ public class ChatCommand extends AbstractChatCommand {
         List<Object> json = new ArrayList<>();
         for (Option option: channel.getOptions()) {
             json.clear();
-            json.add(Msg.format("&o %s", option.displayName));
+            json.add(" ");
+            json.add(Msg.button(ChatColor.WHITE, "&o"+option.displayName, option.displayName+"\n&5"+option.description, null));
             for (Option.State state: option.states) {
                 json.add(" ");
                 String current = SQLSetting.getString(uuid, channel.getKey(), option.key, option.defaultValue);

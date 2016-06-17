@@ -277,8 +277,8 @@ public class ChatPlugin extends JavaPlugin {
         }
     }
 
-    public void didCreateMessage(Message message) {
-        if (connectListener != null) {
+    public void didCreateMessage(Channel channel, Message message) {
+        if (connectListener != null && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
         }
         if (dynmapHandler != null &&

@@ -83,6 +83,11 @@ public class PrivateChannel extends AbstractChannel {
         // Message
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
         Msg.raw(player, json);
+        // Sound Cue
+        if (!message.message.toLowerCase().contains(player.getName().toLowerCase()) ||
+            !playSoundCue(player, "Name")) {
+            playSoundCue(player, "Chat");
+        }
         // Reply
         SQLSetting.set(uuid, key, "ReplyName", message.senderName);
     }
@@ -98,7 +103,7 @@ public class PrivateChannel extends AbstractChannel {
         message.senderServer = ChatPlugin.getInstance().getServerName();
         message.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
         fillMessage(message);
-        ChatPlugin.getInstance().didCreateMessage(message);
+        ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -159,7 +164,7 @@ public class PrivateChannel extends AbstractChannel {
         Message message = makeMessage(player, msg);
         message.target = target.getUuid();
         message.targetName = target.getName();
-        ChatPlugin.getInstance().didCreateMessage(message);
+        ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
 }

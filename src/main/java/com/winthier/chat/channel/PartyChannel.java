@@ -38,7 +38,7 @@ public class PartyChannel extends AbstractChannel {
             SQLLog.store(c.player, this, partyName, c.message);
             Message message = makeMessage(c.player, c.message);
             message.targetName = partyName;
-            if (range <= 0) ChatPlugin.getInstance().didCreateMessage(message);
+            ChatPlugin.getInstance().didCreateMessage(this, message);
             handleMessage(message);
         }        
     }
@@ -53,7 +53,7 @@ public class PartyChannel extends AbstractChannel {
         message.senderName = "Console";
         message.targetName = target;
         SQLLog.store("Console", this, target, msg);
-        if (range == 0) ChatPlugin.getInstance().didCreateMessage(message);
+        ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -105,6 +105,11 @@ public class PartyChannel extends AbstractChannel {
         // Message
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
         Msg.raw(player, json);
+        // Sound Cue
+        if (!message.message.toLowerCase().contains(player.getName().toLowerCase()) ||
+            !playSoundCue(player, "Name")) {
+            playSoundCue(player, "Chat");
+        }
     }
 
     String getPartyName(UUID uuid) {
