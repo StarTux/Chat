@@ -131,6 +131,7 @@ public abstract class AbstractChannel implements Channel {
             message.json = filter.getJson();
             message.languageFilterJson = filter.getLanguageFilterJson();
             message.languageFilterMessage = filter.toString();
+            message.shouldCancel = filter.shouldCancel();
         }
     }
 

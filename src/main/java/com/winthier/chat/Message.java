@@ -25,6 +25,7 @@ public class Message {
     public List<Object> languageFilterJson;
 
     transient public Location location;
+    transient public boolean shouldCancel = false;
 
     private static void store(Map<String, Object> map, String key, Object value) {
         if (value == null) return;

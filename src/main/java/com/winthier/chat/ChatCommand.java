@@ -1,7 +1,6 @@
 package com.winthier.chat;
 
 import com.winthier.chat.ChatPlugin;
-import com.winthier.chat.MessageFilter;
 import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.Option;

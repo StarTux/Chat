@@ -18,6 +18,7 @@ public class MessageFilter {
     // Output
     List<Object> json = null;
     List<Object> languageFilterJson = null;
+    boolean shouldCancel = false;
 
     public MessageFilter(UUID sender, String message) {
         this.sender = sender;
@@ -122,7 +123,13 @@ public class MessageFilter {
 
         void filterSpam() {
             for (SQLPattern pat: SQLPattern.find("Spam")) {
-                message = pat.replaceAll(message);
+                if (pat.getReplacement().isEmpty()) {
+                    if (pat.getMatcher(message).find()) {
+                        shouldCancel = true;
+                    }
+                } else {
+                    message = pat.replaceAll(message);
+                }
             }
             if (message.length() >= 5) {
                 int caps = 0;
@@ -174,5 +181,9 @@ public class MessageFilter {
             hoverEvent.put("value", "Click to open URL " + url);
             return result;
         }
+    }
+
+    public boolean shouldCancel() {
+        return shouldCancel;
     }
 }

@@ -55,6 +55,7 @@ public class PrivateChannel extends AbstractChannel {
         UUID uuid = player.getUniqueId();
         String key = getKey();
         fillMessage(message);
+        if (message.shouldCancel && message.sender != null) return;
         List<Object> json = new ArrayList<>();
         ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", ChatColor.WHITE);
         ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", ChatColor.WHITE);
@@ -170,6 +171,7 @@ public class PrivateChannel extends AbstractChannel {
     void talk(Player player, Chatter target, String msg) {
         SQLLog.store(player, this, target.getUuid().toString(), msg);
         Message message = makeMessage(player, msg);
+        if (message.shouldCancel) return;
         message.target = target.getUuid();
         message.targetName = target.getName();
         ChatPlugin.getInstance().didCreateMessage(this, message);

@@ -31,6 +31,7 @@ public class PublicChannel extends AbstractChannel {
         } else {
             SQLLog.store(c.player, this, null, c.message);
             Message message = makeMessage(c.player, c.message);
+            if (message.shouldCancel) return;
             ChatPlugin.getInstance().didCreateMessage(this, message);
             handleMessage(message);
         }        
@@ -47,6 +48,7 @@ public class PublicChannel extends AbstractChannel {
     
     public void handleMessage(Message message) {
         fillMessage(message);
+        if (message.shouldCancel && message.sender != null) return;
         ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s: %s", getTag(), message.senderServer, message.senderName, message.message));
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
