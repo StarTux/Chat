@@ -72,7 +72,7 @@ public class PrivateChannel extends AbstractChannel {
             json.add(serverTag(message, channelColor, bracketColor, bracketType));
         }
         // From/To
-        json.add(Msg.button(senderColor, ack?"to":"from", null, null));
+        json.add(Msg.button(senderColor, ack? "To" : "From", null, null));
         json.add(" ");
         // Player Title
         if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", false)) {
