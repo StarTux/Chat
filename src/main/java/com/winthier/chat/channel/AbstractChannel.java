@@ -192,7 +192,7 @@ public abstract class AbstractChannel implements Channel {
                           (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "") +
                           (message.senderServerDisplayName != null ? "\n&5&oServer&r " + message.senderServerDisplayName : "") +
                           "\n&5&oChannel&r " + getTitle(),
-                          "/tell " + message.senderName + " ");
+                          "/msg " + message.senderName + " ");
     }
 
     void appendMessage(List<Object> json, Message message, ChatColor textColor, boolean languageFilter) {
