@@ -75,7 +75,7 @@ public class PartyChannel extends AbstractChannel {
     public void exampleOutput(Player player) {
         Message message = makeMessage(player, "Hello World");
         message.targetName = "Example";
-        message.prefix = (Msg.format(" &7&oExample&r "));
+        message.prefix = (Msg.format(" &7&oPreview&r "));
         send(message, player);
     }
 

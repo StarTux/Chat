@@ -58,7 +58,7 @@ public class PrivateChannel extends AbstractChannel {
         Message message = makeMessage(player, "Hello World");
         message.target = player.getUniqueId();
         message.targetName = player.getName();
-        message.prefix = (Msg.format(" &7&oExample&r "));
+        message.prefix = (Msg.format(" &7&oPreview&r "));
         send(message, player);
     }
 
