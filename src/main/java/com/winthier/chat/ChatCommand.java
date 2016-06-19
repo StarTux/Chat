@@ -116,14 +116,6 @@ public class ChatCommand extends AbstractChatCommand {
             if (!isKeyValuePairValid(channel.getOptions(), key, value)) return;
             SQLSetting.set(uuid, channel.getKey(), key, value);
             Msg.info(player, "&aSettings updated");
-            if (channel instanceof AbstractChannel) {
-                AbstractChannel ac = (AbstractChannel)channel;
-                if (key.startsWith("SoundCueChat")) {
-                    ac.playSoundCue(player, "Chat");
-                } else if (key.startsWith("SoundCueName")) {
-                    ac.playSoundCue(player, "Name");
-                }
-            }
         }
         showSettingsMenu(player, channel);
     }
@@ -168,7 +160,9 @@ public class ChatCommand extends AbstractChatCommand {
             }
             Msg.raw(player, json);
         }
+        channel.exampleOutput(player);
         json.clear();
+        json.add(" ");
         json.add(Msg.button(ChatColor.DARK_RED, "&r[&4Reset&r]", "&4Reset to channel defaults.", "/ch set "+channel.getAlias()+" reset"));
         Msg.raw(player, json);
     }
@@ -206,7 +200,7 @@ public class ChatCommand extends AbstractChatCommand {
             json.add(Msg.button(ChatColor.RED, chatter.getName(), "Click to unignore " + chatter.getName(), "/ch ignore " + chatter.getName()));
         }
         if (count == 0) {
-            json.add(" &anobody");
+            json.add(Msg.format(" &anobody"));
         }
         Msg.raw(player, json);
     }

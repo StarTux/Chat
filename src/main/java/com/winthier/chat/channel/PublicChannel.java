@@ -62,6 +62,13 @@ public class PublicChannel extends AbstractChannel {
         }
     }
 
+    @Override
+    public void exampleOutput(Player player) {
+        Message message = makeMessage(player, "Hello World");
+        message.prefix = (Msg.format(" &7&oExample&r "));
+        send(message, player);
+    }
+
     void send(Message message, Player player) {
         UUID uuid = player.getUniqueId();
         String key = getKey();
@@ -73,6 +80,7 @@ public class PublicChannel extends AbstractChannel {
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
         BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
         json.add("");
+        if (message.prefix != null) json.add(message.prefix);
         // Channel Tag
         if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false)) {
             json.add(channelTag(channelColor, bracketColor, bracketType));

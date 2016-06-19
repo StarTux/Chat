@@ -24,6 +24,7 @@ public interface Channel extends CommandResponder {
     List<Option> getOptions();
     void playerDidUseChat(PlayerCommandContext context);
     void announce(String sender, Object msg);
-    public List<Chatter> getOnlineMembers();
-    public List<Player> getLocalMembers();
+    List<Chatter> getOnlineMembers();
+    List<Player> getLocalMembers();
+    void exampleOutput(Player player);
 }

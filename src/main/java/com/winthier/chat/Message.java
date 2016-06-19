@@ -26,6 +26,7 @@ public class Message {
 
     transient public Location location;
     transient public boolean shouldCancel = false;
+    transient public String prefix = null;
 
     private static void store(Map<String, Object> map, String key, Object value) {
         if (value == null) return;

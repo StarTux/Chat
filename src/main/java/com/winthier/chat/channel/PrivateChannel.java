@@ -38,8 +38,10 @@ public class PrivateChannel extends AbstractChannel {
             if (!hasPermission(player)) return;
             if (!isJoined(player.getUniqueId())) return;
         }
+        fillMessage(message);
+        if (message.shouldCancel && message.sender != null) return;
         if (message.special != null || !shouldIgnore(player.getUniqueId(), message)) {
-            sendMessage(message, player, message.special != null);
+            send(message, player);
         }
         if (message.special == null) {
             sendAck(message, player);
@@ -51,11 +53,19 @@ public class PrivateChannel extends AbstractChannel {
         
     }
 
-    void sendMessage(Message message, Player player, boolean ack) {
+    @Override
+    public void exampleOutput(Player player) {
+        Message message = makeMessage(player, "Hello World");
+        message.target = player.getUniqueId();
+        message.targetName = player.getName();
+        message.prefix = (Msg.format(" &7&oExample&r "));
+        send(message, player);
+    }
+
+    void send(Message message, Player player) {
+        boolean ack = message.special != null;
         UUID uuid = player.getUniqueId();
         String key = getKey();
-        fillMessage(message);
-        if (message.shouldCancel && message.sender != null) return;
         List<Object> json = new ArrayList<>();
         ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", ChatColor.WHITE);
         ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", ChatColor.WHITE);
@@ -64,6 +74,7 @@ public class PrivateChannel extends AbstractChannel {
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
         BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
         json.add("");
+        if (message.prefix != null) json.add(message.prefix);
         // Channel Tag
         if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false)) {
             json.add(channelTag(channelColor, bracketColor, bracketType));
