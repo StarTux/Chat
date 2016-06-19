@@ -180,7 +180,7 @@ public class ChatCommand extends AbstractChatCommand {
                 json.add(Msg.button(ChatColor.RED, "o", "Join " + channel.getTitle(), "/ch join " + channel.getAlias()));
             }
             json.add(" ");
-            json.add(Msg.button(SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE), channel.getTitle(), null, null));
+            json.add(Msg.button(SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE), channel.getTitle(), "Focus " + channel.getTitle(), "/" + channel.getAlias()));
             json.add(Msg.button(ChatColor.DARK_GRAY, " - ", null, null));
             json.add(Msg.button(ChatColor.GRAY, channel.getDescription(), null, null));
             Msg.raw(player, json);
