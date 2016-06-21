@@ -181,9 +181,9 @@ public class ChatCommand extends AbstractChatCommand {
                 json.add(Msg.button(ChatColor.RED, "o", "Join " + channel.getTitle(), "/ch join " + channel.getAlias()));
             }
             json.add(" ");
-            ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey() + "*", "ChannelColor", ChatColor.WHITE);
+            ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE);
             if (channel.equals(ChatPlugin.getInstance().getFocusChannel(player.getUniqueId()))) {
-                json.add(Msg.button(channelColor, channel.getTitle(), "You are focusing " + channel.getTitle(), null));
+                json.add(Msg.button(channelColor, channel.getTitle() + "*", "You are focusing " + channel.getTitle(), null));
             } else {
                 json.add(Msg.button(channelColor, channel.getTitle(), "Focus " + channel.getTitle(), "/ch " + channel.getAlias()));
             }
