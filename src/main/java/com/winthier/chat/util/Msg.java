@@ -53,10 +53,13 @@ public class Msg {
         }
     }
 
-    public static Object button(ChatColor color, String chat, String tooltip, String command) {
+    public static Object button(ChatColor color, String chat, String insertion, String tooltip, String command) {
         Map<String, Object> map = new HashMap<>();
         map.put("text", format(chat));
         map.put("color", color.name().toLowerCase());
+        if (insertion != null) {
+            map.put("insertion", insertion);
+        }
         if (command != null) {
             Map<String, Object> clickEvent = new HashMap<>();
             map.put("clickEvent", clickEvent);
@@ -72,8 +75,12 @@ public class Msg {
         return map;
     }
 
+    public static Object button(ChatColor color, String chat, String tooltip, String command) {
+        return button(color, chat, null, tooltip, command);
+    }
+
     public static Object button(String chat, String tooltip, String command) {
-        return button(ChatColor.WHITE, chat, tooltip, command);
+        return button(ChatColor.WHITE, chat, null, tooltip, command);
     }
 
     public static String camelCase(String msg) {

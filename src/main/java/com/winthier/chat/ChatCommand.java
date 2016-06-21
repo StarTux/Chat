@@ -82,6 +82,7 @@ public class ChatCommand extends AbstractChatCommand {
             channel.joinChannel(player.getUniqueId());
             channel.setFocusChannel(player.getUniqueId());
             Msg.info(player, "Now focusing %s&r.", channel.getTitle());
+            listChannels(player);
         }
         return true;
     }
@@ -180,7 +181,12 @@ public class ChatCommand extends AbstractChatCommand {
                 json.add(Msg.button(ChatColor.RED, "o", "Join " + channel.getTitle(), "/ch join " + channel.getAlias()));
             }
             json.add(" ");
-            json.add(Msg.button(SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE), channel.getTitle(), "Focus " + channel.getTitle(), "/" + channel.getAlias()));
+            ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey() + "*", "ChannelColor", ChatColor.WHITE);
+            if (channel.equals(ChatPlugin.getInstance().getFocusChannel(player.getUniqueId()))) {
+                json.add(Msg.button(channelColor, channel.getTitle(), "You are focusing " + channel.getTitle(), null));
+            } else {
+                json.add(Msg.button(channelColor, channel.getTitle(), "Focus " + channel.getTitle(), "/ch " + channel.getAlias()));
+            }
             json.add(Msg.button(ChatColor.DARK_GRAY, " - ", null, null));
             json.add(Msg.button(ChatColor.GRAY, channel.getDescription(), null, null));
             Msg.raw(player, json);

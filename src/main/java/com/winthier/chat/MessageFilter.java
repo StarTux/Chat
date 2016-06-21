@@ -178,7 +178,6 @@ public class MessageFilter {
             Map<String, Object> hoverEvent = new HashMap<>();
             result.put("hoverEvent", hoverEvent);
             hoverEvent.put("action", "show_text");
-            hoverEvent.put("value", "Click to open URL " + url);
             return result;
         }
     }

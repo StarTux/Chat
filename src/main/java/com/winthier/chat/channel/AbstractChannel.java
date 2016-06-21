@@ -8,8 +8,10 @@ import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ public abstract class AbstractChannel implements Channel {
     String title, key, tag, description;
     List<String> aliases = new ArrayList<>();
     int range = 0;
+    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
     @Override
     public String getAlias() {
@@ -70,11 +73,16 @@ public abstract class AbstractChannel implements Channel {
     @Override
     public List<Option> getOptions() {
         return Arrays.asList(
-            Option.booleanOption("Joined", "Listening", "Join or leave the channel.", "1"),
+            Option.booleanOption("ShowChannelTag", "Show Channel Tag", "Show the channel tag at the beginning of every message", "0"),
+            Option.booleanOption("ShowPlayerTitle", "Show Player Title", "Show a player's current title in every message", "1"),
+            Option.booleanOption("ShowServer", "Show Server", "Show a player's server in every message", "0"),
+
             Option.colorOption("ChannelColor", "Channel Color", "Main channel color", "white"),
             Option.colorOption("TextColor", "Text Color", "Color of chat messages", "white"),
             Option.colorOption("SenderColor", "Player Color", "Color of player names", "white"),
             Option.colorOption("BracketColor", "Bracket Color", "Color of brackets and puncutation", "white"),
+
+            Option.bracketOption("BracketType", "Brackets", "Appearance of brackets", "angle"),
 
             Option.soundOption("SoundCueChat", "Chat Cue", "Sound played when you receive a message", "off"),
             Option.intOption("SoundCueChatVolume", "Chat Cue Volume", "Sound played when you receive a message", "10", 1, 10),
@@ -82,10 +90,6 @@ public abstract class AbstractChannel implements Channel {
             Option.soundOption("SoundCueName", "Name Cue", "Sound played when your named is mentioned in chat", "off"),
             Option.intOption("SoundCueNameVolume", "Name Cue Volume", "Sound played when your name is mentioned in chat", "10", 1, 10),
 
-            Option.bracketOption("BracketType", "Brackets", "Appearance of brackets", "angle"),
-            Option.booleanOption("ShowChannelTag", "Show Channel Tag", "Show the channel tag at the beginning of every message", "0"),
-            Option.booleanOption("ShowPlayerTitle", "Show Player Title", "Show a player's current title in every message", "1"),
-            Option.booleanOption("ShowServer", "Show Server", "Show a player's server in every message", "0"),
             Option.booleanOption("LanguageFilter", "Language Filter", "Filter out foul language", "1")
             );
     }
@@ -188,26 +192,24 @@ public abstract class AbstractChannel implements Channel {
         }
         return Msg.button(senderColor,
                           useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName,
+                          message.senderName,
                           message.senderName +
                           (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "") +
                           (message.senderServerDisplayName != null ? "\n&5&oServer&r " + message.senderServerDisplayName : "") +
-                          "\n&5&oChannel&r " + getTitle(),
+                          "\n&5&oChannel&r " + getTitle() +
+                          "\n&5&oTime&r " + timeFormat.format(new Date()),
                           "/msg " + message.senderName + " ");
     }
 
     void appendMessage(List<Object> json, Message message, ChatColor textColor, boolean languageFilter) {
         List<Object> sourceList = languageFilter ? message.languageFilterJson : message.json;
-        for (Object o: sourceList) {
-            if (o instanceof Map) {
-                @SuppressWarnings("unchecked")
-                    Map<String, Object> map = (Map<String, Object>)o;
-                map = new HashMap<>(map);
-                map.put("color", textColor.name().toLowerCase());
-                json.add(map);
-            } else {
-                json.add(o);
-            }
-        }
+        Map<String, Object> map = new HashMap<>();
+        List<Object> extra = new ArrayList<>(sourceList);
+        map.put("text", "");
+        map.put("color", textColor.name().toLowerCase());
+        map.put("extra", extra);
+        map.put("insertion", languageFilter ? message.languageFilterMessage : message.message);
+        json.add(map);
     }
 
     static boolean shouldIgnore(UUID player, Message message) {
