@@ -118,7 +118,11 @@ public class SQLSetting {
         SQLSetting result = find(uuid, channel, key);
         if (result == null) {
             result = new SQLSetting(uuid, channel, key, value);
-            findSettings(uuid).map.put(new Key(uuid, channel, key), result);
+            if (uuid == null) {
+                getDefaultSettings().map.put(new Key(uuid, channel, key), result);
+            } else {
+                findSettings(uuid).map.put(new Key(uuid, channel, key), result);
+            }
             try {
                 SQLDB.get().save(result);
             } catch (PersistenceException pe) {
