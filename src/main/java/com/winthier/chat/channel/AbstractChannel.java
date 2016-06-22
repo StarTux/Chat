@@ -158,7 +158,7 @@ public abstract class AbstractChannel implements Channel {
         return Msg.button(channelColor,
                           bracketColor + bracketType.opening + channelColor + getTag() + bracketColor + bracketType.closing,
                           getTitle() + "\n&5&o" + getDescription(),
-                          "/" + getKey() + " ");
+                          "/" + getAlias() + " ");
     }
 
     Object serverTag(Message message, ChatColor serverColor, ChatColor bracketColor, BracketType bracketType) {
