@@ -12,12 +12,11 @@ import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.title.TitleHandler;
 import com.winthier.chat.vault.VaultHandler;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import org.bukkit.Location;
@@ -25,6 +24,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -158,7 +158,9 @@ public class ChatPlugin extends JavaPlugin {
 
     @SuppressWarnings("unchecked")
     void initializeDatabase() {
-        ConfigurationSection patternSection = getConfig().getConfigurationSection("patterns");
+        YamlConfiguration config;
+        config = YamlConfiguration.loadConfiguration(new InputStreamReader(getResource("database.yml")));
+        ConfigurationSection patternSection = config.getConfigurationSection("patterns");
         if (patternSection != null) {
             for (String category: patternSection.getKeys(false)) {
                 for (Object o: patternSection.getList(category)) {
@@ -186,7 +188,7 @@ public class ChatPlugin extends JavaPlugin {
                 }
             }
         }
-        ConfigurationSection channelsSection = getConfig().getConfigurationSection("channels");
+        ConfigurationSection channelsSection = config.getConfigurationSection("channels");
         if (channelsSection != null) {
             for (String key: channelsSection.getKeys(false)) {
                 ConfigurationSection channelSection = channelsSection.getConfigurationSection(key);
@@ -207,7 +209,7 @@ public class ChatPlugin extends JavaPlugin {
                 getDatabase().save(chan);
             }
         }
-        for (Map<?, ?> tmpMap: getConfig().getMapList("settings")) {
+        for (Map<?, ?> tmpMap: config.getMapList("settings")) {
             @SuppressWarnings("unchecked")
             Map<String, String> map = (Map<String, String>)tmpMap;
             SQLSetting st = new SQLSetting((UUID)null, map.get("channel"), map.get("key"), (Object)map.get("value"));
@@ -257,6 +259,11 @@ public class ChatPlugin extends JavaPlugin {
     }
 
     public Channel getFocusChannel(UUID uuid) {
+        String forcedFocusChannelName = getConfig().getString("ForcedFocusChannel", null);
+        if (forcedFocusChannelName != null && !forcedFocusChannelName.isEmpty()) {
+            Channel channel = findChannel(forcedFocusChannelName);
+            if (channel != null) return channel;
+        }
         String channelName = SQLSetting.getString(uuid, null, "FocusChannel", "g");
         return findChannel(channelName);
     }
