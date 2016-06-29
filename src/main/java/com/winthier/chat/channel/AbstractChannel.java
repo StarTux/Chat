@@ -100,7 +100,7 @@ public abstract class AbstractChannel implements Channel {
     }
 
     @Override
-    public void announce(String sender, Object msg) {
+    public void announce(Object msg) {
         Message message;
         if (msg instanceof String) {
             message = makeMessage(null, (String)msg);
@@ -119,8 +119,6 @@ public abstract class AbstractChannel implements Channel {
             message.json = json;
             message.languageFilterJson = json;
         }
-        message.senderName = sender;
-        message.special = "announcement";
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
@@ -187,6 +185,7 @@ public abstract class AbstractChannel implements Channel {
     }
 
     Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
+        if (message.senderName == null) return "";
         if (message.sender == null) {
             return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName, null, null);
         }

@@ -92,7 +92,7 @@ public class PrivateChannel extends AbstractChannel {
         }
         // Player Name
         json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
-        json.add(Msg.button(bracketColor, ":", null, null));
+        if (!tagPlayerName && message.senderName != null) json.add(Msg.button(bracketColor, ":", null, null));
         json.add(" ");
         // Message
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));

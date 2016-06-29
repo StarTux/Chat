@@ -99,7 +99,7 @@ public class AdminCommand extends AbstractChatCommand {
             for (int i = 3; i < args.length; ++i) {
                 sb.append(" ").append(args[i]);
             }
-            channel.announce(sender.getName(), sb.toString());
+            channel.announce(sb.toString());
             Msg.info(sender, "Announcement sent to %s", channel.getTitle());
         }
         return true;
