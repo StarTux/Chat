@@ -38,7 +38,7 @@ public class SQLPattern
 
     public Pattern getPattern() {
         if (pattern == null) {
-            pattern = Pattern.compile(getRegex());
+            pattern = Pattern.compile(getRegex(), Pattern.CASE_INSENSITIVE);
         }
         return pattern;
     }
