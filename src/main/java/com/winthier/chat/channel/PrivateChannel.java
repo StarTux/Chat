@@ -126,6 +126,7 @@ public class PrivateChannel extends AbstractChannel {
     @Override
     public void playerDidUseCommand(PlayerCommandContext context) {
         UUID uuid = context.player.getUniqueId();
+        if (context.message == null) return;
         final String[] arr = context.message.split("\\s+", 2);
         if (arr.length == 0) {
             return;
