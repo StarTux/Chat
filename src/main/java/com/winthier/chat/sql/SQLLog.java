@@ -35,7 +35,7 @@ public class SQLLog {
     Integer x, y, z;
     @NotNull String channel;
     String target;
-    @NotNull String message;
+    @NotNull @Length(max=511) String message;
 
     private SQLLog(String sender, Channel channel, String target, String message) {
         setTime(new Date());
