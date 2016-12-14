@@ -131,30 +131,6 @@ public class MessageFilter {
                     message = pat.replaceAll(message);
                 }
             }
-            String[] arr = message.split(" ");
-            if (arr.length > 0) {
-                int capsCount = 0;
-                for (int i = 0; i < arr.length; ++i) {
-                    String word = arr[i];
-                    if (word.length() >= 4) {
-                        int caps = 0;
-                        for (int j = 0; j < word.length(); ++j) {
-                            if (Character.isUpperCase(word.charAt(j))) caps += 1;
-                        }
-                        if (caps * 2 >= word.length()) {
-                            arr[i] = word.toLowerCase();
-                            capsCount += 1;
-                        }
-                    }
-                }
-                if (capsCount * 2 >= arr.length) {
-                    message = message.toLowerCase();
-                } else if (capsCount > 0) {
-                    StringBuilder sb = new StringBuilder(arr[0]);
-                    for (int i = 1; i < arr.length; ++i) sb.append(" ").append(arr[i]);
-                    message = sb.toString();
-                }
-            }
         }
 
         Map<String, Object> toJson() {
