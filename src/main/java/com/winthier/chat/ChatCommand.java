@@ -32,7 +32,7 @@ public class ChatCommand extends AbstractChatCommand {
         String firstArg = args[0].toLowerCase();
         if (firstArg.equals("set")) {
             if (player == null) return false;
-            if (args.length == 0) {
+            if (args.length == 1) {
                 showMenu(player);
                 return true;
             }
