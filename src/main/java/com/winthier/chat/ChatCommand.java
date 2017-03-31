@@ -3,7 +3,10 @@ package com.winthier.chat;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
+import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.Option;
+import com.winthier.chat.channel.PlayerCommandContext;
+import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLPattern;
@@ -75,6 +78,16 @@ public class ChatCommand extends AbstractChatCommand {
                 count += 1;
             }
             Msg.send(sender, "&oChannel &a%s &r(%d):%s", channel.getTitle(), count, sb.toString());
+        } else if (firstArg.equals("say")) {
+            if (args.length < 3) return false;
+            CommandResponder cmd = ChatPlugin.getInstance().findCommand(args[1]);
+            if (cmd == null) return false;
+            if (player != null && !cmd.hasPermission(player)) return false;
+            StringBuilder sb = new StringBuilder(args[2]);
+            for (int i = 3; i < args.length; i += 1) sb.append(" ").append(args[i]);
+            String msg = sb.toString();
+            if (player != null && !ChatPlayerTalkEvent.call(player, cmd.getChannel(), msg)) return false;
+            cmd.playerDidUseCommand(new PlayerCommandContext(player, args[1], msg));
         } else if (args.length == 1) {
             if (player == null) return false;
             Channel channel = ChatPlugin.getInstance().findChannel(firstArg);
@@ -137,6 +150,8 @@ public class ChatCommand extends AbstractChatCommand {
         json.add(Msg.button(ChatColor.BLUE, "&r[&9List&r]", "/ch list\n&5&oChannel List", "/ch list"));
         json.add(" ");
         json.add(Msg.button(ChatColor.BLUE, "&r[&9Who&r]", "/ch who\n&5&oUser List", "/ch who"));
+        json.add(" ");
+        json.add(Msg.button(ChatColor.BLUE, "&r[&9Say&r]", "/ch say <channel> <msg>\n&5&oTalk in chat", "/ch say "));
         Msg.raw(player, json);
     }
 
