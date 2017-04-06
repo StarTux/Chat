@@ -1,30 +1,23 @@
 package com.winthier.chat;
 
-import com.winthier.chat.ChatPlugin;
-import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.Option;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
-import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
-import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class ChatCommand extends AbstractChatCommand {
+public final class ChatCommand extends AbstractChatCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Player player = sender instanceof Player ? (Player)sender : null;
@@ -55,7 +48,7 @@ public class ChatCommand extends AbstractChatCommand {
         } else if (firstArg.equals("ignore")) {
             if (args.length == 1) {
                 listIgnores(player);
-            } else if (args.length == 2){
+            } else if (args.length == 2) {
                 toggleIgnore(player, args[1]);
             } else {
                 return false;
@@ -142,7 +135,7 @@ public class ChatCommand extends AbstractChatCommand {
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
             if (!channel.hasPermission(player)) continue;
             json.add(" ");
-            json.add(Msg.button("&r["+SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE)+channel.getTag()+"&r]", channel.getTitle(), "/ch set "+channel.getAlias()));
+            json.add(Msg.button("&r[" + SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE) + channel.getTag() + "&r]", channel.getTitle(), "/ch set " + channel.getAlias()));
         }
         Msg.raw(player, json);
         json.clear();
@@ -162,16 +155,16 @@ public class ChatCommand extends AbstractChatCommand {
         for (Option option: channel.getOptions()) {
             json.clear();
             json.add(" ");
-            json.add(Msg.button(ChatColor.WHITE, "&o"+option.displayName, option.displayName+"\n&5"+option.description, null));
+            json.add(Msg.button(ChatColor.WHITE, "&o" + option.displayName, option.displayName + "\n&5" + option.description, null));
             for (Option.State state: option.states) {
                 json.add(" ");
                 String current = SQLSetting.getString(uuid, channel.getKey(), option.key, option.defaultValue);
                 boolean active = false;
                 if (current != null && current.equals(state.value)) active = true;
                 if (active) {
-                    json.add(Msg.button("&r["+state.activeColor+state.displayName+"&r]", state.description, "/ch set "+channel.getAlias()+" "+option.key+" "+state.value));
+                    json.add(Msg.button("&r[" + state.activeColor + state.displayName + "&r]", state.description, "/ch set " + channel.getAlias() + " " + option.key + " " + state.value));
                 } else {
-                    json.add(Msg.button(state.color+state.displayName, state.description, "/ch set "+channel.getAlias()+" "+option.key+" "+state.value));
+                    json.add(Msg.button(state.color + state.displayName, state.description, "/ch set " + channel.getAlias() + " " + option.key + " " + state.value));
                 }
             }
             Msg.raw(player, json);
@@ -179,7 +172,7 @@ public class ChatCommand extends AbstractChatCommand {
         channel.exampleOutput(player);
         json.clear();
         json.add(" ");
-        json.add(Msg.button(ChatColor.DARK_RED, "&r[&4Reset&r]", "&4Reset to channel defaults.", "/ch set "+channel.getAlias()+" reset"));
+        json.add(Msg.button(ChatColor.DARK_RED, "&r[&4Reset&r]", "&4Reset to channel defaults.", "/ch set " + channel.getAlias() + " reset"));
         Msg.raw(player, json);
     }
 

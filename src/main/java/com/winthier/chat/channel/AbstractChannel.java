@@ -5,7 +5,6 @@ import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
 import com.winthier.chat.MessageFilter;
 import com.winthier.chat.sql.SQLIgnore;
-import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.text.SimpleDateFormat;
@@ -20,58 +19,63 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 @Getter @Setter
 public abstract class AbstractChannel implements Channel {
-    String title, key, tag, description;
-    List<String> aliases = new ArrayList<>();
-    int range = 0;
-    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+    private String title, key, tag, description;
+    private int range = 0;
+    private final List<String> aliases = new ArrayList<>();
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
     @Override
-    public String getAlias() {
+    public final String getAlias() {
         return getAliases().get(0);
     }
 
+    /**
+     * Override if channel has a special permission.
+     */
     @Override
     public boolean hasPermission(Player player) {
         return player.hasPermission("chat.channel." + getKey()) || player.hasPermission("chat.channel.*");
     }
 
+    /**
+     * Override if channel has a special permission.
+     */
     @Override
     public boolean hasPermission(UUID player) {
         return ChatPlugin.getInstance().hasPermission(player, "chat.channel." + getKey()) || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
     }
 
     @Override
-    public void setFocusChannel(UUID player) {
+    public final void setFocusChannel(UUID player) {
         SQLSetting.set(player, null, "FocusChannel", getKey());
     }
 
     @Override
-    public void joinChannel(UUID player) {
+    public final void joinChannel(UUID player) {
         SQLSetting.set(player, getKey(), "Joined", true);
     }
 
     @Override
-    public void leaveChannel(UUID player) {
+    public final void leaveChannel(UUID player) {
         SQLSetting.set(player, getKey(), "Joined", false);
     }
-    
+
     @Override
-    public boolean isJoined(UUID player) {
+    public final boolean isJoined(UUID player) {
         return SQLSetting.getBoolean(player, getKey(), "Joined", true);
     }
 
     @Override
-    public Channel getChannel() {
+    public final Channel getChannel() {
         return this;
     }
 
     @Override
-    public List<Option> getOptions() {
+    public final List<Option> getOptions() {
         return Arrays.asList(
             Option.booleanOption("ShowChannelTag", "Show Channel Tag", "Show the channel tag at the beginning of every message", "0"),
             Option.booleanOption("ShowPlayerTitle", "Show Player Title", "Show a player's current title in every message", "1"),
@@ -94,13 +98,16 @@ public abstract class AbstractChannel implements Channel {
             );
     }
 
+    /**
+     * Override if channel command syntax is more specific.
+     */
     @Override
     public void playerDidUseChat(PlayerCommandContext context) {
         playerDidUseCommand(context);
     }
 
     @Override
-    public void announce(Object msg) {
+    public final void announce(Object msg) {
         Message message;
         if (msg instanceof String) {
             message = makeMessage(null, (String)msg);
@@ -123,7 +130,7 @@ public abstract class AbstractChannel implements Channel {
         handleMessage(message);
     }
 
-    void fillMessage(Message message) {
+    final void fillMessage(Message message) {
         if (message.senderTitle == null) {
             ChatPlugin.getInstance().loadTitle(message);
         }
@@ -137,7 +144,7 @@ public abstract class AbstractChannel implements Channel {
         }
     }
 
-    Message makeMessage(Player player, String text) {
+    final Message makeMessage(Player player, String text) {
         Message message = new Message();
         message.channel = getKey();
         if (player != null) {
@@ -152,14 +159,14 @@ public abstract class AbstractChannel implements Channel {
         return message;
     }
 
-    Object channelTag(ChatColor channelColor, ChatColor bracketColor, BracketType bracketType) {
+    final Object channelTag(ChatColor channelColor, ChatColor bracketColor, BracketType bracketType) {
         return Msg.button(channelColor,
                           bracketColor + bracketType.opening + channelColor + getTag() + bracketColor + bracketType.closing,
                           getTitle() + "\n&5&o" + getDescription(),
                           "/" + getAlias() + " ");
     }
 
-    Object serverTag(Message message, ChatColor serverColor, ChatColor bracketColor, BracketType bracketType) {
+    final Object serverTag(Message message, ChatColor serverColor, ChatColor bracketColor, BracketType bracketType) {
         String name;
         if (message.senderServerDisplayName != null) {
             name = message.senderServerDisplayName;
@@ -174,17 +181,17 @@ public abstract class AbstractChannel implements Channel {
                           null);
     }
 
-    Object senderTitleTag(Message message, ChatColor bracketColor, BracketType bracketType) {
+    final Object senderTitleTag(Message message, ChatColor bracketColor, BracketType bracketType) {
         if (message.senderTitle == null) return "";
         return Msg.button(
             bracketColor,
             bracketColor + bracketType.opening + Msg.format(message.senderTitle) + bracketColor + bracketType.closing,
-            Msg.format(message.senderTitle) +
-            (message.senderTitleDescription != null ? "\n&5&o" + message.senderTitleDescription : ""),
+            Msg.format(message.senderTitle)
+            + (message.senderTitleDescription != null ? "\n&5&o" + message.senderTitleDescription : ""),
             null);
     }
 
-    Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
+    final Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
         if (message.senderName == null) return "";
         if (message.sender == null) {
             return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName, null, null);
@@ -192,15 +199,15 @@ public abstract class AbstractChannel implements Channel {
         return Msg.button(senderColor,
                           useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName,
                           message.senderName,
-                          message.senderName +
-                          (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "") +
-                          (message.senderServerDisplayName != null ? "\n&5&oServer&r " + message.senderServerDisplayName : "") +
-                          "\n&5&oChannel&r " + getTitle() +
-                          "\n&5&oTime&r " + timeFormat.format(new Date()),
+                          message.senderName
+                          + (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "")
+                          + (message.senderServerDisplayName != null ? "\n&5&oServer&r " + message.senderServerDisplayName : "")
+                          + "\n&5&oChannel&r " + getTitle()
+                          + "\n&5&oTime&r " + timeFormat.format(new Date()),
                           "/msg " + message.senderName + " ");
     }
 
-    void appendMessage(List<Object> json, Message message, ChatColor textColor, boolean languageFilter) {
+    final void appendMessage(List<Object> json, Message message, ChatColor textColor, boolean languageFilter) {
         List<Object> sourceList = languageFilter ? message.languageFilterJson : message.json;
         Map<String, Object> map = new HashMap<>();
         List<Object> extra = new ArrayList<>(sourceList);
@@ -217,7 +224,7 @@ public abstract class AbstractChannel implements Channel {
     }
 
 
-    public List<Chatter> getOnlineMembers() {
+    public final List<Chatter> getOnlineMembers() {
         List<Chatter> result = new ArrayList<>();
         for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
             if (!hasPermission(chatter.getUuid())) continue;
@@ -227,7 +234,7 @@ public abstract class AbstractChannel implements Channel {
         return result;
     }
 
-    public List<Player> getLocalMembers() {
+    public final List<Player> getLocalMembers() {
         List<Player> result = new ArrayList<>();
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
@@ -237,10 +244,10 @@ public abstract class AbstractChannel implements Channel {
         return result;
     }
 
-    public boolean playSoundCue(Player player, String skey) {
-        SoundCue soundCue = SoundCue.of(SQLSetting.getString(player.getUniqueId(), getKey(), "SoundCue"+skey, "off"));
+    public final boolean playSoundCue(Player player, String skey) {
+        SoundCue soundCue = SoundCue.of(SQLSetting.getString(player.getUniqueId(), getKey(), "SoundCue" + skey, "off"));
         if (soundCue == null) return false;
-        int volume = SQLSetting.getInt(player.getUniqueId(), getKey(), "SoundCue"+skey+"Volume", 10);
+        int volume = SQLSetting.getInt(player.getUniqueId(), getKey(), "SoundCue" + skey + "Volume", 10);
         float vol = (float)volume / 10.0f;
         player.playSound(player.getEyeLocation(), soundCue.sound, vol, 1.0f);
         return true;

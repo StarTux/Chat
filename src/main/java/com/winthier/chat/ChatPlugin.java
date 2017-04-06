@@ -1,6 +1,13 @@
 package com.winthier.chat;
 
-import com.winthier.chat.channel.*;
+import com.winthier.chat.channel.AbstractChannel;
+import com.winthier.chat.channel.Channel;
+import com.winthier.chat.channel.CommandResponder;
+import com.winthier.chat.channel.PartyChannel;
+import com.winthier.chat.channel.PartyCommand;
+import com.winthier.chat.channel.PrivateChannel;
+import com.winthier.chat.channel.PublicChannel;
+import com.winthier.chat.channel.ReplyCommand;
 import com.winthier.chat.connect.ConnectListener;
 import com.winthier.chat.dynmap.DynmapHandler;
 import com.winthier.chat.event.ChatMessageEvent;
@@ -15,12 +22,11 @@ import com.winthier.chat.vault.VaultHandler;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
-import org.bukkit.Location;
+import lombok.Setter;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -30,20 +36,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
-public class ChatPlugin extends JavaPlugin {
-    @Getter static ChatPlugin instance;
-    final List<CommandResponder> commandResponders = new ArrayList<>();
-    final List<Channel> channels = new ArrayList<>();
-    ConnectListener connectListener = null;
-    VaultHandler vaultHandler = null;
-    TitleHandler titleHandler = null;
-    ChatListener chatListener = new ChatListener();
-    PrivateChannel privateChannel = null;
-    PartyChannel partyChannel = null;
-    PlayerCacheHandler playerCacheHandler = null;
-    DynmapHandler dynmapHandler = null;
-    ChatCommand chatCommand = new ChatCommand();
-    public boolean debugMode = false;
+public final class ChatPlugin extends JavaPlugin {
+    @Getter private static ChatPlugin instance;
+    private final List<CommandResponder> commandResponders = new ArrayList<>();
+    private final List<Channel> channels = new ArrayList<>();
+    private ConnectListener connectListener = null;
+    private VaultHandler vaultHandler = null;
+    private TitleHandler titleHandler = null;
+    private ChatListener chatListener = new ChatListener();
+    private PrivateChannel privateChannel = null;
+    private PartyChannel partyChannel = null;
+    private PlayerCacheHandler playerCacheHandler = null;
+    private DynmapHandler dynmapHandler = null;
+    private ChatCommand chatCommand = new ChatCommand();
+    @Setter private boolean debugMode = false;
     private SQLDatabase db;
 
     @Override
@@ -183,7 +189,6 @@ public class ChatPlugin extends JavaPlugin {
                         pat.setRegex((String)o);
                         pat.setReplacement("");
                         getDb().save(pat);
-                    } else {
                     }
                 }
             }
@@ -288,8 +293,8 @@ public class ChatPlugin extends JavaPlugin {
         if (connectListener != null && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
         }
-        if (dynmapHandler != null &&
-            SQLSetting.getBoolean(null, message.channel, "PostToDynmap", false)) {
+        if (dynmapHandler != null
+            && SQLSetting.getBoolean(null, message.channel, "PostToDynmap", false)) {
             dynmapHandler.postPlayerMessage(message);
         }
     }

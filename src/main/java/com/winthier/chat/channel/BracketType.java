@@ -4,14 +4,16 @@ public enum BracketType {
     PAREN("(", ")"),
     BRACKETS("[", "]"),
     CURLY("{", "}"),
-    ANGLE("<", ">")
-    ;
+    ANGLE("<", ">");
+
     final String opening;
     final String closing;
+
     BracketType(String opening, String closing) {
         this.opening = opening;
         this.closing = closing;
     }
+
     static BracketType of(String val) {
         if (val == null) return BracketType.BRACKETS;
         try {
@@ -21,4 +23,3 @@ public enum BracketType {
         }
     }
 }
-

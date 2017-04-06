@@ -7,18 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 
 @Getter
-public class MessageFilter {
-    final UUID sender;
-    final String message;
-    final List<Component> components = new ArrayList<>();
+public final class MessageFilter {
+    private final UUID sender;
+    private final String message;
+    private final List<Component> components = new ArrayList<>();
     // Output
-    List<Object> json = null;
-    List<Object> languageFilterJson = null;
-    boolean shouldCancel = false;
+    private List<Object> json = null;
+    private List<Object> languageFilterJson = null;
+    private boolean shouldCancel = false;
 
     public MessageFilter(UUID sender, String message) {
         this.sender = sender;
@@ -90,12 +91,9 @@ public class MessageFilter {
         return sb.toString();
     }
 
-    class Component {
-        String message;
-
-        Component(String message) {
-            this.message = message;
-        }
+    @AllArgsConstructor
+    private class Component {
+        private String message;
 
         void colorize() {
             message = ChatColor.translateAlternateColorCodes('&', message);
@@ -140,8 +138,8 @@ public class MessageFilter {
         }
     }
 
-    class URLComponent extends Component {
-        String url;
+    private final class URLComponent extends Component {
+        private final String url;
 
         URLComponent(String message, String url) {
             super(message);
@@ -152,8 +150,13 @@ public class MessageFilter {
             this(message, message);
         }
 
-        @Override void colorize() {}
-        @Override boolean findURL() { return false; }
+        @Override
+        void colorize() { }
+
+        @Override
+        boolean findURL() {
+            return false;
+        }
 
         @Override
         Map<String, Object> toJson() {

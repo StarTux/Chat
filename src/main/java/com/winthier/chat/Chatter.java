@@ -4,7 +4,7 @@ import java.util.UUID;
 import lombok.Value;
 
 @Value
-public class Chatter {
-    UUID uuid;
-    String name;
+public final class Chatter {
+    private final UUID uuid;
+    private final String name;
 }

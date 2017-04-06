@@ -17,10 +17,9 @@ public enum SoundCue {
     CHICKEN(Sound.ENTITY_CHICKEN_HURT),
     COW(Sound.ENTITY_COW_HURT),
     DONKEY(Sound.ENTITY_DONKEY_AMBIENT),
-    VILLAGER(Sound.ENTITY_VILLAGER_TRADING),
-    ;
+    VILLAGER(Sound.ENTITY_VILLAGER_TRADING);
 
-    SoundCue(Sound sound){
+    SoundCue(Sound sound) {
         this.sound = sound;
     }
 

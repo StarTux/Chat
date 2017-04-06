@@ -4,8 +4,6 @@ import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
 import java.util.List;
 import java.util.UUID;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public interface Channel extends CommandResponder {

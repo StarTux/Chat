@@ -2,23 +2,17 @@ package com.winthier.chat.channel;
 
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Message;
-import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-public class PublicChannel extends AbstractChannel {
+public final class PublicChannel extends AbstractChannel {
     @Override
     public void playerDidUseCommand(PlayerCommandContext c) {
         if (SQLSetting.getBoolean(null, getKey(), "MutePlayers", false)) return;
@@ -34,7 +28,7 @@ public class PublicChannel extends AbstractChannel {
             if (message.shouldCancel) return;
             ChatPlugin.getInstance().didCreateMessage(this, message);
             handleMessage(message);
-        }        
+        }
     }
 
     @Override
@@ -45,7 +39,7 @@ public class PublicChannel extends AbstractChannel {
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
-    
+
     public void handleMessage(Message message) {
         fillMessage(message);
         if (message.shouldCancel && message.sender != null) return;
@@ -54,9 +48,10 @@ public class PublicChannel extends AbstractChannel {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;
+            int range = getRange();
             if (range != 0 && message.location != null) {
                 if (!message.location.getWorld().equals(player.getWorld())) continue;
-                if (message.location.distanceSquared(player.getLocation()) > range*range) continue;
+                if (message.location.distanceSquared(player.getLocation()) > range * range) continue;
             }
             send(message, player);
         }
@@ -101,8 +96,8 @@ public class PublicChannel extends AbstractChannel {
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
         Msg.raw(player, json);
         // Sound Cue
-        if (!message.message.toLowerCase().contains(player.getName().toLowerCase()) ||
-            !playSoundCue(player, "Name")) {
+        if (!message.message.toLowerCase().contains(player.getName().toLowerCase())
+            || !playSoundCue(player, "Name")) {
             playSoundCue(player, "Chat");
         }
     }

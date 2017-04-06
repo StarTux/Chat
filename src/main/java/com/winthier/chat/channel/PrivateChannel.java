@@ -3,12 +3,10 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
-import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
@@ -17,7 +15,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 @Getter
-public class PrivateChannel extends AbstractChannel {
+public final class PrivateChannel extends AbstractChannel {
     @Override
     public boolean hasPermission(Player player) {
         return player.hasPermission("chat.pm");
@@ -50,7 +48,6 @@ public class PrivateChannel extends AbstractChannel {
 
     @Override
     public void consoleDidUseCommand(String msg) {
-        
     }
 
     @Override
@@ -84,7 +81,7 @@ public class PrivateChannel extends AbstractChannel {
             json.add(serverTag(message, channelColor, bracketColor, bracketType));
         }
         // From/To
-        json.add(Msg.button(senderColor, ack? "To" : "From", null, null));
+        json.add(Msg.button(senderColor, ack ? "To" : "From", null, null));
         json.add(" ");
         // Player Title
         if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", false)) {
@@ -99,8 +96,8 @@ public class PrivateChannel extends AbstractChannel {
         Msg.raw(player, json);
         // Sound Cue
         if (!ack) {
-            if (!message.message.toLowerCase().contains(player.getName().toLowerCase()) ||
-                !playSoundCue(player, "Name")) {
+            if (!message.message.toLowerCase().contains(player.getName().toLowerCase())
+                || !playSoundCue(player, "Name")) {
                 playSoundCue(player, "Chat");
             }
         }

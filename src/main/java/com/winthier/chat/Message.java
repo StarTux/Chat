@@ -1,13 +1,12 @@
 package com.winthier.chat;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Location;
 
-public class Message {
+public final class Message {
     public UUID sender;
     public String senderName;
     public String channel;
@@ -18,7 +17,7 @@ public class Message {
     public String senderTitleDescription;
     public String senderServer;
     public String senderServerDisplayName;
-    
+
     public String message;
     public String languageFilterMessage;
     public List<Object> json;
@@ -46,14 +45,14 @@ public class Message {
         String result = fetchString(map, key);
         return result == null ? null : UUID.fromString(result);
     }
-    
+
     @SuppressWarnings("unchecked")
     private static List<Object> fetchList(Map<String, Object> map, String key) {
         Object result = map.get(key);
         if (result == null) return null;
         return result instanceof List ? (List<Object>)result : null;
     }
-    
+
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         store(map, "sender", sender);

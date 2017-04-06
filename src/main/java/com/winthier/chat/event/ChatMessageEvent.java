@@ -10,8 +10,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-@Getter
-@RequiredArgsConstructor
+@Getter @RequiredArgsConstructor
 public class ChatMessageEvent extends Event implements Cancellable {
     // Event Stuff
 
@@ -26,11 +25,11 @@ public class ChatMessageEvent extends Event implements Cancellable {
         return handlers;
     }
 
-    @Setter boolean cancelled = false;
+    @Setter private boolean cancelled = false;
 
     // Chat Stuff
-    final Channel channel;
-    final Message message;
+    private final Channel channel;
+    private final Message message;
 
     public static boolean call(Channel channel, Message message) {
         ChatMessageEvent event = new ChatMessageEvent(channel, message);

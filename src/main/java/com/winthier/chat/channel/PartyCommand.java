@@ -3,12 +3,12 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import java.util.Arrays;
 import java.util.List;
-import lombok.Value;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 
-@Value
+@Getter
 public class PartyCommand implements CommandResponder {
-    List<String> aliases = Arrays.<String>asList("party");
+    private final List<String> aliases = Arrays.<String>asList("party");
 
     @Override
     public void playerDidUseCommand(PlayerCommandContext context) {
@@ -17,7 +17,6 @@ public class PartyCommand implements CommandResponder {
 
     @Override
     public void consoleDidUseCommand(String msg) {
-        
     }
 
     @Override

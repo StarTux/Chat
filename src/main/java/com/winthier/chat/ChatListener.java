@@ -1,9 +1,10 @@
 package com.winthier.chat;
 
-import com.winthier.chat.channel.*;
+import com.winthier.chat.channel.Channel;
+import com.winthier.chat.channel.CommandResponder;
+import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
-import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,7 +16,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class ChatListener implements Listener {
+public final class ChatListener implements Listener {
     @EventHandler
     public void onAsyncPlayerChat(final AsyncPlayerChatEvent event) {
         event.setCancelled(true);
@@ -72,7 +73,7 @@ public class ChatListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerChatTabComplete(PlayerChatTabCompleteEvent event){
+    public void onPlayerChatTabComplete(PlayerChatTabCompleteEvent event) {
         for (String name: ChatPlugin.getInstance().completePlayerName(event.getLastToken())) {
             if (!event.getTabCompletions().contains(name)) {
                 event.getTabCompletions().add(name);

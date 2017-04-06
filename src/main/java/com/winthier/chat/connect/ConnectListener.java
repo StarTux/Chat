@@ -9,13 +9,12 @@ import com.winthier.connect.bukkit.event.ConnectMessageEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public class ConnectListener implements Listener {
-    final static String CHANNEL = "Chat";
-    
+public final class ConnectListener implements Listener {
+    private static final String CHANNEL = "Chat";
+
     @EventHandler
     public void onConnectMessage(ConnectMessageEvent event) {
         if (!event.getMessage().getChannel().equals(CHANNEL)) return;

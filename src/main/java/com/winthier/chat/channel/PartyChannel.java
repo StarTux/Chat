@@ -3,26 +3,20 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
-import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-public class PartyChannel extends AbstractChannel {
+public final class PartyChannel extends AbstractChannel {
     @Override
     public void playerDidUseCommand(PlayerCommandContext c) {
-        if (range < 0) return;
+        if (getRange() < 0) return;
         if (!isJoined(c.player.getUniqueId())) {
             joinChannel(c.player.getUniqueId());
         }
@@ -41,7 +35,7 @@ public class PartyChannel extends AbstractChannel {
             message.targetName = partyName;
             ChatPlugin.getInstance().didCreateMessage(this, message);
             handleMessage(message);
-        }        
+        }
     }
 
     @Override
@@ -117,8 +111,8 @@ public class PartyChannel extends AbstractChannel {
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
         Msg.raw(player, json);
         // Sound Cue
-        if (!message.message.toLowerCase().contains(player.getName().toLowerCase()) ||
-            !playSoundCue(player, "Name")) {
+        if (!message.message.toLowerCase().contains(player.getName().toLowerCase())
+            || !playSoundCue(player, "Name")) {
             playSoundCue(player, "Chat");
         }
     }
@@ -166,7 +160,7 @@ public class PartyChannel extends AbstractChannel {
     void listPlayers(Player player, String partyName) {
         List<Object> json = new ArrayList<>();
         json.add(Msg.format("&oParty &a%s&r:", partyName));
-        ChatColor senderColor = SQLSetting.getChatColor(player.getUniqueId(), key, "SenderColor", ChatColor.WHITE);
+        ChatColor senderColor = SQLSetting.getChatColor(player.getUniqueId(), getKey(), "SenderColor", ChatColor.WHITE);
         for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
             String otherPartyName = getPartyName(chatter.getUuid());
             if (otherPartyName != null && otherPartyName.equals(partyName)) {

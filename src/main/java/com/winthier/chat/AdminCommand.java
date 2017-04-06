@@ -1,6 +1,5 @@
 package com.winthier.chat;
 
-import com.winthier.chat.MessageFilter;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLPattern;
@@ -11,7 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class AdminCommand extends AbstractChatCommand {
+public final class AdminCommand extends AbstractChatCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Player player = sender instanceof Player ? (Player)sender : null;
@@ -26,9 +25,9 @@ public class AdminCommand extends AbstractChatCommand {
             ChatPlugin.getInstance().loadChannels();
             Msg.info(sender, "Configs reloaded");
         } else if (firstArg.equals("debug") && args.length == 1) {
-            boolean v = !ChatPlugin.getInstance().debugMode;
-            ChatPlugin.getInstance().debugMode = v;
-            Msg.info(sender, "Debug mode %s", (v ? "enabled": "disabled"));
+            boolean v = !ChatPlugin.getInstance().isDebugMode();
+            ChatPlugin.getInstance().setDebugMode(v);
+            Msg.info(sender, "Debug mode %s", (v ? "enabled" : "disabled"));
         } else if (firstArg.equals("testfilter") && args.length >= 2) {
             StringBuilder sb = new StringBuilder(args[1]);
             for (int i = 2; i < args.length; ++i) {
@@ -73,7 +72,7 @@ public class AdminCommand extends AbstractChatCommand {
                 Msg.warn(sender, "Channel not found: %s", channelArg);
                 return true;
             }
-            for (SQLSetting sett: SQLSetting.getDefaultSettings().map.values()) {
+            for (SQLSetting sett: SQLSetting.getDefaultSettings().getMap().values()) {
                 if (!channel.getKey().equals(sett.getChannel())) continue;
                 Msg.send(sender, "%s/%s = %s", sett.getChannel(), sett.getSettingKey(), sett.getSettingValue());
             }

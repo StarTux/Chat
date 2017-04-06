@@ -1,6 +1,5 @@
 package com.winthier.chat;
 
-import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.util.Msg;
 import java.util.UUID;
@@ -10,9 +9,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @AllArgsConstructor
-public class JoinLeaveCommand extends AbstractChatCommand {
-    boolean join;
-    
+public final class JoinLeaveCommand extends AbstractChatCommand {
+    private final boolean join;
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Player player = sender instanceof Player ? (Player)sender : null;

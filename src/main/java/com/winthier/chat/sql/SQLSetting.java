@@ -15,7 +15,6 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
@@ -24,35 +23,38 @@ import org.bukkit.ChatColor;
 @Entity
 @Table(name = "settings",
        uniqueConstraints = @UniqueConstraint(columnNames = {"uuid", "channel", "setting_key"}))
-@Getter
-@Setter
-@NoArgsConstructor
-public class SQLSetting {
+@Getter @Setter @NoArgsConstructor
+public final class SQLSetting {
     @Value
-    static class Key {
-        UUID uuid; String channel; String key;
+    private static final class Key {
+        private final UUID uuid;
+        private final String channel;
+        private final String key;
     }
-    @RequiredArgsConstructor
-    public static class Settings {
-        public final Map<Key, SQLSetting> map = new HashMap<>();
-        final long created = System.currentTimeMillis();
-        boolean tooOld() {
-            return System.currentTimeMillis() - created > 1000*60;
+
+    @Getter @RequiredArgsConstructor
+    public static final class Settings {
+        private final Map<Key, SQLSetting> map = new HashMap<>();
+        private final long created = System.currentTimeMillis();
+        private boolean tooOld() {
+            return System.currentTimeMillis() - created > 1000 * 60;
         }
     }
+
     // Cache
-    final static Map<UUID, Settings> cache = new HashMap<>();
-    static Settings defaultSettings = null;
+    private static final Map<UUID, Settings> CACHE = new HashMap<>();
+    private static Settings defaultSettings = null;
+
     // Content
-    @Id Integer id;
-    UUID uuid;
-    String channel;
-    @Column(nullable = false) String settingKey;
-    String settingValue;
-    @Version Date version;
-    
+    @Id private Integer id;
+    private UUID uuid;
+    private String channel;
+    @Column(nullable = false) private String settingKey;
+    private String settingValue;
+    @Version private Date version;
+
     public SQLSetting(UUID uuid, String channel, String key, Object value) {
-	setUuid(uuid);
+        setUuid(uuid);
         setChannel(channel);
         setSettingKey(key);
         setGenericValue(value);
@@ -85,17 +87,17 @@ public class SQLSetting {
 
     public static Settings getDefaultSettings() {
         if (defaultSettings == null || defaultSettings.tooOld()) {
-	    defaultSettings = makeSettings(SQLDB.get().find(SQLSetting.class).where().isNull("uuid").findList());
+            defaultSettings = makeSettings(SQLDB.get().find(SQLSetting.class).where().isNull("uuid").findList());
         }
         return defaultSettings;
     }
 
     private static Settings findSettings(UUID uuid) {
-	Settings result = cache.get(uuid);
-	if (result == null || result.tooOld()) {
+        Settings result = CACHE.get(uuid);
+        if (result == null || result.tooOld()) {
             result = makeSettings(SQLDB.get().find(SQLSetting.class).where().eq("uuid", uuid).findList());
-            cache.put(uuid, result);
-	}
+            CACHE.put(uuid, result);
+        }
         return result;
     }
 
@@ -108,8 +110,13 @@ public class SQLSetting {
         if (uuid == null) {
             defaultSettings = null;
         } else {
-            cache.remove(uuid);
+            CACHE.remove(uuid);
         }
+    }
+
+    static void clearCache() {
+        CACHE.clear();
+        defaultSettings = null;
     }
 
     public static SQLSetting set(UUID uuid, String channel, String key, Object value) {
@@ -159,8 +166,9 @@ public class SQLSetting {
         if (v == null) return null;
         try {
             return ChatColor.valueOf(v.toUpperCase());
-        } catch (IllegalArgumentException iae) {}
-        return null;
+        } catch (IllegalArgumentException iae) {
+            return null;
+        }
     }
 
     UUID getSettingUuid() {
@@ -168,8 +176,9 @@ public class SQLSetting {
         if (v == null) return null;
         try {
             return UUID.fromString(v);
-        } catch (IllegalArgumentException iae) {}
-        return null;
+        } catch (IllegalArgumentException iae) {
+            return null;
+        }
     }
 
     public static String getString(UUID uuid, String channel, String key, String dfl) {

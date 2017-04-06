@@ -5,9 +5,10 @@ import com.winthier.sql.SQLDatabase;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import javax.persistence.PersistenceException;
 
-public class SQLDB {
+public final class SQLDB {
+    private SQLDB() { }
+
     static SQLDatabase get() {
         return ChatPlugin.getInstance().getDb();
     }
@@ -23,10 +24,9 @@ public class SQLDB {
     }
 
     public static void reload() {
-        SQLSetting.cache.clear();
-        SQLSetting.defaultSettings = null;
-        SQLIgnore.cache.clear();
-        SQLPattern.cache = null;
+        SQLSetting.clearCache();
+        SQLIgnore.clearCache();
+        SQLPattern.clearCache();
     }
 
     public static void clear(UUID uuid) {

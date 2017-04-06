@@ -6,9 +6,9 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-public class VaultHandler {
-    Permission permission = null;
-    Chat chat = null;
+public final class VaultHandler {
+    private Permission permission = null;
+    private Chat chat = null;
 
     public Permission getPermission() {
         if (permission == null) {
@@ -25,9 +25,9 @@ public class VaultHandler {
         }
         return chat;
     }
-    
-    public boolean hasPermission(UUID uuid, String permission) {
-        return getPermission().playerHas((String)null, Bukkit.getServer().getOfflinePlayer(uuid), permission);
+
+    public boolean hasPermission(UUID uuid, String node) {
+        return getPermission().playerHas((String)null, Bukkit.getServer().getOfflinePlayer(uuid), node);
     }
 
     public String getPlayerTitle(UUID uuid) {

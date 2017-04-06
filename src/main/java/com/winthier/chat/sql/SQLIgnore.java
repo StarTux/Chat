@@ -14,45 +14,43 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 
 @Entity
 @Table(name = "ignores",
        uniqueConstraints = @UniqueConstraint(columnNames = {"player", "ignoree"}))
-@Getter
-@Setter
-@NoArgsConstructor
-public class SQLIgnore {
+@Getter @Setter @NoArgsConstructor
+public final class SQLIgnore {
     // Cache
-    static class Ignores {
-        final Map<UUID, SQLIgnore> map = new HashMap<>();
-        final long created = System.currentTimeMillis();
-        boolean tooOld() {
-            return System.currentTimeMillis() - created > 1000*60;
+    private static class Ignores {
+        private final Map<UUID, SQLIgnore> map = new HashMap<>();
+        private final long created = System.currentTimeMillis();
+        private boolean tooOld() {
+            return System.currentTimeMillis() - created > 1000 * 60;
         }
     }
-    final static Map<UUID, Ignores> cache = new HashMap<>();
+    private static final Map<UUID, Ignores> CACHE = new HashMap<>();
+
     // Content
-    @Id Integer id;
-    @Column(nullable = false) UUID player;
-    @Column(nullable = false) UUID ignoree;
+    @Id private Integer id;
+    @Column(nullable = false) private UUID player;
+    @Column(nullable = false) private UUID ignoree;
 
     private SQLIgnore(UUID player, UUID ignoree) {
-	setPlayer(player);
+        setPlayer(player);
         setIgnoree(ignoree);
     }
 
     public static Ignores findIgnores(UUID player) {
-	Ignores result = cache.get(player);
-	if (result == null || result.tooOld()) {
+        Ignores result = CACHE.get(player);
+        if (result == null || result.tooOld()) {
             result = new Ignores();
-	    for (SQLIgnore ignore: SQLDB.get().find(SQLIgnore.class).where().eq("player", player).findList()) {
+            for (SQLIgnore ignore: SQLDB.get().find(SQLIgnore.class).where().eq("player", player).findList()) {
                 result.map.put(ignore.getIgnoree(), ignore);
             }
-            cache.put(player, result);
-	}
-	return result;
+            CACHE.put(player, result);
+        }
+        return result;
     }
 
     public static boolean ignore(UUID player, UUID ignoree, boolean shouldIgnore) {
@@ -100,6 +98,10 @@ public class SQLIgnore {
     }
 
     static void clearCache(UUID uuid) {
-        cache.remove(uuid);
+        CACHE.remove(uuid);
+    }
+
+    static void clearCache() {
+        CACHE.clear();
     }
 }
