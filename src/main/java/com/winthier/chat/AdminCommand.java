@@ -101,6 +101,9 @@ public class AdminCommand extends AbstractChatCommand {
             }
             channel.announce(sb.toString());
             Msg.info(sender, "Announcement sent to %s", channel.getTitle());
+        } else if (firstArg.equals("initdb") && args.length == 1) {
+            ChatPlugin.getInstance().initializeDatabase();
+            Msg.info(sender, "Database initialized.");
         }
         return true;
     }
@@ -112,5 +115,6 @@ public class AdminCommand extends AbstractChatCommand {
         Msg.send(sender, "&e/chadm ListDefaults &o<Channel>&7- &rView channel default settings");
         Msg.send(sender, "&e/chadm SetDefault &o<Channel> <Key> <Value> &7- &rChange channel default setting");
         Msg.send(sender, "&e/chadm Announce &o<Channel> <Message> &7- &rMake an announcement");
+        Msg.send(sender, "&e/chadm InitDB &7- &rInitialize the Database");
     }
 }

@@ -1,8 +1,5 @@
 package com.winthier.chat.sql;
 
-import com.avaje.ebean.validation.Length;
-import com.avaje.ebean.validation.NotEmpty;
-import com.avaje.ebean.validation.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -31,9 +29,9 @@ public class SQLPattern
     static Map<String, List<SQLPattern>> cache = null;
     // Content
     @Id Integer id;
-    @NotNull String category;
-    @NotNull String regex;
-    @NotNull String replacement;
+    @Column(nullable = false) String category;
+    @Column(nullable = false) String regex;
+    @Column(nullable = false) String replacement;
     transient Pattern pattern = null;
 
     public Pattern getPattern() {

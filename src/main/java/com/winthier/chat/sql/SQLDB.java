@@ -1,26 +1,15 @@
 package com.winthier.chat.sql;
 
-import com.avaje.ebean.EbeanServer;
 import com.winthier.chat.ChatPlugin;
+import com.winthier.sql.SQLDatabase;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.PersistenceException;
 
 public class SQLDB {
-    static EbeanServer get() {
-        return ChatPlugin.getInstance().getDatabase();
-    }
-
-    public static boolean probe() {
-        try {
-            for (Class<?> clazz : getDatabaseClasses()) {
-                get().find(clazz).findRowCount();
-            }
-        } catch (PersistenceException ex) {
-            return false;
-        }
-        return true;
+    static SQLDatabase get() {
+        return ChatPlugin.getInstance().getDb();
     }
 
     public static List<Class<?>> getDatabaseClasses() {

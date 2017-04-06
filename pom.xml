@@ -83,6 +83,13 @@
       <version>2.3</version>
       <scope>provided</scope>
     </dependency>
+    <!-- SQL -->
+    <dependency>
+      <groupId>com.winthier.sql</groupId>
+      <artifactId>sql</artifactId>
+      <version>0.1</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

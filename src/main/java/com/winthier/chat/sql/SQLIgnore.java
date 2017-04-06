@@ -1,14 +1,12 @@
 package com.winthier.chat.sql;
 
-import com.avaje.ebean.validation.Length;
-import com.avaje.ebean.validation.NotEmpty;
-import com.avaje.ebean.validation.NotNull;
 import com.winthier.chat.ChatPlugin;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.PersistenceException;
@@ -37,8 +35,8 @@ public class SQLIgnore {
     final static Map<UUID, Ignores> cache = new HashMap<>();
     // Content
     @Id Integer id;
-    @NotNull UUID player;
-    @NotNull UUID ignoree;
+    @Column(nullable = false) UUID player;
+    @Column(nullable = false) UUID ignoree;
 
     private SQLIgnore(UUID player, UUID ignoree) {
 	setPlayer(player);

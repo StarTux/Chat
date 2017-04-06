@@ -1,14 +1,12 @@
 package com.winthier.chat.sql;
 
-import com.avaje.ebean.validation.Length;
-import com.avaje.ebean.validation.NotEmpty;
-import com.avaje.ebean.validation.NotNull;
 import com.winthier.chat.ChatPlugin;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.PersistenceException;
@@ -49,7 +47,7 @@ public class SQLSetting {
     @Id Integer id;
     UUID uuid;
     String channel;
-    @NotNull String settingKey;
+    @Column(nullable = false) String settingKey;
     String settingValue;
     @Version Date version;
     

@@ -1,14 +1,12 @@
 package com.winthier.chat.sql;
 
-import com.avaje.ebean.validation.Length;
-import com.avaje.ebean.validation.NotEmpty;
-import com.avaje.ebean.validation.NotNull;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.channel.Channel;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -28,14 +26,14 @@ import org.bukkit.entity.Player;
 public class SQLLog {
     @Id Integer id;
     UUID player;
-    @NotNull String sender;
-    @NotNull Date time;
-    @NotNull String server;
+    @Column(nullable = false) String sender;
+    @Column(nullable = false) Date time;
+    @Column(nullable = false) String server;
     String world;
     Integer x, y, z;
-    @NotNull String channel;
+    @Column(nullable = false) String channel;
     String target;
-    @NotNull @Length(max=511) String message;
+    @Column(nullable = false, length = 511) String message;
 
     private SQLLog(String sender, Channel channel, String target, String message) {
         setTime(new Date());

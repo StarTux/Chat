@@ -1,10 +1,8 @@
 package com.winthier.chat.sql;
 
-import com.avaje.ebean.validation.Length;
-import com.avaje.ebean.validation.NotEmpty;
-import com.avaje.ebean.validation.NotNull;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -23,11 +21,11 @@ import lombok.Setter;
 public class SQLChannel {
     // Content
     @Id Integer id;
-    @NotNull String channelKey;
-    @NotNull String tag;
-    @NotNull String title;
-    @NotNull String aliases;
-    @NotNull String description;
+    @Column(nullable = false) String channelKey;
+    @Column(nullable = false) String tag;
+    @Column(nullable = false) String title;
+    @Column(nullable = false) String aliases;
+    @Column(nullable = false) String description;
     Integer localRange;
     
     public static List<SQLChannel> fetch() {

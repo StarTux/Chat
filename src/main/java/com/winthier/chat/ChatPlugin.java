@@ -12,6 +12,7 @@ import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.title.TitleHandler;
 import com.winthier.chat.vault.VaultHandler;
+import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,17 +44,16 @@ public class ChatPlugin extends JavaPlugin {
     DynmapHandler dynmapHandler = null;
     ChatCommand chatCommand = new ChatCommand();
     public boolean debugMode = false;
+    private SQLDatabase db;
 
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
         reloadConfig();
-        if (!SQLDB.probe()) {
-            getLogger().info("Installing Chat database due to first time usage");
-            installDDL();
-            initializeDatabase();
-        }
+        db = new SQLDatabase(this);
+        for (Class<?> clazz: SQLDB.getDatabaseClasses()) db.registerTable(clazz);
+        db.createAllTables();
         loadChannels();
         if (getServer().getPluginManager().getPlugin("Connect") != null) {
             connectListener = new ConnectListener();
@@ -175,14 +175,14 @@ public class ChatPlugin extends JavaPlugin {
                             } else {
                                 pat.setReplacement("");
                             }
-                            getDatabase().save(pat);
+                            getDb().save(pat);
                         }
                     } else if (o instanceof String) {
                         SQLPattern pat = new SQLPattern();
                         pat.setCategory(category);
                         pat.setRegex((String)o);
                         pat.setReplacement("");
-                        getDatabase().save(pat);
+                        getDb().save(pat);
                     } else {
                     }
                 }
@@ -206,25 +206,20 @@ public class ChatPlugin extends JavaPlugin {
                 if (channelSection.isSet("range")) {
                     chan.setLocalRange(channelSection.getInt("range"));
                 }
-                getDatabase().save(chan);
+                getDb().save(chan);
             }
         }
         for (Map<?, ?> tmpMap: config.getMapList("settings")) {
             @SuppressWarnings("unchecked")
             Map<String, String> map = (Map<String, String>)tmpMap;
             SQLSetting st = new SQLSetting((UUID)null, map.get("channel"), map.get("key"), (Object)map.get("value"));
-            getDatabase().save(st);
+            getDb().save(st);
         }
     }
 
     @Override
     public void onDisable() {
         instance = null;
-    }
-
-    @Override
-    public List<Class<?>> getDatabaseClasses() {
-        return SQLDB.getDatabaseClasses();
     }
 
     public CommandResponder findCommand(String nameOrAlias) {
