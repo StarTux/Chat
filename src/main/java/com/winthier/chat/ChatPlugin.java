@@ -5,12 +5,14 @@ import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.PartyChannel;
 import com.winthier.chat.channel.PartyCommand;
+import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.channel.PrivateChannel;
 import com.winthier.chat.channel.PublicChannel;
 import com.winthier.chat.channel.ReplyCommand;
 import com.winthier.chat.connect.ConnectListener;
 import com.winthier.chat.dynmap.DynmapHandler;
 import com.winthier.chat.event.ChatMessageEvent;
+import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.playercache.PlayerCacheHandler;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
@@ -99,6 +101,29 @@ public final class ChatPlugin extends JavaPlugin {
         getCommand("join").setExecutor(new JoinLeaveCommand(true));
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
         getCommand("ignore").setExecutor(new IgnoreCommand());
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        CommandResponder cmd = findCommand(label);
+        if (cmd == null) return false;
+        Player player = sender instanceof Player ? (Player)sender : null;
+        if (player != null && !cmd.hasPermission(player)) return true;
+        String msg;
+        if (args.length == 0) {
+            msg = null;
+        } else {
+            StringBuilder sb = new StringBuilder(args[0]);
+            for (int i = 1; i < args.length; i += 1) sb.append(" ").append(args[i]);
+            msg = sb.toString();
+        }
+        if (player == null) {
+            cmd.consoleDidUseCommand(msg);
+        } else {
+            if (!ChatPlayerTalkEvent.call(player, cmd.getChannel(), msg)) return true;
+            cmd.playerDidUseCommand(new PlayerCommandContext(player, label, msg));
+        }
+        return true;
     }
 
     @Override

@@ -48,6 +48,10 @@ commands:
   reply:
     aliases: [ r, reply ]
     permission: chat.pm
+  party:
+    permission: chat.channel.party
+  p:
+    permission: chat.channel.party
 permissions:
   chat.chat:
     description: Use /chat
@@ -84,4 +88,5 @@ permissions:
     default: false
   chat.channel.mini:
     default: false
-    
+  chat.channel.party:
+    default: false
