@@ -46,12 +46,6 @@ public final class MessageFilter {
                 }
                 break OUTER;
             }
-        } else {
-            for (Component component: components) {
-                for (SQLPattern pat: SQLPattern.find("URL")) {
-                    component.message = pat.replaceAll(message);
-                }
-            }
         }
     }
 
