@@ -108,7 +108,8 @@ public final class AdminCommand extends AbstractChatCommand {
     }
 
     void usage(CommandSender sender) {
-        Msg.send(sender, "&e/chadm Debug &7- &rReload configs and databases");
+        Msg.send(sender, "&e/chadm Reload &7- &rReload configs and databases");
+        Msg.send(sender, "&e/chadm Debug &7- &rToggle debug mode");
         Msg.send(sender, "&e/chadm TestFilter &o<Message> &7- &rTest all chat filters");
         Msg.send(sender, "&e/chadm TestPattern &o<PatternName> <Message> &7- &rTest a pattern");
         Msg.send(sender, "&e/chadm ListDefaults &o<Channel>&7- &rView channel default settings");
