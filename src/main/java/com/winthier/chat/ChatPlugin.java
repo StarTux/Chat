@@ -78,7 +78,7 @@ public final class ChatPlugin extends JavaPlugin {
         }
         if (getServer().getPluginManager().getPlugin("Title") != null) {
             titleHandler = new TitleHandler();
-            getLogger().warning("Title plugin found!");
+            getLogger().info("Title plugin found!");
         } else {
             getLogger().warning("Title plugin NOT found!");
         }
