@@ -78,6 +78,7 @@ public final class SQLPattern {
     }
 
     static void clearCache() {
+        if (cache == null) return;
         cache.clear();
         cache = null;
     }
