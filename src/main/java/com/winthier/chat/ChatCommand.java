@@ -4,6 +4,7 @@ import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.Option;
 import com.winthier.chat.channel.PlayerCommandContext;
+import com.winthier.chat.channel.PrivateChannel;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
@@ -29,7 +30,7 @@ public final class ChatCommand extends AbstractChatCommand {
         if (firstArg.equals("set")) {
             if (player == null) return false;
             if (args.length == 1) {
-                showMenu(player);
+                listChannelsForSettings(player);
                 return true;
             }
             setOption(player, Arrays.copyOfRange(args, 1, args.length));
@@ -131,20 +132,44 @@ public final class ChatCommand extends AbstractChatCommand {
         if (player == null) return;
         Msg.info(player, "&3Menu");
         List<Object> json = new ArrayList<>();
+        json.add(Msg.format("&oChannels"));
+        for (Channel channel: ChatPlugin.getInstance().getChannels()) {
+            if (!channel.hasPermission(player)) continue;
+            json.add(" ");
+            ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE);
+            if (channel instanceof PrivateChannel) {
+                json.add(Msg.button(channelColor, "[" + channel.getTag() + "]", "/msg [user] [message]\n&5&oWhisper someone.", "/" + channel.getTag().toLowerCase() + " "));
+            } else {
+                json.add(Msg.button(channelColor, "[" + channel.getTag() + "]", "/" + channel.getTag().toLowerCase() + " [message]\n&5&oTalk in " + channel.getTitle(), "/" + channel.getTag().toLowerCase() + " "));
+            }
+        }
+        Msg.raw(player, json);
+        json.clear();
+        json.add(Msg.format("&oCommands "));
+        json.add(Msg.button(ChatColor.GOLD, "&6[List]", "/ch list\n&5&oChannel List.", "/ch list"));
+        json.add(" ");
+        json.add(Msg.button(ChatColor.BLUE, "&9[Who]", "/ch who [channel]\n&5&oUser List", "/ch who "));
+        json.add(" ");
+        json.add(Msg.button(ChatColor.GRAY, "&7[Set]", "/ch set\n&5&oChange channel preferences.", "/ch set"));
+        json.add(" ");
+        json.add(Msg.button(ChatColor.LIGHT_PURPLE, "&d[Reply]", "/reply <msg>\n&5&oReply to private messages.", "/reply "));
+        json.add(" ");
+        json.add(Msg.button(ChatColor.GREEN, "&a[Party]", "/party [name]\n&5&oSelect a named party,\n&5&oshow current party.", "/party "));
+        json.add(" ");
+        json.add(Msg.button(ChatColor.RED, "&c[Ignore]", "/ignore [user]\n&5&oIgnore, unignore, or\n&5&olist ignored users.", "/ignore "));
+        Msg.raw(player, json);
+    }
+
+    void listChannelsForSettings(Player player) {
+        if (player == null) return;
+        Msg.info(player, "&3Menu");
+        List<Object> json = new ArrayList<>();
         json.add(Msg.format("&oChannel Settings"));
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
             if (!channel.hasPermission(player)) continue;
             json.add(" ");
             json.add(Msg.button("&r[" + SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE) + channel.getTag() + "&r]", channel.getTitle(), "/ch set " + channel.getAlias()));
         }
-        Msg.raw(player, json);
-        json.clear();
-        json.add(Msg.format("&oChannel List "));
-        json.add(Msg.button(ChatColor.BLUE, "&r[&9List&r]", "/ch list\n&5&oChannel List", "/ch list"));
-        json.add(" ");
-        json.add(Msg.button(ChatColor.BLUE, "&r[&9Who&r]", "/ch who\n&5&oUser List", "/ch who"));
-        json.add(" ");
-        json.add(Msg.button(ChatColor.BLUE, "&r[&9Say&r]", "/ch say <channel> <msg>\n&5&oTalk in chat", "/ch say "));
         Msg.raw(player, json);
     }
 
@@ -190,10 +215,13 @@ public final class ChatCommand extends AbstractChatCommand {
             }
             json.add(" ");
             ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE);
-            if (channel.equals(ChatPlugin.getInstance().getFocusChannel(player.getUniqueId()))) {
-                json.add(Msg.button(channelColor, channel.getTitle() + "*", "You are focusing " + channel.getTitle(), null));
+            if (channel instanceof PrivateChannel) {
+                json.add(Msg.button(channelColor, channel.getTitle(), "/msg [user] [message]\n&5&oWhisper someone.", "/" + channel.getTag().toLowerCase() + " "));
             } else {
-                json.add(Msg.button(channelColor, channel.getTitle(), "Focus " + channel.getTitle(), "/ch " + channel.getAlias()));
+                json.add(Msg.button(channelColor, channel.getTitle(), "/" + channel.getTag().toLowerCase() + " [message]\n&5&oTalk in " + channel.getTitle(), "/" + channel.getTag().toLowerCase() + " "));
+            }
+            if (channel.equals(ChatPlugin.getInstance().getFocusChannel(player.getUniqueId()))) {
+                json.add(Msg.button(channelColor, "*", "You are focusing " + channel.getTitle(), null));
             }
             json.add(Msg.button(ChatColor.DARK_GRAY, " - ", null, null));
             json.add(Msg.button(ChatColor.GRAY, channel.getDescription(), null, null));
