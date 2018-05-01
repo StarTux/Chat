@@ -135,6 +135,7 @@ public final class ChatCommand extends AbstractChatCommand {
         json.add(Msg.format("&oChannels"));
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
             if (!channel.hasPermission(player)) continue;
+            if (SQLSetting.getBoolean(null, channel.getKey(), "MutePlayers", false)) continue;
             json.add(" ");
             ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE);
             if (channel instanceof PrivateChannel) {
@@ -215,11 +216,7 @@ public final class ChatCommand extends AbstractChatCommand {
             }
             json.add(" ");
             ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE);
-            if (channel instanceof PrivateChannel) {
-                json.add(Msg.button(channelColor, channel.getTitle(), "/msg [user] [message]\n&5&oWhisper someone.", "/" + channel.getTag().toLowerCase() + " "));
-            } else {
-                json.add(Msg.button(channelColor, channel.getTitle(), "/" + channel.getTag().toLowerCase() + " [message]\n&5&oTalk in " + channel.getTitle(), "/" + channel.getTag().toLowerCase() + " "));
-            }
+            json.add(Msg.button(channelColor, channel.getTitle(), "/" + channel.getTag().toLowerCase() + " [message]\n&5&oFocus " + channel.getTitle(), "/" + channel.getTag().toLowerCase()));
             if (channel.equals(ChatPlugin.getInstance().getFocusChannel(player.getUniqueId()))) {
                 json.add(Msg.button(channelColor, "*", "You are focusing " + channel.getTitle(), null));
             }
