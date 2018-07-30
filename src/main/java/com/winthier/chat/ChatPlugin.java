@@ -20,7 +20,7 @@ import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.title.TitleHandler;
-import com.winthier.chat.vault.VaultHandler;
+import com.winthier.generic_events.GenericEventsPlugin;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -43,7 +43,6 @@ public final class ChatPlugin extends JavaPlugin {
     private final List<CommandResponder> commandResponders = new ArrayList<>();
     private final List<Channel> channels = new ArrayList<>();
     private ConnectListener connectListener = null;
-    private VaultHandler vaultHandler = null;
     private TitleHandler titleHandler = null;
     private ChatListener chatListener = new ChatListener();
     private PrivateChannel privateChannel = null;
@@ -69,12 +68,6 @@ public final class ChatPlugin extends JavaPlugin {
             getLogger().info("Connect plugin found!");
         } else {
             getLogger().warning("Connect plugin NOT found!");
-        }
-        if (getServer().getPluginManager().getPlugin("Vault") != null) {
-            vaultHandler = new VaultHandler();
-            getLogger().info("Vault plugin found!");
-        } else {
-            getLogger().warning("Vault plugin NOT found!");
         }
         if (getServer().getPluginManager().getPlugin("Title") != null) {
             titleHandler = new TitleHandler();
@@ -279,8 +272,7 @@ public final class ChatPlugin extends JavaPlugin {
         if (uuid == null) return true;
         Player player = getServer().getPlayer(uuid);
         if (player != null) return player.hasPermission(permission);
-        if (vaultHandler != null) return vaultHandler.hasPermission(uuid, permission);
-        return false;
+        return GenericEventsPlugin.getInstance().playerHasPermission(uuid, permission);
     }
 
     public Channel getFocusChannel(UUID uuid) {
@@ -306,8 +298,6 @@ public final class ChatPlugin extends JavaPlugin {
     public void loadTitle(Message message) {
         if (titleHandler != null) {
             titleHandler.loadTitle(message);
-        } else if (vaultHandler != null) {
-            message.senderTitle = vaultHandler.getPlayerTitle(message.sender);
         }
     }
 

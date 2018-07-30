@@ -1,11 +1,12 @@
 name: Chat
-description: Cross server chat plugin for Winthier
+description: Cross server chat plugin for Cavetale
 author: StarTux
 version: 0.1
 api-version: 1.13
+website: https://cavetale.com
 main: com.winthier.chat.ChatPlugin
-depend: [ SQL ]
-softdepend: [ Connect, Title, Vault, PlayerCache, dynmap ]
+depend: [ SQL, GenericEvents ]
+softdepend: [ Connect, Title, PlayerCache, dynmap ]
 commands:
   chat:
     aliases: [ ch ]
