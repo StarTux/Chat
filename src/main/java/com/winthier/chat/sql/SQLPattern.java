@@ -26,9 +26,9 @@ public final class SQLPattern {
 
     // Content
     @Id private Integer id;
-    @Column(nullable = false) private String category;
-    @Column(nullable = false) private String regex;
-    @Column(nullable = false) private String replacement;
+    @Column(nullable = false, length = 16) private String category;
+    @Column(nullable = false, length = 255) private String regex;
+    @Column(nullable = false, length = 255) private String replacement;
     private transient Pattern pattern = null;
 
     public Pattern getPattern() {

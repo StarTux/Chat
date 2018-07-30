@@ -17,11 +17,11 @@ import lombok.Setter;
 public final class SQLChannel {
     // Content
     @Id private Integer id;
-    @Column(nullable = false) private String channelKey;
-    @Column(nullable = false) private String tag;
-    @Column(nullable = false) private String title;
-    @Column(nullable = false) private String aliases;
-    @Column(nullable = false) private String description;
+    @Column(nullable = false, length = 16) private String channelKey;
+    @Column(nullable = false, length = 8) private String tag;
+    @Column(nullable = false, length = 16) private String title;
+    @Column(nullable = false, length = 64) private String aliases;
+    @Column(nullable = false, length = 255) private String description;
     private Integer localRange;
 
     public static List<SQLChannel> fetch() {

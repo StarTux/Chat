@@ -20,12 +20,12 @@ import org.bukkit.entity.Player;
 public final class SQLLog {
     @Id private Integer id;
     private UUID player;
-    @Column(nullable = false) private String sender;
+    @Column(nullable = false, length = 16) private String sender;
     @Column(nullable = false) private Date time;
-    @Column(nullable = false) private String server;
+    @Column(nullable = false, length = 16) private String server;
     private String world;
     private Integer x, y, z;
-    @Column(nullable = false) private String channel;
+    @Column(nullable = false, length = 16) private String channel;
     private String target;
     @Column(nullable = false, length = 511) private String message;
 
