@@ -20,7 +20,7 @@ import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.title.TitleHandler;
-import com.winthier.generic_events.GenericEventsPlugin;
+import com.winthier.generic_events.GenericEvents;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -272,7 +273,7 @@ public final class ChatPlugin extends JavaPlugin {
         if (uuid == null) return true;
         Player player = getServer().getPlayer(uuid);
         if (player != null) return player.hasPermission(permission);
-        return GenericEventsPlugin.getInstance().playerHasPermission(uuid, permission);
+        return GenericEvents.playerHasPermission(uuid, permission);
     }
 
     public Channel getFocusChannel(UUID uuid) {
@@ -305,7 +306,7 @@ public final class ChatPlugin extends JavaPlugin {
         if (!ChatMessageEvent.call(channel, message)) {
             return;
         }
-        if (connectListener != null && channel.getRange() == 0) {
+        if (!message.local && connectListener != null && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
         }
         if (dynmapHandler != null
@@ -381,5 +382,17 @@ public final class ChatPlugin extends JavaPlugin {
 
     public boolean doesIgnore(UUID player, UUID ignoree) {
         return SQLIgnore.doesIgnore(player, ignoree);
+    }
+
+    public void onBungeeJoin(UUID uuid, String name) {
+        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
+            announce("info", ChatColor.GREEN + name + " joined");
+        }
+    }
+
+    public void onBungeeQuit(UUID uuid, String name) {
+        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
+            announce("info", ChatColor.YELLOW + name + " disconnected");
+        }
     }
 }

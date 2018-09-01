@@ -27,6 +27,8 @@ public final class Message {
     transient public boolean shouldCancel = false;
     transient public String prefix = null;
 
+    transient public boolean local;
+
     private static void store(Map<String, Object> map, String key, Object value) {
         if (value == null) return;
         if (value instanceof UUID) {

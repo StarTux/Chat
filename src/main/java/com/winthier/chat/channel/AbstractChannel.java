@@ -107,7 +107,16 @@ public abstract class AbstractChannel implements Channel {
     }
 
     @Override
-    public final void announce(Object msg) {
+    public void announce(Object msg) {
+        announce(msg, false);
+    }
+
+    @Override
+    public void announceLocal(Object msg) {
+        announce(msg, true);
+    }
+
+    private void announce(Object msg, boolean local) {
         Message message;
         if (msg instanceof String) {
             message = makeMessage(null, (String)msg);
@@ -126,6 +135,7 @@ public abstract class AbstractChannel implements Channel {
             message.json = json;
             message.languageFilterJson = json;
         }
+        message.local = local;
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }

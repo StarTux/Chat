@@ -92,3 +92,6 @@ permissions:
     default: false
   chat.channel.party:
     default: false
+  chat.joinmessage:
+    description: Display join and leave messages
+    default: op
