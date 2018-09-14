@@ -58,6 +58,9 @@ permissions:
   chat.chat:
     description: Use /chat
     default: op
+  chat.admin:
+    description: Use /chatadmin
+    default: op
   chat.pm:
     default: false
   chat.url:
