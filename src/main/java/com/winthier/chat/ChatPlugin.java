@@ -380,19 +380,26 @@ public final class ChatPlugin extends JavaPlugin {
         return true;
     }
 
+    public boolean announceLocal(String channel, Object message) {
+        Channel ch = findChannel(channel);
+        if (ch == null) return false;
+        ch.announceLocal(message);
+        return true;
+    }
+
     public boolean doesIgnore(UUID player, UUID ignoree) {
         return SQLIgnore.doesIgnore(player, ignoree);
     }
 
     public void onBungeeJoin(UUID uuid, String name) {
         if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-            announce("info", ChatColor.GREEN + name + " joined");
+            announceLocal("info", ChatColor.GREEN + name + " joined");
         }
     }
 
     public void onBungeeQuit(UUID uuid, String name) {
         if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-            announce("info", ChatColor.YELLOW + name + " disconnected");
+            announceLocal("info", ChatColor.YELLOW + name + " disconnected");
         }
     }
 }
