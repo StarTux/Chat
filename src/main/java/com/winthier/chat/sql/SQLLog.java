@@ -54,10 +54,10 @@ public final class SQLLog {
     }
 
     public static void store(String sender, Channel channel, String target, String message) {
-        SQLDB.get().save(new SQLLog(sender, channel, target, message));
+        SQLDB.get().saveAsync(new SQLLog(sender, channel, target, message), null);
     }
 
     public static void store(Player player, Channel channel, String target, String message) {
-        SQLDB.get().save(new SQLLog(player, channel, target, message));
+        SQLDB.get().saveAsync(new SQLLog(player, channel, target, message), null);
     }
 }
