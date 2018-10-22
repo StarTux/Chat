@@ -91,9 +91,6 @@ public abstract class AbstractChannel implements Channel {
             Option.soundOption("SoundCueChat", "Chat Cue", "Sound played when you receive a message", "off"),
             Option.intOption("SoundCueChatVolume", "Chat Cue Volume", "Sound played when you receive a message", "10", 1, 10),
 
-            Option.soundOption("SoundCueName", "Name Cue", "Sound played when your named is mentioned in chat", "off"),
-            Option.intOption("SoundCueNameVolume", "Name Cue Volume", "Sound played when your name is mentioned in chat", "10", 1, 10),
-
             Option.booleanOption("LanguageFilter", "Language Filter", "Filter out foul language", "1")
             );
     }
@@ -254,10 +251,10 @@ public abstract class AbstractChannel implements Channel {
         return result;
     }
 
-    public final boolean playSoundCue(Player player, String skey) {
-        SoundCue soundCue = SoundCue.of(SQLSetting.getString(player.getUniqueId(), getKey(), "SoundCue" + skey, "off"));
+    public final boolean playSoundCue(Player player) {
+        SoundCue soundCue = SoundCue.of(SQLSetting.getString(player.getUniqueId(), getKey(), "SoundCueChat", "off"));
         if (soundCue == null) return false;
-        int volume = SQLSetting.getInt(player.getUniqueId(), getKey(), "SoundCue" + skey + "Volume", 10);
+        int volume = SQLSetting.getInt(player.getUniqueId(), getKey(), "SoundCueChatVolume", 10);
         float vol = (float)volume / 10.0f;
         player.playSound(player.getEyeLocation(), soundCue.sound, vol, 1.0f);
         return true;

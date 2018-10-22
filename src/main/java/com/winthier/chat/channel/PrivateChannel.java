@@ -96,10 +96,7 @@ public final class PrivateChannel extends AbstractChannel {
         Msg.raw(player, json);
         // Sound Cue
         if (!ack) {
-            if (!message.message.toLowerCase().contains(player.getName().toLowerCase())
-                || !playSoundCue(player, "Name")) {
-                playSoundCue(player, "Chat");
-            }
+            playSoundCue(player);
         }
         // Reply
         SQLSetting.set(uuid, key, "ReplyName", message.senderName);

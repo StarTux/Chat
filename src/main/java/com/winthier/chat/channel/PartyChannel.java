@@ -111,10 +111,7 @@ public final class PartyChannel extends AbstractChannel {
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
         Msg.raw(player, json);
         // Sound Cue
-        if (!message.message.toLowerCase().contains(player.getName().toLowerCase())
-            || !playSoundCue(player, "Name")) {
-            playSoundCue(player, "Chat");
-        }
+        playSoundCue(player);
     }
 
     String getPartyName(UUID uuid) {
