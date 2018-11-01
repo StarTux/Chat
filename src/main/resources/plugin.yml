@@ -98,3 +98,6 @@ permissions:
   chat.joinmessage:
     description: Display join and leave messages
     default: op
+  chat.item:
+    description: Paste items in chat
+    default: op

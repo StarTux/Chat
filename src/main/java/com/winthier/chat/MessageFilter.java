@@ -1,5 +1,6 @@
 package com.winthier.chat;
 
+import com.cavetale.dirty.Dirty;
 import com.winthier.chat.sql.SQLPattern;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +10,11 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.json.simple.JSONValue;
 
 @Getter
 public final class MessageFilter {
@@ -29,6 +34,7 @@ public final class MessageFilter {
 
     public void process() {
         findURLs();
+        findItems();
         colorize();
         filterSpam();
         json = build();
@@ -41,6 +47,19 @@ public final class MessageFilter {
         OUTER: while (true) {
                 for (Component component: new ArrayList<>(components)) {
                     if (component.findURL()) {
+                        continue OUTER;
+                    }
+                }
+                break OUTER;
+            }
+        }
+    }
+
+    public void findItems() {
+        if (ChatPlugin.getInstance().hasPermission(sender, "chat.item")) {
+        OUTER: while (true) {
+                for (Component component: new ArrayList<>(components)) {
+                    if (component.findItem()) {
                         continue OUTER;
                     }
                 }
@@ -107,6 +126,37 @@ public final class MessageFilter {
             return false;
         }
 
+        boolean findItem() {
+            for (SQLPattern pat: SQLPattern.find("item")) {
+                Matcher matcher = pat.getMatcher(message);
+                if (matcher.find()) {
+                    System.out.println("matcher find");
+                    int index = components.indexOf(this);
+                    Map<String, Object> raw = new HashMap<>();
+                    raw.put("text", "[item]");
+                    Map<String, Object> hoverEvent = new HashMap<>();
+                    raw.put("hoverEvent", hoverEvent);
+                    hoverEvent.put("action", "show_item");
+                    Map<String, Object> value = new HashMap<>();
+                    Player player = Bukkit.getPlayer(sender);
+                    if (player != null) {
+                        ItemStack item = player.getInventory().getItemInMainHand();
+                        if (item != null) {
+                            value.put("id", "minecraft:" + item.getType().name().toLowerCase());
+                            value.put("Count", item.getAmount());
+                            value.put("tag", Dirty.getItemTag(item));
+                        }
+                    }
+                    hoverEvent.put("value", JSONValue.toJSONString(value));
+                    components.add(index, new RawComponent("[item]", raw));
+                    components.add(index, new Component(message.substring(0, matcher.start())));
+                    message = message.substring(matcher.end());
+                    return true;
+                }
+            }
+            return false;
+        }
+
         void filterLanguage() {
             for (SQLPattern pat: SQLPattern.find("Language")) {
                 message = pat.replaceWithAsterisks(message);
@@ -147,8 +197,10 @@ public final class MessageFilter {
         @Override
         void colorize() { }
 
-        @Override
-        boolean findURL() {
+        @Override boolean findItem() {
+            return false;
+        }
+        @Override boolean findURL() {
             return false;
         }
 
@@ -167,6 +219,28 @@ public final class MessageFilter {
             result.put("hoverEvent", hoverEvent);
             hoverEvent.put("action", "show_text");
             return result;
+        }
+    }
+
+    private final class RawComponent extends Component {
+        private final Map<String, Object> raw;
+
+        RawComponent(String message, Map<String, Object> raw) {
+            super(message);
+            this.raw = raw;
+        }
+
+        @Override boolean findItem() {
+            return false;
+        }
+        @Override boolean findURL() {
+            return false;
+        }
+
+        @Override void colorize() { }
+
+        @Override Map<String, Object> toJson() {
+            return this.raw;
         }
     }
 

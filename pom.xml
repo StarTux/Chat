@@ -78,6 +78,13 @@
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    <!-- Dirty -->
+    <dependency>
+      <groupId>com.cavetale.dirty</groupId>
+      <artifactId>dirty</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <build>
     <finalName>${project.name}</finalName>
