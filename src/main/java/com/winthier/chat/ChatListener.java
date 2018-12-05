@@ -12,6 +12,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -66,11 +67,18 @@ public final class ChatListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
+        event.setJoinMessage(null);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
+        event.setQuitMessage(null);
+    }
+
+    @EventHandler
+    public void onPlayerKick(PlayerKickEvent event) {
+        event.setLeaveMessage(null);
     }
 
     @EventHandler
