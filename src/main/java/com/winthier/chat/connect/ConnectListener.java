@@ -3,9 +3,10 @@ package com.winthier.chat.connect;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
+import com.winthier.chat.util.Msg;
 import com.winthier.connect.Connect;
 import com.winthier.connect.OnlinePlayer;
-import com.winthier.connect.bukkit.event.ConnectMessageEvent;
+import com.winthier.connect.event.ConnectMessageEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,11 +48,11 @@ public final class ConnectListener implements Listener {
     }
 
     public String getServerName() {
-        return Connect.getInstance().getServer().getName();
+        return Connect.getInstance().getServerName();
     }
 
     public String getServerDisplayName() {
-        return Connect.getInstance().getServer().getDisplayName();
+        return Msg.camelCase(Connect.getInstance().getServerName());
     }
 
     public void broadcastMessage(Message message) {
