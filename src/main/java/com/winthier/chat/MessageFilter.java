@@ -130,7 +130,6 @@ public final class MessageFilter {
             for (SQLPattern pat: SQLPattern.find("item")) {
                 Matcher matcher = pat.getMatcher(message);
                 if (matcher.find()) {
-                    System.out.println("matcher find");
                     int index = components.indexOf(this);
                     Map<String, Object> raw = new HashMap<>();
                     raw.put("text", "[item]");
