@@ -1,12 +1,12 @@
 package com.winthier.chat;
 
+import cn.nukkit.Player;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.util.Msg;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 @AllArgsConstructor
 public final class JoinLeaveCommand extends AbstractChatCommand {

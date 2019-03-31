@@ -1,10 +1,10 @@
 package com.winthier.chat;
 
+import cn.nukkit.level.Location;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.bukkit.Location;
 
 public final class Message {
     public UUID sender;
@@ -23,11 +23,11 @@ public final class Message {
     public List<Object> json;
     public List<Object> languageFilterJson;
 
-    transient public Location location;
-    transient public boolean shouldCancel = false;
-    transient public String prefix = null;
+    public transient Location location;
+    public transient boolean shouldCancel = false;
+    public transient String prefix = null;
 
-    transient public boolean local;
+    public transient boolean local;
 
     private static void store(Map<String, Object> map, String key, Object value) {
         if (value == null) return;

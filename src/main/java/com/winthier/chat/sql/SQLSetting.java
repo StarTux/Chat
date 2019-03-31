@@ -1,5 +1,6 @@
 package com.winthier.chat.sql;
 
+import cn.nukkit.utils.TextFormat;
 import com.winthier.chat.ChatPlugin;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,7 +19,6 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
-import org.bukkit.ChatColor;
 
 @Entity
 @Table(name = "settings",
@@ -68,8 +68,8 @@ public final class SQLSetting {
         } else if (value instanceof Boolean) {
             Boolean bv = (Boolean)value;
             setSettingValue(bv ? "1" : "0");
-        } else if (value instanceof ChatColor) {
-            ChatColor color = (ChatColor)value;
+        } else if (value instanceof TextFormat) {
+            TextFormat color = (TextFormat)value;
             setSettingValue(color.name().toLowerCase());
         } else {
             setSettingValue(value.toString());
@@ -161,11 +161,11 @@ public final class SQLSetting {
         return i != 0;
     }
 
-    ChatColor getChatColor() {
+    TextFormat getChatColor() {
         String v = getSettingValue();
         if (v == null) return null;
         try {
-            return ChatColor.valueOf(v.toUpperCase());
+            return TextFormat.valueOf(v.toUpperCase());
         } catch (IllegalArgumentException iae) {
             return null;
         }
@@ -214,7 +214,7 @@ public final class SQLSetting {
         return dfl;
     }
 
-    public static ChatColor getChatColor(UUID uuid, String channel, String key, ChatColor dfl) {
+    public static TextFormat getChatColor(UUID uuid, String channel, String key, TextFormat dfl) {
         SQLSetting setting;
         if (uuid != null) {
             setting = find(uuid, channel, key);

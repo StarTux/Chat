@@ -1,22 +1,22 @@
 package com.winthier.chat.util;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.utils.TextFormat;
 import com.winthier.chat.ChatPlugin;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.json.simple.JSONValue;
+import net.minidev.json.JSONValue;
 
 public final class Msg {
     private Msg() { }
 
     public static String format(String msg, Object... args) {
         if (msg == null) return "";
-        msg = ChatColor.translateAlternateColorCodes('&', msg);
+        msg = TextFormat.colorize(msg);
         if (args.length > 0) {
             msg = String.format(msg, args);
         }
@@ -40,7 +40,7 @@ public final class Msg {
         if (ChatPlugin.getInstance().isDebugMode()) {
             ChatPlugin.getInstance().getLogger().info("Running console command: " + cmd);
         }
-        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
+        Server.getInstance().dispatchCommand(Server.getInstance().getConsoleSender(), cmd);
     }
 
     public static void raw(Player player, Object... obj) {
@@ -52,7 +52,7 @@ public final class Msg {
         }
     }
 
-    public static Object button(ChatColor color, String chat, String insertion, String tooltip, String command) {
+    public static Object button(TextFormat color, String chat, String insertion, String tooltip, String command) {
         Map<String, Object> map = new HashMap<>();
         map.put("text", format(chat));
         map.put("color", color.name().toLowerCase());
@@ -74,12 +74,12 @@ public final class Msg {
         return map;
     }
 
-    public static Object button(ChatColor color, String chat, String tooltip, String command) {
+    public static Object button(TextFormat color, String chat, String tooltip, String command) {
         return button(color, chat, null, tooltip, command);
     }
 
     public static Object button(String chat, String tooltip, String command) {
-        return button(ChatColor.WHITE, chat, null, tooltip, command);
+        return button(TextFormat.WHITE, chat, null, tooltip, command);
     }
 
     public static String camelCase(String msg) {

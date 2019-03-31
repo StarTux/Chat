@@ -1,5 +1,7 @@
 package com.winthier.chat.sql;
 
+import cn.nukkit.Player;
+import cn.nukkit.level.Location;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.channel.Channel;
 import java.util.Date;
@@ -11,8 +13,6 @@ import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 @Entity
 @Table(name = "logs")
@@ -44,10 +44,10 @@ public final class SQLLog {
         setPlayer(player.getUniqueId());
         setSender(player.getName());
         Location loc = player.getLocation();
-        setWorld(loc.getWorld().getName());
-        setX(loc.getBlockX());
-        setY(loc.getBlockY());
-        setZ(loc.getBlockZ());
+        setWorld(loc.getLevel().getName());
+        setX((int) Math.floor(loc.getX()));
+        setY((int) Math.floor(loc.getY()));
+        setZ((int) Math.floor(loc.getZ()));
         setChannel(channel.getKey());
         setTarget(target);
         setMessage(message);

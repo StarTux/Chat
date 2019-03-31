@@ -1,5 +1,8 @@
 package com.winthier.chat.channel;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.utils.TextFormat;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
@@ -9,10 +12,8 @@ import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 
+/* Massively Zombiefied for Nukkit port */
 public final class PartyChannel extends AbstractChannel {
     @Override
     public void playerDidUseCommand(PlayerCommandContext c) {
@@ -56,7 +57,7 @@ public final class PartyChannel extends AbstractChannel {
         fillMessage(message);
         if (message.shouldCancel && message.sender != null) return;
         ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s][%s]%s: %s", getTag(), message.targetName, message.senderServer, message.senderName, message.message));
-        for (Player player: Bukkit.getServer().getOnlinePlayers()) {
+        for (Player player: Server.getInstance().getOnlinePlayers().values()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;
@@ -78,10 +79,10 @@ public final class PartyChannel extends AbstractChannel {
         String key = getKey();
         String partyName = message.targetName;
         List<Object> json = new ArrayList<>();
-        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", ChatColor.WHITE);
-        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", ChatColor.WHITE);
-        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", ChatColor.WHITE);
-        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", ChatColor.WHITE);
+        TextFormat channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", TextFormat.WHITE);
+        TextFormat textColor = SQLSetting.getChatColor(uuid, key, "TextColor", TextFormat.WHITE);
+        TextFormat senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", TextFormat.WHITE);
+        TextFormat bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", TextFormat.WHITE);
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
         BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
         json.add("");
@@ -109,7 +110,8 @@ public final class PartyChannel extends AbstractChannel {
         json.add(" ");
         // Message
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
-        Msg.raw(player, json);
+        // .raw(player, json); /* Zombiefied for Nukkit port */
+        player.sendMessage("[Party] " + partyName + " " + message.senderName + ": " + message.message);
         // Sound Cue
         playSoundCue(player);
     }
@@ -155,16 +157,19 @@ public final class PartyChannel extends AbstractChannel {
     }
 
     void listPlayers(Player player, String partyName) {
-        List<Object> json = new ArrayList<>();
-        json.add(Msg.format("&oParty &a%s&r:", partyName));
-        ChatColor senderColor = SQLSetting.getChatColor(player.getUniqueId(), getKey(), "SenderColor", ChatColor.WHITE);
+        // List<Object> json = new ArrayList<>();
+        // json.add(Msg.format("&oParty &a%s&r:", partyName));
+        StringBuilder sb = new StringBuilder(Msg.format("&oParty &a%s&r:", partyName));
+        TextFormat senderColor = SQLSetting.getChatColor(player.getUniqueId(), getKey(), "SenderColor", TextFormat.WHITE);
         for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
             String otherPartyName = getPartyName(chatter.getUuid());
             if (otherPartyName != null && otherPartyName.equals(partyName)) {
-                json.add(" ");
-                json.add(Msg.button(senderColor, chatter.getName(), null, null));
+                // json.add(" ");
+                // json.add(Msg.button(senderColor, chatter.getName(), null, null));
+                sb.append(" ").append(senderColor + chatter.getName());
             }
         }
-        Msg.raw(player, json);
+        // .raw(player, json);
+        player.sendMessage(sb.toString());
     }
 }

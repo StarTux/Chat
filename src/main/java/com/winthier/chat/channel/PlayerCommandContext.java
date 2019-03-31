@@ -1,7 +1,7 @@
 package com.winthier.chat.channel;
 
+import cn.nukkit.Player;
 import lombok.AllArgsConstructor;
-import org.bukkit.entity.Player;
 
 @AllArgsConstructor
 public final class PlayerCommandContext {

@@ -1,7 +1,7 @@
 package com.winthier.chat.channel;
 
+import cn.nukkit.Player;
 import java.util.List;
-import org.bukkit.entity.Player;
 
 public interface CommandResponder {
     List<String> getAliases();

@@ -1,33 +1,21 @@
 package com.winthier.chat;
 
+import cn.nukkit.Player;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerChatEvent;
+import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
+import cn.nukkit.event.player.PlayerJoinEvent;
+import cn.nukkit.event.player.PlayerKickEvent;
+import cn.nukkit.event.player.PlayerQuitEvent;
+import cn.nukkit.event.server.ServerCommandEvent;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public final class ChatListener implements Listener {
-    @EventHandler
-    public void onAsyncPlayerChat(final AsyncPlayerChatEvent event) {
-        event.setCancelled(true);
-        new BukkitRunnable() {
-            @Override public void run() {
-                onPlayerChat(event.getPlayer(), event.getMessage());
-            }
-        }.runTask(ChatPlugin.getInstance());
-    }
-
     void onPlayerChat(Player player, String message) {
         if (!player.isValid()) return;
         Channel channel = ChatPlugin.getInstance().getFocusChannel(player.getUniqueId());
@@ -35,6 +23,12 @@ public final class ChatListener implements Listener {
         if (!channel.hasPermission(player)) return;
         if (!ChatPlayerTalkEvent.call(player, channel, message)) return;
         channel.playerDidUseChat(new PlayerCommandContext(player, null, message));
+    }
+
+    @EventHandler
+    public void onPlayerChat(final PlayerChatEvent event) {
+        event.setCancelled(true);
+        onPlayerChat(event.getPlayer(), event.getMessage());
     }
 
     @EventHandler
@@ -67,26 +61,17 @@ public final class ChatListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
-        event.setJoinMessage(null);
+        // event.setJoinMessage((String)null);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
-        event.setQuitMessage(null);
+        // event.setQuitMessage((String)null);
     }
 
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event) {
-        event.setLeaveMessage(null);
-    }
-
-    @EventHandler
-    public void onPlayerChatTabComplete(PlayerChatTabCompleteEvent event) {
-        for (String name: ChatPlugin.getInstance().completePlayerName(event.getLastToken())) {
-            if (!event.getTabCompletions().contains(name)) {
-                event.getTabCompletions().add(name);
-            }
-        }
+        // event.setLeaveMessage((String)null);
     }
 }

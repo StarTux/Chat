@@ -1,10 +1,10 @@
 package com.winthier.chat.channel;
 
+import cn.nukkit.Player;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
 import java.util.List;
 import java.util.UUID;
-import org.bukkit.entity.Player;
 
 public interface Channel extends CommandResponder {
     String getTitle();

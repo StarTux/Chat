@@ -1,14 +1,15 @@
 package com.winthier.chat;
 
+import cn.nukkit.Player;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.regex.Matcher;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import net.minidev.json.JSONValue;
 
 public final class AdminCommand extends AbstractChatCommand {
     @Override
@@ -46,8 +47,10 @@ public final class AdminCommand extends AbstractChatCommand {
             if (player != null) {
                 MessageFilter filter2 = new MessageFilter(player.getUniqueId(), sb.toString());
                 filter2.process();
-                Msg.raw(player, filter2.getJson());
-                Msg.raw(player, filter2.getLanguageFilterJson());
+                // .raw(player, filter2.getJson());
+                // .raw(player, filter2.getLanguageFilterJson());
+                player.sendMessage(JSONValue.toJSONString(filter2.getJson()));
+                player.sendMessage(JSONValue.toJSONString(filter2.getLanguageFilterJson()));
             }
         } else if (firstArg.equals("testpattern") && args.length >= 3) {
             StringBuilder sb = new StringBuilder(args[2]);

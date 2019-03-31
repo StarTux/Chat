@@ -1,5 +1,7 @@
 package com.winthier.chat.connect;
 
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
@@ -10,9 +12,6 @@ import com.winthier.connect.event.ConnectMessageEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 
 public final class ConnectListener implements Listener {
     private static final String CHANNEL = "Chat";
@@ -33,17 +32,21 @@ public final class ConnectListener implements Listener {
                 }
             }
         } else if (channel.equals("BUNGEE_PLAYER_JOIN")) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
-            UUID uuid = UUID.fromString((String)map.get("uuid"));
-            String name = (String)map.get("name");
-            ChatPlugin.getInstance().onBungeeJoin(uuid, name);
+            return;
+            /* Zombiefied for Nukkit port */
+            // @SuppressWarnings("unchecked")
+            // Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
+            // UUID uuid = UUID.fromString((String)map.get("uuid"));
+            // String name = (String)map.get("name");
+            // ChatPlugin.getInstance().onBungeeJoin(uuid, name);
         } else if (channel.equals("BUNGEE_PLAYER_QUIT")) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
-            UUID uuid = UUID.fromString((String)map.get("uuid"));
-            String name = (String)map.get("name");
-            ChatPlugin.getInstance().onBungeeQuit(uuid, name);
+            return;
+            /* Zombiefied for Nukkit port */
+            // @SuppressWarnings("unchecked")
+            // Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
+            // UUID uuid = UUID.fromString((String)map.get("uuid"));
+            // String name = (String)map.get("name");
+            // ChatPlugin.getInstance().onBungeeQuit(uuid, name);
         }
     }
 

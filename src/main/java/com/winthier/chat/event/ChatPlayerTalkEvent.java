@@ -1,14 +1,14 @@
 package com.winthier.chat.event;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.event.Cancellable;
+import cn.nukkit.event.Event;
+import cn.nukkit.event.HandlerList;
 import com.winthier.chat.channel.Channel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 
 @Getter @RequiredArgsConstructor
 public final class ChatPlayerTalkEvent extends Event implements Cancellable {
@@ -16,12 +16,7 @@ public final class ChatPlayerTalkEvent extends Event implements Cancellable {
 
     private static HandlerList handlers = new HandlerList();
 
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
-
-    @Override
-    public HandlerList getHandlers() {
+    public static HandlerList getHandlers() {
         return handlers;
     }
 
@@ -35,7 +30,7 @@ public final class ChatPlayerTalkEvent extends Event implements Cancellable {
 
     public static boolean call(Player player, Channel channel, String msg) {
         ChatPlayerTalkEvent event = new ChatPlayerTalkEvent(player, channel, msg);
-        Bukkit.getServer().getPluginManager().callEvent(event);
+        Server.getInstance().getPluginManager().callEvent(event);
         return (!event.isCancelled());
     }
 }

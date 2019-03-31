@@ -1,10 +1,13 @@
 package com.winthier.chat;
 
+import cn.nukkit.Player;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.utils.TextFormat;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.Option;
 import com.winthier.chat.channel.PlayerCommandContext;
-import com.winthier.chat.channel.PrivateChannel;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
@@ -13,11 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
+/* Massively zombiefied for Nukkit port */
 public final class ChatCommand extends AbstractChatCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -133,115 +133,124 @@ public final class ChatCommand extends AbstractChatCommand {
         Msg.info(player, "&3Menu");
         List<Object> json = new ArrayList<>();
         json.add(Msg.format("&oChannels"));
+        StringBuilder sb = new StringBuilder("");
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
             if (!channel.hasPermission(player)) continue;
             if (SQLSetting.getBoolean(null, channel.getKey(), "MutePlayers", false)) continue;
-            json.add(" ");
-            ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE);
-            if (channel instanceof PrivateChannel) {
-                json.add(Msg.button(channelColor, "[" + channel.getTag() + "]", "/msg [user] [message]\n&5&oWhisper someone.", "/" + channel.getTag().toLowerCase() + " "));
-            } else {
-                json.add(Msg.button(channelColor, "[" + channel.getTag() + "]", "/" + channel.getTag().toLowerCase() + " [message]\n&5&oTalk in " + channel.getTitle(), "/" + channel.getTag().toLowerCase() + " "));
-            }
+            // json.add(" ");
+            TextFormat channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", TextFormat.WHITE);
+            // if (channel instanceof PrivateChannel) {
+            //     json.add(Msg.button(channelColor, "[" + channel.getTag() + "]", "/msg [user] [message]\n&5&oWhisper someone.", "/" + channel.getTag().toLowerCase() + " "));
+            // } else {
+            //     json.add(Msg.button(channelColor, "[" + channel.getTag() + "]", "/" + channel.getTag().toLowerCase() + " [message]\n&5&oTalk in " + channel.getTitle(), "/" + channel.getTag().toLowerCase() + " "));
+            // }
+            sb.append(channelColor.toString()).append(" [").append(channel.getKey()).append("]");
         }
-        Msg.raw(player, json);
-        json.clear();
-        json.add(Msg.format("&oCommands "));
-        json.add(Msg.button(ChatColor.GOLD, "&6[List]", "/ch list\n&5&oChannel List.", "/ch list"));
-        json.add(" ");
-        json.add(Msg.button(ChatColor.BLUE, "&9[Who]", "/ch who [channel]\n&5&oUser List", "/ch who "));
-        json.add(" ");
-        json.add(Msg.button(ChatColor.GRAY, "&7[Set]", "/ch set\n&5&oChange channel preferences.", "/ch set"));
-        json.add(" ");
-        json.add(Msg.button(ChatColor.LIGHT_PURPLE, "&d[Reply]", "/reply <msg>\n&5&oReply to private messages.", "/reply "));
-        json.add(" ");
-        json.add(Msg.button(ChatColor.GREEN, "&a[Party]", "/party [name]\n&5&oSelect a named party,\n&5&oshow current party.", "/party "));
-        json.add(" ");
-        json.add(Msg.button(ChatColor.RED, "&c[Ignore]", "/ignore [user]\n&5&oIgnore, unignore, or\n&5&olist ignored users.", "/ignore "));
-        Msg.raw(player, json);
+        // .raw(player, json);
+        player.sendMessage(sb.toString());
+        // json.clear();
+        // json.add(Msg.format("&oCommands "));
+        // json.add(Msg.button(TextFormat.GOLD, "&6[List]", "/ch list\n&5&oChannel List.", "/ch list"));
+        // json.add(" ");
+        // json.add(Msg.button(TextFormat.BLUE, "&9[Who]", "/ch who [channel]\n&5&oUser List", "/ch who "));
+        // json.add(" ");
+        // json.add(Msg.button(TextFormat.GRAY, "&7[Set]", "/ch set\n&5&oChange channel preferences.", "/ch set"));
+        // json.add(" ");
+        // json.add(Msg.button(TextFormat.LIGHT_PURPLE, "&d[Reply]", "/reply <msg>\n&5&oReply to private messages.", "/reply "));
+        // json.add(" ");
+        // json.add(Msg.button(TextFormat.GREEN, "&a[Party]", "/party [name]\n&5&oSelect a named party,\n&5&oshow current party.", "/party "));
+        // json.add(" ");
+        // json.add(Msg.button(TextFormat.RED, "&c[Ignore]", "/ignore [user]\n&5&oIgnore, unignore, or\n&5&olist ignored users.", "/ignore "));
+        // .raw(player, json);
     }
 
     void listChannelsForSettings(Player player) {
         if (player == null) return;
-        Msg.info(player, "&3Menu");
-        List<Object> json = new ArrayList<>();
-        json.add(Msg.format("&oChannel Settings"));
-        for (Channel channel: ChatPlugin.getInstance().getChannels()) {
-            if (!channel.hasPermission(player)) continue;
-            json.add(" ");
-            json.add(Msg.button("&r[" + SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE) + channel.getTag() + "&r]", channel.getTitle(), "/ch set " + channel.getAlias()));
-        }
-        Msg.raw(player, json);
+        // Msg.info(player, "&3Menu");
+        // List<Object> json = new ArrayList<>();
+        // json.add(Msg.format("&oChannel Settings"));
+        // for (Channel channel: ChatPlugin.getInstance().getChannels()) {
+        //     if (!channel.hasPermission(player)) continue;
+        //     json.add(" ");
+        //     json.add(Msg.button("&r[" + SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", TextFormat.WHITE) + channel.getTag() + "&r]", channel.getTitle(), "/ch set " + channel.getAlias()));
+        // }
+        // .raw(player, json);
     }
 
     void showSettingsMenu(Player player, Channel channel) {
-        UUID uuid = player.getUniqueId();
-        Msg.info(player, SQLSetting.getChatColor(uuid, channel.getKey(), "ChannelColor", ChatColor.WHITE) + channel.getTitle() + " Settings");
-        List<Object> json = new ArrayList<>();
-        for (Option option: channel.getOptions()) {
-            json.clear();
-            json.add(" ");
-            json.add(Msg.button(ChatColor.WHITE, "&o" + option.displayName, option.displayName + "\n&5" + option.description, null));
-            for (Option.State state: option.states) {
-                json.add(" ");
-                String current = SQLSetting.getString(uuid, channel.getKey(), option.key, option.defaultValue);
-                boolean active = false;
-                if (current != null && current.equals(state.value)) active = true;
-                if (active) {
-                    json.add(Msg.button("&r[" + state.activeColor + state.displayName + "&r]", state.description, "/ch set " + channel.getAlias() + " " + option.key + " " + state.value));
-                } else {
-                    json.add(Msg.button(state.color + state.displayName, state.description, "/ch set " + channel.getAlias() + " " + option.key + " " + state.value));
-                }
-            }
-            Msg.raw(player, json);
-        }
-        channel.exampleOutput(player);
-        json.clear();
-        json.add(" ");
-        json.add(Msg.button(ChatColor.DARK_RED, "&r[&4Reset&r]", "&4Reset to channel defaults.", "/ch set " + channel.getAlias() + " reset"));
-        Msg.raw(player, json);
+        // UUID uuid = player.getUniqueId();
+        // Msg.info(player, SQLSetting.getChatColor(uuid, channel.getKey(), "ChannelColor", TextFormat.WHITE) + channel.getTitle() + " Settings");
+        // List<Object> json = new ArrayList<>();
+        // for (Option option: channel.getOptions()) {
+        //     json.clear();
+        //     json.add(" ");
+        //     json.add(Msg.button(TextFormat.WHITE, "&o" + option.displayName, option.displayName + "\n&5" + option.description, null));
+        //     for (Option.State state: option.states) {
+        //         json.add(" ");
+        //         String current = SQLSetting.getString(uuid, channel.getKey(), option.key, option.defaultValue);
+        //         boolean active = false;
+        //         if (current != null && current.equals(state.value)) active = true;
+        //         if (active) {
+        //             json.add(Msg.button("&r[" + state.activeColor + state.displayName + "&r]", state.description, "/ch set " + channel.getAlias() + " " + option.key + " " + state.value));
+        //         } else {
+        //             json.add(Msg.button(state.color + state.displayName, state.description, "/ch set " + channel.getAlias() + " " + option.key + " " + state.value));
+        //         }
+        //     }
+        //     .raw(player, json);
+        // }
+        // channel.exampleOutput(player);
+        // json.clear();
+        // json.add(" ");
+        // json.add(Msg.button(TextFormat.DARK_RED, "&r[&4Reset&r]", "&4Reset to channel defaults.", "/ch set " + channel.getAlias() + " reset"));
+        // .raw(player, json);
     }
 
     void listChannels(Player player) {
         if (player == null) return;
         Msg.info(player, "Channel List");
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
-            List<Object> json = new ArrayList<>();
-            if (!channel.hasPermission(player)) continue;
-            json.add(" ");
-            if (channel.isJoined(player.getUniqueId())) {
-                json.add(Msg.button(ChatColor.GREEN, "x", "Leave " + channel.getTitle(), "/ch leave " + channel.getAlias()));
-            } else {
-                json.add(Msg.button(ChatColor.RED, "o", "Join " + channel.getTitle(), "/ch join " + channel.getAlias()));
-            }
-            json.add(" ");
-            ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE);
-            json.add(Msg.button(channelColor, channel.getTitle(), "/" + channel.getTag().toLowerCase() + " [message]\n&5&oFocus " + channel.getTitle(), "/" + channel.getTag().toLowerCase()));
-            if (channel.equals(ChatPlugin.getInstance().getFocusChannel(player.getUniqueId()))) {
-                json.add(Msg.button(channelColor, "*", "You are focusing " + channel.getTitle(), null));
-            }
-            json.add(Msg.button(ChatColor.DARK_GRAY, " - ", null, null));
-            json.add(Msg.button(ChatColor.GRAY, channel.getDescription(), null, null));
-            Msg.raw(player, json);
+            // List<Object> json = new ArrayList<>();
+            // if (!channel.hasPermission(player)) continue;
+            // json.add(" ");
+            // if (channel.isJoined(player.getUniqueId())) {
+            //     json.add(Msg.button(TextFormat.GREEN, "x", "Leave " + channel.getTitle(), "/ch leave " + channel.getAlias()));
+            // } else {
+            //     json.add(Msg.button(TextFormat.RED, "o", "Join " + channel.getTitle(), "/ch join " + channel.getAlias()));
+            // }
+            // json.add(" ");
+            TextFormat channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", TextFormat.WHITE);
+            // json.add(Msg.button(channelColor, channel.getTitle(), "/" + channel.getTag().toLowerCase() + " [message]\n&5&oFocus " + channel.getTitle(), "/" + channel.getTag().toLowerCase()));
+            // if (channel.equals(ChatPlugin.getInstance().getFocusChannel(player.getUniqueId()))) {
+            //     json.add(Msg.button(channelColor, "*", "You are focusing " + channel.getTitle(), null));
+            // }
+            // json.add(Msg.button(TextFormat.DARK_GRAY, " - ", null, null));
+            // json.add(Msg.button(TextFormat.GRAY, channel.getDescription(), null, null));
+            // .raw(player, json);
+            boolean focus = channel.equals(ChatPlugin.getInstance().getFocusChannel(player.getUniqueId()));
+            player.sendMessage((focus ? TextFormat.YELLOW + "*" : " ") + channelColor + "[" + channel.getTag() + "] " + channel.getTitle());
         }
     }
 
     void listIgnores(Player player) {
         UUID uuid = player.getUniqueId();
-        List<Object> json = new ArrayList<>();
-        json.add(Msg.format("&oIgnoring"));
+        // List<Object> json = new ArrayList<>();
+        StringBuilder sb = new StringBuilder(Msg.format("&oIgnoring"));
+        // json.add(Msg.format("&oIgnoring"));
         int count = 0;
         for (UUID ign: SQLIgnore.listIgnores(uuid)) {
             Chatter chatter = ChatPlugin.getInstance().findOfflinePlayer(ign);
             if (chatter == null) continue;
             count += 1;
-            json.add(" ");
-            json.add(Msg.button(ChatColor.RED, chatter.getName(), "Click to unignore " + chatter.getName(), "/ch ignore " + chatter.getName()));
+            // json.add(" ");
+            // json.add(Msg.button(TextFormat.RED, chatter.getName(), "Click to unignore " + chatter.getName(), "/ch ignore " + chatter.getName()));
+            sb.append(" ").append(chatter.getName());
         }
         if (count == 0) {
-            json.add(Msg.format(" &anobody"));
+            // json.add(Msg.format(" &anobody"));
+            sb.append(Msg.format(" &anobody"));
         }
-        Msg.raw(player, json);
+        // .raw(player, json);
+        player.sendMessage(sb.toString());
     }
 
     void toggleIgnore(Player player, String name) {

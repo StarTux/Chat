@@ -1,5 +1,13 @@
 package com.winthier.chat;
 
+import cn.nukkit.IPlayer;
+import cn.nukkit.Player;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.PluginCommand;
+import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.utils.Config;
+import cn.nukkit.utils.ConfigSection;
 import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
@@ -10,36 +18,24 @@ import com.winthier.chat.channel.PrivateChannel;
 import com.winthier.chat.channel.PublicChannel;
 import com.winthier.chat.channel.ReplyCommand;
 import com.winthier.chat.connect.ConnectListener;
-import com.winthier.chat.dynmap.DynmapHandler;
 import com.winthier.chat.event.ChatMessageEvent;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
-import com.winthier.chat.playercache.PlayerCacheHandler;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.title.TitleHandler;
-import com.winthier.generic_events.GenericEvents;
 import com.winthier.sql.SQLDatabase;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
-public final class ChatPlugin extends JavaPlugin {
+public final class ChatPlugin extends PluginBase {
     @Getter private static ChatPlugin instance;
     private final List<CommandResponder> commandResponders = new ArrayList<>();
     private final List<Channel> channels = new ArrayList<>();
@@ -48,17 +44,16 @@ public final class ChatPlugin extends JavaPlugin {
     private ChatListener chatListener = new ChatListener();
     private PrivateChannel privateChannel = null;
     private PartyChannel partyChannel = null;
-    private PlayerCacheHandler playerCacheHandler = null;
-    private DynmapHandler dynmapHandler = null;
+    // private PlayerCacheHandler playerCacheHandler = null; /* Zombiefied for Nukkit port */
+    // private DynmapHandler dynmapHandler = null; /* Zombiefied for Nukkit port */
     private ChatCommand chatCommand = new ChatCommand();
-    @Setter private boolean debugMode = false;
+    @Setter private boolean debugMode = true;
     private SQLDatabase db;
 
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
-        reloadConfig();
         db = new SQLDatabase(this);
         for (Class<?> clazz: SQLDB.getDatabaseClasses()) db.registerTable(clazz);
         db.createAllTables();
@@ -76,25 +71,27 @@ public final class ChatPlugin extends JavaPlugin {
         } else {
             getLogger().warning("Title plugin NOT found!");
         }
-        if (getServer().getPluginManager().getPlugin("PlayerCache") != null) {
-            playerCacheHandler = new PlayerCacheHandler();
-            getLogger().info("PlayerCache plugin found!");
-        } else {
-            getLogger().warning("PlayerCache plugin NOT found!");
-        }
-        if (getServer().getPluginManager().getPlugin("dynmap") != null) {
-            dynmapHandler = new DynmapHandler();
-            getServer().getPluginManager().registerEvents(dynmapHandler, this);
-            getLogger().info("Dynmap plugin found!");
-        } else {
-            getLogger().warning("Dynmap plugin NOT found!");
-        }
+        /* Zombiefied for Nukkit port */
+        // if (getServer().getPluginManager().getPlugin("PlayerCache") != null) {
+        //     playerCacheHandler = new PlayerCacheHandler();
+        //     getLogger().info("PlayerCache plugin found!");
+        // } else {
+        //     getLogger().warning("PlayerCache plugin NOT found!");
+        // }
+        /* Zombiefied for Nukkit port */
+        // if (getServer().getPluginManager().getPlugin("dynmap") != null) {
+        //     dynmapHandler = new DynmapHandler();
+        //     getServer().getPluginManager().registerEvents(dynmapHandler, this);
+        //     getLogger().info("Dynmap plugin found!");
+        // } else {
+        //     getLogger().warning("Dynmap plugin NOT found!");
+        // }
         getServer().getPluginManager().registerEvents(chatListener, this);
-        getCommand("chatadmin").setExecutor(new AdminCommand());
-        getCommand("chat").setExecutor(chatCommand);
-        getCommand("join").setExecutor(new JoinLeaveCommand(true));
-        getCommand("leave").setExecutor(new JoinLeaveCommand(false));
-        getCommand("ignore").setExecutor(new IgnoreCommand());
+        ((PluginCommand)getCommand("chatadmin")).setExecutor(new AdminCommand());
+        ((PluginCommand)getCommand("chat")).setExecutor(chatCommand);
+        ((PluginCommand)getCommand("join")).setExecutor(new JoinLeaveCommand(true));
+        ((PluginCommand)getCommand("leave")).setExecutor(new JoinLeaveCommand(false));
+        ((PluginCommand)getCommand("ignore")).setExecutor(new IgnoreCommand());
     }
 
     @Override
@@ -120,12 +117,13 @@ public final class ChatPlugin extends JavaPlugin {
         return true;
     }
 
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 0) return null;
-        String arg = args[args.length - 1];
-        return completePlayerName(arg);
-    }
+    /* Zombiefied for Nukkit port */
+    // @Override
+    // public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    //     if (args.length == 0) return null;
+    //     String arg = args[args.length - 1];
+    //     return completePlayerName(arg);
+    // }
 
     public List<String> completePlayerName(String name) {
         List<String> result = new ArrayList<>();
@@ -183,9 +181,9 @@ public final class ChatPlugin extends JavaPlugin {
 
     @SuppressWarnings("unchecked")
     void initializeDatabase() {
-        YamlConfiguration config;
-        config = YamlConfiguration.loadConfiguration(new InputStreamReader(getResource("database.yml")));
-        ConfigurationSection patternSection = config.getConfigurationSection("patterns");
+        Config config = new Config();
+        config.load(getResource("database.yml"));
+        ConfigSection patternSection = config.getSection("patterns");
         if (patternSection != null) {
             for (String category: patternSection.getKeys(false)) {
                 for (Object o: patternSection.getList(category)) {
@@ -212,10 +210,10 @@ public final class ChatPlugin extends JavaPlugin {
                 }
             }
         }
-        ConfigurationSection channelsSection = config.getConfigurationSection("channels");
+        ConfigSection channelsSection = config.getSection("channels");
         if (channelsSection != null) {
             for (String key: channelsSection.getKeys(false)) {
-                ConfigurationSection channelSection = channelsSection.getConfigurationSection(key);
+                ConfigSection channelSection = channelsSection.getSection(key);
                 SQLChannel chan = new SQLChannel();
                 chan.setChannelKey(key);
                 chan.setTag(channelSection.getString("tag"));
@@ -227,7 +225,7 @@ public final class ChatPlugin extends JavaPlugin {
                     sb.append(",").append(aliases.get(i));
                 }
                 chan.setAliases(sb.toString());
-                if (channelSection.isSet("range")) {
+                if (channelSection.exists("range")) {
                     chan.setLocalRange(channelSection.getInt("range"));
                 }
                 getDb().save(chan);
@@ -271,9 +269,11 @@ public final class ChatPlugin extends JavaPlugin {
 
     public boolean hasPermission(UUID uuid, String permission) {
         if (uuid == null) return true;
-        Player player = getServer().getPlayer(uuid);
+        Player player = getServer().getPlayer(uuid).orElse(null);
         if (player != null) return player.hasPermission(permission);
-        return GenericEvents.playerHasPermission(uuid, permission);
+        return false;
+        /* Zombiefied for Nukkit port */
+        // return GenericEvents.playerHasPermission(uuid, permission);
     }
 
     public Channel getFocusChannel(UUID uuid) {
@@ -309,10 +309,11 @@ public final class ChatPlugin extends JavaPlugin {
         if (!message.local && connectListener != null && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
         }
-        if (dynmapHandler != null
-            && SQLSetting.getBoolean(null, message.channel, "PostToDynmap", false)) {
-            dynmapHandler.postPlayerMessage(message);
-        }
+        /* Zombiefied for Nukkit port */
+        // if (dynmapHandler != null
+        //     && SQLSetting.getBoolean(null, message.channel, "PostToDynmap", false)) {
+        //     dynmapHandler.postPlayerMessage(message);
+        // }
     }
 
     public void didReceiveMessage(Message message) {
@@ -341,7 +342,7 @@ public final class ChatPlugin extends JavaPlugin {
             return connectListener.getOnlinePlayers();
         } else {
             List<Chatter> result = new ArrayList<>();
-            for (Player player: getServer().getOnlinePlayers()) {
+            for (Player player: getServer().getOnlinePlayers().values()) {
                 result.add(new Chatter(player.getUniqueId(), player.getName()));
             }
             return result;
@@ -349,28 +350,29 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public Chatter findOfflinePlayer(UUID uuid) {
-        if (playerCacheHandler != null) {
-            String name = playerCacheHandler.nameForUuid(uuid);
-            if (name == null) return null;
-            return new Chatter(uuid, name);
-        }
-        OfflinePlayer op = getServer().getOfflinePlayer(uuid);
+        /* Zombiefied for Nukkit port */
+        // if (playerCacheHandler != null) {
+        //     String name = playerCacheHandler.nameForUuid(uuid);
+        //     if (name == null) return null;
+        //     return new Chatter(uuid, name);
+        // }
+        IPlayer op = getServer().getOfflinePlayer(uuid);
         if (op == null) return null;
         return new Chatter(uuid, op.getName());
     }
 
     public Chatter findOfflinePlayer(String name) {
-        if (playerCacheHandler != null) {
-            UUID uuid = playerCacheHandler.uuidForName(name);
-            if (uuid == null) return null;
-            String name2 = playerCacheHandler.nameForUuid(uuid);
-            if (name2 != null) name = name2;
-            return new Chatter(uuid, name);
-        }
-        @SuppressWarnings("deprecation")
-        OfflinePlayer op = getServer().getOfflinePlayer(name);
-        if (op == null) return null;
-        return new Chatter(op.getUniqueId(), op.getName());
+        /* Zombiefied for Nukkit port */
+        // if (playerCacheHandler != null) {
+        //     UUID uuid = playerCacheHandler.uuidForName(name);
+        //     if (uuid == null) return null;
+        //     String name2 = playerCacheHandler.nameForUuid(uuid);
+        //     if (name2 != null) name = name2;
+        //     return new Chatter(uuid, name);
+        // }
+        UUID uuid = getServer().lookupName(name).orElse(null);
+        if (uuid == null) return null;
+        return new Chatter(uuid, name);
     }
 
     public boolean announce(String channel, Object message) {
@@ -391,15 +393,17 @@ public final class ChatPlugin extends JavaPlugin {
         return SQLIgnore.doesIgnore(player, ignoree);
     }
 
-    public void onBungeeJoin(UUID uuid, String name) {
-        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-            announceLocal("info", ChatColor.GREEN + name + " joined");
-        }
-    }
+    /* Zombiefied for Nukkit port */
 
-    public void onBungeeQuit(UUID uuid, String name) {
-        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-            announceLocal("info", ChatColor.YELLOW + name + " disconnected");
-        }
-    }
+    // public void onBungeeJoin(UUID uuid, String name) {
+    //     if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
+    //         announceLocal("info", TextFormat.GREEN + name + " joined");
+    //     }
+    // }
+
+    // public void onBungeeQuit(UUID uuid, String name) {
+    //     if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
+    //         announceLocal("info", TextFormat.YELLOW + name + " disconnected");
+    //     }
+    // }
 }

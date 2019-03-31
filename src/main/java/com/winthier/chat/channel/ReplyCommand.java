@@ -1,10 +1,10 @@
 package com.winthier.chat.channel;
 
+import cn.nukkit.Player;
 import com.winthier.chat.ChatPlugin;
 import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
-import org.bukkit.entity.Player;
 
 @Getter
 public class ReplyCommand implements CommandResponder {

@@ -1,5 +1,8 @@
 package com.winthier.chat.channel;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.utils.TextFormat;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
@@ -17,9 +20,6 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 
 @Getter @Setter
 public abstract class AbstractChannel implements Channel {
@@ -166,14 +166,14 @@ public abstract class AbstractChannel implements Channel {
         return message;
     }
 
-    final Object channelTag(ChatColor channelColor, ChatColor bracketColor, BracketType bracketType) {
+    final Object channelTag(TextFormat channelColor, TextFormat bracketColor, BracketType bracketType) {
         return Msg.button(channelColor,
                           bracketColor + bracketType.opening + channelColor + getTag() + bracketColor + bracketType.closing,
                           getTitle() + "\n&5&o" + getDescription(),
                           "/" + getAlias() + " ");
     }
 
-    final Object serverTag(Message message, ChatColor serverColor, ChatColor bracketColor, BracketType bracketType) {
+    final Object serverTag(Message message, TextFormat serverColor, TextFormat bracketColor, BracketType bracketType) {
         String name;
         if (message.senderServerDisplayName != null) {
             name = message.senderServerDisplayName;
@@ -188,7 +188,7 @@ public abstract class AbstractChannel implements Channel {
                           null);
     }
 
-    final Object senderTitleTag(Message message, ChatColor bracketColor, BracketType bracketType) {
+    final Object senderTitleTag(Message message, TextFormat bracketColor, BracketType bracketType) {
         if (message.senderTitle == null) return "";
         return Msg.button(
             bracketColor,
@@ -198,7 +198,7 @@ public abstract class AbstractChannel implements Channel {
             null);
     }
 
-    final Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
+    final Object senderTag(Message message, TextFormat senderColor, TextFormat bracketColor, BracketType bracketType, boolean useBrackets) {
         if (message.senderName == null) return "";
         if (message.sender == null) {
             return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName, null, null);
@@ -214,7 +214,7 @@ public abstract class AbstractChannel implements Channel {
                           "/msg " + message.senderName + " ");
     }
 
-    final void appendMessage(List<Object> json, Message message, ChatColor textColor, boolean languageFilter) {
+    final void appendMessage(List<Object> json, Message message, TextFormat textColor, boolean languageFilter) {
         List<Object> sourceList = languageFilter ? message.languageFilterJson : message.json;
         Map<String, Object> map = new HashMap<>();
         List<Object> extra = new ArrayList<>(sourceList);
@@ -243,7 +243,7 @@ public abstract class AbstractChannel implements Channel {
 
     public final List<Player> getLocalMembers() {
         List<Player> result = new ArrayList<>();
-        for (Player player: Bukkit.getServer().getOnlinePlayers()) {
+        for (Player player: Server.getInstance().getOnlinePlayers().values()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
             result.add(player);
@@ -256,7 +256,8 @@ public abstract class AbstractChannel implements Channel {
         if (soundCue == null) return false;
         int volume = SQLSetting.getInt(player.getUniqueId(), getKey(), "SoundCueChatVolume", 10);
         float vol = (float)volume / 10.0f;
-        player.playSound(player.getEyeLocation(), soundCue.sound, vol, 1.0f);
+        /* Zombiefied for Nukkit port */
+        // player.playSound(player.getLocation().add(0, player.getEyeHeight(), 0), soundCue.sound, vol, 1.0f);
         return true;
     }
 }

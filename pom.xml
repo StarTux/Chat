@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.winthier.chat</groupId>
-  <artifactId>chat</artifactId>
+  <artifactId>chat-nukkit</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
   <name>Chat</name>
@@ -11,10 +11,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <repositories>
-    <!-- Spigot Repo -->
+    <!-- Nukkit Repo -->
     <repository>
-      <id>spigot-repo</id>
-      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+      <id>nukkit-repo</id>
+      <url>https://repo.nukkitx.com/snapshot</url>
     </repository>
     <!-- Dynmap Repo -->
     <repository>
@@ -23,11 +23,12 @@
     </repository>
   </repositories>
   <dependencies>
-    <!-- Spigot-API -->
+    <!-- Nukkit API -->
     <dependency>
-      <groupId>org.spigotmc</groupId>
-      <artifactId>spigot-api</artifactId>
-      <version>1.13.1-R0.1-SNAPSHOT</version>
+      <groupId>cn.nukkit</groupId>
+      <artifactId>nukkit</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
     <!-- Lombok -->
     <dependency>
@@ -39,49 +40,14 @@
     <!-- Connect -->
     <dependency>
       <groupId>com.winthier.connect</groupId>
-      <artifactId>connect</artifactId>
+      <artifactId>connect-nukkit</artifactId>
       <version>0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- Title -->
-    <dependency>
-      <groupId>com.winthier.title</groupId>
-      <artifactId>title</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- PlayerCache -->
-    <dependency>
-      <groupId>com.winthier.playercache</groupId>
-      <artifactId>playercache</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- GenericEvents -->
-    <dependency>
-      <groupId>com.winthier.generic_events</groupId>
-      <artifactId>generic_events</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- Dynmap -->
-    <dependency>
-      <groupId>us.dynmap</groupId>
-      <artifactId>dynmap-api</artifactId>
-      <version>2.3</version>
       <scope>provided</scope>
     </dependency>
     <!-- SQL -->
     <dependency>
       <groupId>com.winthier.sql</groupId>
-      <artifactId>sql</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- Dirty -->
-    <dependency>
-      <groupId>com.cavetale.dirty</groupId>
-      <artifactId>dirty</artifactId>
+      <artifactId>sql-nukkit</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>

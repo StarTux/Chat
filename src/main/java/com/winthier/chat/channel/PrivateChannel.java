@@ -1,5 +1,8 @@
 package com.winthier.chat.channel;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.utils.TextFormat;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
@@ -10,9 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 
 @Getter
 public final class PrivateChannel extends AbstractChannel {
@@ -30,7 +30,7 @@ public final class PrivateChannel extends AbstractChannel {
         if (message.special == null) {
             ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s->%s: %s", getTag(), message.senderServer, message.senderName, message.targetName, message.message));
         }
-        Player player = Bukkit.getServer().getPlayer(message.target);
+        Player player = Server.getInstance().getPlayer(message.target).orElse(null);
         if (player == null) return;
         if (message.special == null) {
             if (!hasPermission(player)) return;
@@ -64,10 +64,10 @@ public final class PrivateChannel extends AbstractChannel {
         UUID uuid = player.getUniqueId();
         String key = getKey();
         List<Object> json = new ArrayList<>();
-        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", ChatColor.WHITE);
-        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", ChatColor.WHITE);
-        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", ChatColor.WHITE);
-        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", ChatColor.WHITE);
+        TextFormat channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", TextFormat.WHITE);
+        TextFormat textColor = SQLSetting.getChatColor(uuid, key, "TextColor", TextFormat.WHITE);
+        TextFormat senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", TextFormat.WHITE);
+        TextFormat bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", TextFormat.WHITE);
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
         BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
         json.add("");
@@ -93,7 +93,8 @@ public final class PrivateChannel extends AbstractChannel {
         json.add(" ");
         // Message
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
-        Msg.raw(player, json);
+        // .raw(player, json); /* Zombiefied for Nukkit port */
+        player.sendMessage("" + TextFormat.DARK_PURPLE + TextFormat.ITALIC + "From " + message.senderName + ": " + message.message);
         // Sound Cue
         if (!ack) {
             playSoundCue(player);
