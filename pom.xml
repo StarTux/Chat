@@ -58,6 +58,13 @@
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    <!-- GenericEvents -->
+    <dependency>
+      <groupId>com.winthier.generic_events</groupId>
+      <artifactId>generic_events-nukkit</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <build>
     <finalName>${project.name}</finalName>

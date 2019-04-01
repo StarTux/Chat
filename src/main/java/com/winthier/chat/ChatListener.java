@@ -14,6 +14,8 @@ import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
+import com.winthier.connect.Connect;
+import java.util.HashMap;
 
 public final class ChatListener implements Listener {
     void onPlayerChat(Player player, String message) {
@@ -61,17 +63,25 @@ public final class ChatListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
-        // event.setJoinMessage((String)null);
+        event.setJoinMessage((String)null);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("uuid", event.getPlayer().getUniqueId().toString());
+        map.put("name", event.getPlayer().getName());
+        Connect.getInstance().broadcastAll("BUNGEE_PLAYER_JOIN", map);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
-        // event.setQuitMessage((String)null);
+        event.setQuitMessage((String)null);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("uuid", event.getPlayer().getUniqueId().toString());
+        map.put("name", event.getPlayer().getName());
+        Connect.getInstance().broadcastAll("BUNGEE_PLAYER_QUIT", map);
     }
 
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event) {
-        // event.setLeaveMessage((String)null);
+        event.setQuitMessage((String)null);
     }
 }

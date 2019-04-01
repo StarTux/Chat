@@ -12,6 +12,7 @@ import com.winthier.connect.event.ConnectMessageEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public final class ConnectListener implements Listener {
     private static final String CHANNEL = "Chat";
@@ -32,21 +33,17 @@ public final class ConnectListener implements Listener {
                 }
             }
         } else if (channel.equals("BUNGEE_PLAYER_JOIN")) {
-            return;
-            /* Zombiefied for Nukkit port */
-            // @SuppressWarnings("unchecked")
-            // Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
-            // UUID uuid = UUID.fromString((String)map.get("uuid"));
-            // String name = (String)map.get("name");
-            // ChatPlugin.getInstance().onBungeeJoin(uuid, name);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
+            UUID uuid = UUID.fromString((String)map.get("uuid"));
+            String name = (String)map.get("name");
+            ChatPlugin.getInstance().onBungeeJoin(uuid, name);
         } else if (channel.equals("BUNGEE_PLAYER_QUIT")) {
-            return;
-            /* Zombiefied for Nukkit port */
-            // @SuppressWarnings("unchecked")
-            // Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
-            // UUID uuid = UUID.fromString((String)map.get("uuid"));
-            // String name = (String)map.get("name");
-            // ChatPlugin.getInstance().onBungeeQuit(uuid, name);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
+            UUID uuid = UUID.fromString((String)map.get("uuid"));
+            String name = (String)map.get("name");
+            ChatPlugin.getInstance().onBungeeQuit(uuid, name);
         }
     }
 

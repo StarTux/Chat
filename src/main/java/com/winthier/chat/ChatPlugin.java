@@ -1,6 +1,5 @@
 package com.winthier.chat;
 
-import cn.nukkit.IPlayer;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
@@ -8,6 +7,7 @@ import cn.nukkit.command.PluginCommand;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
+import cn.nukkit.utils.TextFormat;
 import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
@@ -26,6 +26,7 @@ import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.title.TitleHandler;
+import com.winthier.generic_events.GenericEvents;
 import com.winthier.sql.SQLDatabase;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +45,6 @@ public final class ChatPlugin extends PluginBase {
     private ChatListener chatListener = new ChatListener();
     private PrivateChannel privateChannel = null;
     private PartyChannel partyChannel = null;
-    // private PlayerCacheHandler playerCacheHandler = null; /* Zombiefied for Nukkit port */
-    // private DynmapHandler dynmapHandler = null; /* Zombiefied for Nukkit port */
     private ChatCommand chatCommand = new ChatCommand();
     @Setter private boolean debugMode = true;
     private SQLDatabase db;
@@ -71,13 +70,6 @@ public final class ChatPlugin extends PluginBase {
         } else {
             getLogger().warning("Title plugin NOT found!");
         }
-        /* Zombiefied for Nukkit port */
-        // if (getServer().getPluginManager().getPlugin("PlayerCache") != null) {
-        //     playerCacheHandler = new PlayerCacheHandler();
-        //     getLogger().info("PlayerCache plugin found!");
-        // } else {
-        //     getLogger().warning("PlayerCache plugin NOT found!");
-        // }
         /* Zombiefied for Nukkit port */
         // if (getServer().getPluginManager().getPlugin("dynmap") != null) {
         //     dynmapHandler = new DynmapHandler();
@@ -350,27 +342,13 @@ public final class ChatPlugin extends PluginBase {
     }
 
     public Chatter findOfflinePlayer(UUID uuid) {
-        /* Zombiefied for Nukkit port */
-        // if (playerCacheHandler != null) {
-        //     String name = playerCacheHandler.nameForUuid(uuid);
-        //     if (name == null) return null;
-        //     return new Chatter(uuid, name);
-        // }
-        IPlayer op = getServer().getOfflinePlayer(uuid);
-        if (op == null) return null;
-        return new Chatter(uuid, op.getName());
+        String name = GenericEvents.cachedPlayerName(uuid);
+        if (name == null) return null;
+        return new Chatter(uuid, name);
     }
 
     public Chatter findOfflinePlayer(String name) {
-        /* Zombiefied for Nukkit port */
-        // if (playerCacheHandler != null) {
-        //     UUID uuid = playerCacheHandler.uuidForName(name);
-        //     if (uuid == null) return null;
-        //     String name2 = playerCacheHandler.nameForUuid(uuid);
-        //     if (name2 != null) name = name2;
-        //     return new Chatter(uuid, name);
-        // }
-        UUID uuid = getServer().lookupName(name).orElse(null);
+        UUID uuid = GenericEvents.cachedPlayerUuid(name);
         if (uuid == null) return null;
         return new Chatter(uuid, name);
     }
@@ -393,17 +371,15 @@ public final class ChatPlugin extends PluginBase {
         return SQLIgnore.doesIgnore(player, ignoree);
     }
 
-    /* Zombiefied for Nukkit port */
+    public void onBungeeJoin(UUID uuid, String name) {
+        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
+            announceLocal("info", TextFormat.GREEN + name + " joined");
+        }
+    }
 
-    // public void onBungeeJoin(UUID uuid, String name) {
-    //     if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-    //         announceLocal("info", TextFormat.GREEN + name + " joined");
-    //     }
-    // }
-
-    // public void onBungeeQuit(UUID uuid, String name) {
-    //     if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-    //         announceLocal("info", TextFormat.YELLOW + name + " disconnected");
-    //     }
-    // }
+    public void onBungeeQuit(UUID uuid, String name) {
+        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
+            announceLocal("info", TextFormat.YELLOW + name + " disconnected");
+        }
+    }
 }
