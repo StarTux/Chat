@@ -51,6 +51,13 @@
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    <!-- Title -->
+    <dependency>
+      <groupId>com.winthier.title</groupId>
+      <artifactId>title-nukkit</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <build>
     <finalName>${project.name}</finalName>
