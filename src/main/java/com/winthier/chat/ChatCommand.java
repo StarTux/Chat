@@ -210,7 +210,7 @@ public final class ChatCommand extends AbstractChatCommand {
         Msg.info(player, "Channel List");
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
             // List<Object> json = new ArrayList<>();
-            // if (!channel.hasPermission(player)) continue;
+            if (!channel.hasPermission(player)) continue;
             // json.add(" ");
             // if (channel.isJoined(player.getUniqueId())) {
             //     json.add(Msg.button(TextFormat.GREEN, "x", "Leave " + channel.getTitle(), "/ch leave " + channel.getAlias()));
