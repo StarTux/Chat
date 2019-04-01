@@ -95,7 +95,13 @@ public final class PublicChannel extends AbstractChannel {
         // Message
         appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
         // .raw(player, json);
-        player.sendMessage(channelColor + bracketType.opening + this.getTag() + bracketType.closing + senderColor + message.senderName + ": " + textColor + message.message);
+        player.sendMessage(""
+                           + channelColor + bracketColor + bracketType.opening + this.getTag() + bracketColor + bracketType.closing
+                           + (message.senderTitle != null
+                              ? bracketColor + bracketType.opening + TextFormat.colorize('&', message.senderTitle) + bracketColor + bracketType.closing
+                              : "")
+                           + senderColor + (message.senderName != null ? message.senderName : "")
+                           + bracketColor + ": " + textColor + message.message);
         // Sound Cue
         playSoundCue(player);
     }
