@@ -63,7 +63,7 @@ public final class ChatListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
-        event.setJoinMessage((String)null);
+        event.setJoinMessage("");
         HashMap<String, Object> map = new HashMap<>();
         map.put("uuid", event.getPlayer().getUniqueId().toString());
         map.put("name", event.getPlayer().getName());
@@ -73,7 +73,7 @@ public final class ChatListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
-        event.setQuitMessage((String)null);
+        event.setQuitMessage("");
         HashMap<String, Object> map = new HashMap<>();
         map.put("uuid", event.getPlayer().getUniqueId().toString());
         map.put("name", event.getPlayer().getName());
@@ -82,6 +82,6 @@ public final class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event) {
-        event.setQuitMessage((String)null);
+        event.setQuitMessage("");
     }
 }
