@@ -48,6 +48,24 @@ public final class PrivateChannel extends AbstractChannel {
 
     @Override
     public void consoleDidUseCommand(String msg) {
+        final String[] arr = msg.split("\\s+", 2);
+        if (arr.length != 2) {
+            return;
+        }
+        String targetName = arr[0];
+        Chatter target = ChatPlugin.getInstance().getOnlinePlayer(targetName);
+        if (target == null) {
+            ChatPlugin.getInstance().getLogger().warning("Player not found: " + targetName + ".");
+            return;
+        }
+        msg = arr[1];
+        Message message = makeMessage(null, msg);
+        message.senderName = "Console";
+        message.target = target.getUuid();
+        message.targetName = target.getName();
+        SQLLog.store("Console", this, target.getName(), msg);
+        ChatPlugin.getInstance().didCreateMessage(this, message);
+        handleMessage(message);
     }
 
     @Override

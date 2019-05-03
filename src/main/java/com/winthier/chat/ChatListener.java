@@ -54,13 +54,15 @@ public final class ChatListener implements Listener {
 
     @EventHandler
     public void onServerCommand(ServerCommandEvent event) {
+        System.out.println(event.getEventName() + " " + event.getCommand());
         final String[] arr = event.getCommand().split("\\s+", 2);
-        if (arr.length < 2) return;
+        if (arr.length == 0) return;
         String firstArg = arr[0];
         if (firstArg.startsWith("/")) firstArg = firstArg.substring(1);
         CommandResponder cmd = ChatPlugin.getInstance().findCommand(firstArg);
         if (cmd == null) return;
         event.setCancelled(true);
+        if (arr.length < 2) return;
         cmd.consoleDidUseCommand(arr[1]);
     }
 
