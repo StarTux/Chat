@@ -19,8 +19,6 @@ import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
-import com.winthier.chat.title.TitleHandler;
-import com.winthier.generic_events.GenericEvents;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -44,7 +42,6 @@ public final class ChatPlugin extends JavaPlugin {
     private final List<CommandResponder> commandResponders = new ArrayList<>();
     private final List<Channel> channels = new ArrayList<>();
     private ConnectListener connectListener = null;
-    private TitleHandler titleHandler = null;
     private ChatListener chatListener = new ChatListener();
     private PrivateChannel privateChannel = null;
     private PartyChannel partyChannel = null;
@@ -53,6 +50,7 @@ public final class ChatPlugin extends JavaPlugin {
     private ChatCommand chatCommand = new ChatCommand();
     @Setter private boolean debugMode = false;
     private SQLDatabase db;
+    private Vault vault;
 
     @Override
     public void onEnable() {
@@ -69,12 +67,6 @@ public final class ChatPlugin extends JavaPlugin {
             getLogger().info("Connect plugin found!");
         } else {
             getLogger().warning("Connect plugin NOT found!");
-        }
-        if (getServer().getPluginManager().getPlugin("Title") != null) {
-            titleHandler = new TitleHandler();
-            getLogger().info("Title plugin found!");
-        } else {
-            getLogger().warning("Title plugin NOT found!");
         }
         if (getServer().getPluginManager().getPlugin("PlayerCache") != null) {
             playerCacheHandler = new PlayerCacheHandler();
@@ -95,6 +87,10 @@ public final class ChatPlugin extends JavaPlugin {
         getCommand("join").setExecutor(new JoinLeaveCommand(true));
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
         getCommand("ignore").setExecutor(new IgnoreCommand());
+        if (getServer().getPluginManager().getPlugin("Vault") != null) {
+            vault = new Vault(this);
+            getServer().getScheduler().runTask(this, vault::setup);
+        }
     }
 
     @Override
@@ -273,7 +269,8 @@ public final class ChatPlugin extends JavaPlugin {
         if (uuid == null) return true;
         Player player = getServer().getPlayer(uuid);
         if (player != null) return player.hasPermission(permission);
-        return GenericEvents.playerHasPermission(uuid, permission);
+        if (vault != null) return vault.has(uuid, permission);
+        return false;
     }
 
     public Channel getFocusChannel(UUID uuid) {
@@ -296,10 +293,11 @@ public final class ChatPlugin extends JavaPlugin {
         return getConfig().getString("ServerDisplayName", "N/A");
     }
 
-    public void loadTitle(Message message) {
-        if (titleHandler != null) {
-            titleHandler.loadTitle(message);
+    public String getTitle(UUID uuid) {
+        if (vault != null) {
+            return vault.prefix(uuid);
         }
+        return null;
     }
 
     public void didCreateMessage(Channel channel, Message message) {
@@ -392,13 +390,13 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public void onBungeeJoin(UUID uuid, String name) {
-        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
+        if (hasPermission(uuid, "chat.joinmessage")) {
             announceLocal("info", ChatColor.GREEN + name + " joined");
         }
     }
 
     public void onBungeeQuit(UUID uuid, String name) {
-        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
+        if (hasPermission(uuid, "chat.joinmessage")) {
             announceLocal("info", ChatColor.YELLOW + name + " disconnected");
         }
     }

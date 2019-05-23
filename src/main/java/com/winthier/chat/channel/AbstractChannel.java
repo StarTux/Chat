@@ -138,8 +138,9 @@ public abstract class AbstractChannel implements Channel {
     }
 
     final void fillMessage(Message message) {
-        if (message.senderTitle == null) {
-            ChatPlugin.getInstance().loadTitle(message);
+        if (message.senderTitle == null && message.sender != null) {
+            message.senderTitle = ChatPlugin.getInstance()
+                .getTitle(message.sender);
         }
         if (message.json == null || message.languageFilterJson == null) {
             MessageFilter filter = new MessageFilter(message.sender, message.message);
