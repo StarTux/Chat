@@ -157,7 +157,7 @@ public abstract class AbstractChannel implements Channel {
         message.channel = getKey();
         if (player != null) {
             message.sender = player.getUniqueId();
-            message.senderName = player.getName();
+            message.senderName = player.getDisplayName();
             message.location = player.getLocation();
         }
         message.senderServer = ChatPlugin.getInstance().getServerName();
@@ -193,7 +193,7 @@ public abstract class AbstractChannel implements Channel {
         if (message.senderTitle == null) return "";
         return Msg.button(
             bracketColor,
-            bracketColor + bracketType.opening + Msg.format(message.senderTitle) + bracketColor + bracketType.closing,
+            /*bracketColor + bracketType.opening +*/ Msg.format(message.senderTitle) /*+ bracketColor + bracketType.closing*/,
             Msg.format(message.senderTitle)
             + (message.senderTitleDescription != null ? "\n&5&o" + message.senderTitleDescription : ""),
             null);
@@ -202,7 +202,7 @@ public abstract class AbstractChannel implements Channel {
     final Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
         if (message.senderName == null) return "";
         if (message.sender == null) {
-            return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName, null, null);
+            return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + ChatColor.RESET + bracketColor + bracketType.closing : message.senderName, null, null);
         }
         return Msg.button(senderColor,
                           useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + bracketColor + bracketType.closing : message.senderName,
