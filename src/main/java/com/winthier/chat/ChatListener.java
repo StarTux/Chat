@@ -54,7 +54,6 @@ public final class ChatListener implements Listener {
 
     @EventHandler
     public void onServerCommand(ServerCommandEvent event) {
-        System.out.println(event.getEventName() + " " + event.getCommand());
         final String[] arr = event.getCommand().split("\\s+", 2);
         if (arr.length == 0) return;
         String firstArg = arr[0];
