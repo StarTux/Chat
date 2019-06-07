@@ -8,7 +8,7 @@ import com.winthier.chat.sql.SQLDB;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -18,18 +18,11 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public final class ChatListener implements Listener {
-    @EventHandler
-    public void onAsyncPlayerChat(final AsyncPlayerChatEvent event) {
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerChat(final PlayerChatEvent event) {
         event.setCancelled(true);
-        new BukkitRunnable() {
-            @Override public void run() {
-                onPlayerChat(event.getPlayer(), event.getMessage());
-            }
-        }.runTask(ChatPlugin.getInstance());
-    }
-
-    void onPlayerChat(Player player, String message) {
-        if (!player.isValid()) return;
+        final Player player = event.getPlayer();
+        final String message = event.getMessage();
         Channel channel = ChatPlugin.getInstance().getFocusChannel(player.getUniqueId());
         if (channel == null) return;
         if (!channel.hasPermission(player)) return;
