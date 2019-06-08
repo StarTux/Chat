@@ -118,6 +118,19 @@ public final class ChatCommand extends AbstractChatCommand {
                 SQLSetting.set(uuid, channel.getKey(), option.key, null);
             }
             Msg.info(player, "&aSettings reset to default");
+        } else if (args.length == 2 && args[1].equals("defaults")) {
+            if (!player.hasPermission("chat.admin")) return;
+            for (Option option: channel.getOptions()) {
+                SQLSetting s = SQLSetting.find(uuid, channel.getKey(), option.key);
+                if (s == null || s.getSettingValue() == null) {
+                    s = SQLSetting.find(null, channel.getKey(), option.key);
+                }
+                String value = s != null && s.getSettingValue() != null
+                    ? s.getSettingValue()
+                    : option.defaultValue;
+                SQLSetting.set(null, channel.getKey(), option.key, value);
+            }
+            Msg.info(player, "&aChannel defaults updated");
         } else if (args.length == 3) {
             String key = args[1];
             String value = args[2];
@@ -199,6 +212,10 @@ public final class ChatCommand extends AbstractChatCommand {
         json.clear();
         json.add(" ");
         json.add(Msg.button(ChatColor.DARK_RED, "&r[&4Reset&r]", "&4Reset to channel defaults.", "/ch set " + channel.getAlias() + " reset"));
+        if (player.hasPermission("chat.admin")) {
+            json.add(" ");
+            json.add(Msg.button(ChatColor.DARK_RED, "&r[&eSet Defaults&r]", "&eSet Channel defaults.", "/ch set " + channel.getAlias() + " defaults"));
+        }
         Msg.raw(player, json);
     }
 
