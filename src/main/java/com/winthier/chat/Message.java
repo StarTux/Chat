@@ -9,6 +9,7 @@ import org.bukkit.Location;
 public final class Message {
     public UUID sender;
     public String senderName;
+    public String senderDisplayName;
     public String channel;
     public String special;
     public UUID target;
@@ -59,6 +60,7 @@ public final class Message {
         Map<String, Object> map = new HashMap<>();
         store(map, "sender", sender);
         store(map, "senderName", senderName);
+        store(map, "senderDisplayName", senderDisplayName);
         store(map, "channel", channel);
         store(map, "special", special);
         store(map, "target", target);
@@ -77,6 +79,7 @@ public final class Message {
     private void read(Map<String, Object> map) {
         sender = fetchUuid(map, "sender");
         senderName = fetchString(map, "senderName");
+        senderDisplayName = fetchString(map, "senderDisplayName");
         channel = fetchString(map, "channel");
         special = fetchString(map, "special");
         target = fetchUuid(map, "target");
