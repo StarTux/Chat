@@ -54,6 +54,9 @@ commands:
     permission: chat.channel.party
   p:
     permission: chat.channel.party
+  prefix:
+    permission: chat.prefix
+    usage: 'Usage: /prefix <prefix>|reset'
 permissions:
   chat.chat:
     description: Use /chat
@@ -100,4 +103,7 @@ permissions:
     default: op
   chat.item:
     description: Paste items in chat
+    default: op
+  chat.prefix:
+    description: Use /prefix
     default: op

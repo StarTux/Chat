@@ -87,6 +87,7 @@ public final class ChatPlugin extends JavaPlugin {
         getCommand("join").setExecutor(new JoinLeaveCommand(true));
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
         getCommand("ignore").setExecutor(new IgnoreCommand());
+        getCommand("prefix").setExecutor(new PrefixCommand());
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
             vault = new Vault(this);
             getServer().getScheduler().runTask(this, vault::setup);
@@ -294,6 +295,11 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public String getTitle(UUID uuid) {
+        SQLSetting setting = SQLSetting.find(uuid, null, "prefix");
+        if (setting != null && setting.getSettingValue() != null) {
+            return ChatColor
+                .translateAlternateColorCodes('&', setting.getSettingValue());
+        }
         if (vault != null) {
             return vault.prefix(uuid);
         }
