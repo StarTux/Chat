@@ -297,8 +297,11 @@ public final class ChatPlugin extends JavaPlugin {
     public String getTitle(UUID uuid) {
         SQLSetting setting = SQLSetting.find(uuid, null, "prefix");
         if (setting != null && setting.getSettingValue() != null) {
-            return ChatColor
-                .translateAlternateColorCodes('&', setting.getSettingValue());
+            return ""
+                + ChatColor.DARK_GRAY + ChatColor.BOLD + "[" + ChatColor.RESET
+                .translateAlternateColorCodes('&', setting.getSettingValue())
+                + ChatColor.DARK_GRAY + ChatColor.BOLD + "]"
+                + ChatColor.RESET + " ";
         }
         if (vault != null) {
             return vault.prefix(uuid);
