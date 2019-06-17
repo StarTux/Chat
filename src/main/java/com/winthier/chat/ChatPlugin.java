@@ -309,6 +309,16 @@ public final class ChatPlugin extends JavaPlugin {
         return null;
     }
 
+    public String getSuffix(UUID uuid) {
+        String result = null;
+        if (vault != null) {
+            result = vault.suffix(uuid);
+        }
+        return result != null
+            ? result
+            : "";
+    }
+
     public void didCreateMessage(Channel channel, Message message) {
         if (!ChatMessageEvent.call(channel, message)) {
             return;

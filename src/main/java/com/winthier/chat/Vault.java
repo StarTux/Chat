@@ -44,4 +44,11 @@ final class Vault {
         if (off == null) return null;
         return chat.getPlayerPrefix((String)null, off);
     }
+
+    String suffix(UUID uuid) {
+        if (chat == null) return null;
+        OfflinePlayer off = plugin.getServer().getOfflinePlayer(uuid);
+        if (off == null) return null;
+        return chat.getPlayerSuffix((String)null, off);
+    }
 }

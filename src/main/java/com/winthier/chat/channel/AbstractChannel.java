@@ -202,11 +202,16 @@ public abstract class AbstractChannel implements Channel {
 
     final Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
         if (message.senderName == null) return "";
+        String suffix = "";
         if (message.sender == null) {
             return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + ChatColor.RESET + bracketColor + bracketType.closing : message.senderName, null, null);
+        } else {
+            suffix = ChatPlugin.getInstance().getSuffix(message.sender);
         }
         return Msg.button(senderColor,
-                          useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderDisplayName + bracketColor + bracketType.closing : message.senderDisplayName,
+                          (useBrackets
+                           ? bracketColor + bracketType.opening + senderColor + message.senderDisplayName + suffix + bracketColor + bracketType.closing
+                           : message.senderDisplayName + suffix),
                           message.senderName,
                           message.senderName
                           + (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "")
@@ -220,24 +225,31 @@ public abstract class AbstractChannel implements Channel {
         List<Object> sourceList = languageFilter ? message.languageFilterJson : message.json;
         Map<String, Object> map = new HashMap<>();
         List<Object> extra = new ArrayList<>(sourceList);
-        String colorValue = textColor.name().toLowerCase();
-        boolean boldValue = false;
-        boolean italicValue = false;
-        for (int i = 0; i < message.message.length(); i += 2) {
-            char c = message.message.charAt(i);
-            if (c != ChatColor.COLOR_CHAR) break;
-            if (message.message.length() <= i + 1) break;
-            char d = message.message.charAt(i + 1);
-            ChatColor color = ChatColor.getByChar(d);
+        String colorValue = null;
+        boolean bold = false;
+        boolean italic = false;
+        boolean underlined = false;
+        boolean strikethrough = false;
+        boolean obfuscated = false;
+        for (int i = 0; i < message.message.length() - 1; i += 2) {
+            if (message.message.charAt(i) != ChatColor.COLOR_CHAR) break;
+            ChatColor color = ChatColor
+                .getByChar(message.message.charAt(i + 1));
             if (color == null) break;
             if (color.isColor()) colorValue = color.name().toLowerCase();
-            if (color == ChatColor.BOLD) boldValue = true;
-            if (color == ChatColor.ITALIC) italicValue = true;
+            if (color == ChatColor.BOLD) bold = true;
+            if (color == ChatColor.ITALIC) italic = true;
+            if (color == ChatColor.UNDERLINE) underlined = true;
+            if (color == ChatColor.STRIKETHROUGH) strikethrough = true;
+            if (color == ChatColor.MAGIC) obfuscated = true;
         }
         map.put("text", "");
-        map.put("color", colorValue);
-        map.put("italic", italicValue);
-        map.put("bold", boldValue);
+        if (colorValue != null) map.put("color", colorValue);
+        if (italic) map.put("italic", true);
+        if (bold) map.put("bold", true);
+        if (underlined) map.put("underlined", true);
+        if (strikethrough) map.put("strikethrough", true);
+        if (obfuscated) map.put("obfuscated", true);
         map.put("extra", extra);
         map.put("insertion", languageFilter ? message.languageFilterMessage : message.message);
         json.add(map);
