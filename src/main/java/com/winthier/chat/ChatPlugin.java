@@ -22,8 +22,10 @@ import com.winthier.chat.sql.SQLSetting;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,6 +53,7 @@ public final class ChatPlugin extends JavaPlugin {
     @Setter private boolean debugMode = false;
     private SQLDatabase db;
     private Vault vault;
+    private Set<UUID> chatSpies = new HashSet<>();
 
     @Override
     public void onEnable() {

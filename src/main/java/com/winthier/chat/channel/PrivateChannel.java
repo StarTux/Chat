@@ -8,6 +8,7 @@ import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -28,7 +29,25 @@ public final class PrivateChannel extends AbstractChannel {
 
     public void handleMessage(Message message) {
         if (message.special == null) {
-            ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s->%s: %s", getTag(), message.senderServer, message.senderName, message.targetName, message.message));
+            ChatPlugin.getInstance().getLogger()
+                .info(String.format("[%s][%s]%s->%s: %s", getTag(),
+                                    message.senderServer, message.senderName,
+                                    message.targetName, message.message));
+            final ChatPlugin plugin = ChatPlugin.getInstance();
+            for (UUID uuid : plugin.getChatSpies()) {
+                if (uuid.equals(message.sender)
+                    || uuid.equals(message.target)) {
+                    continue;
+                }
+                final Player spy = plugin.getServer().getPlayer(uuid);
+                if (spy == null) continue;
+                spy.sendMessage(ChatColor.YELLOW
+                                + "[Spy] "
+                                + message.senderName
+                                + "->"
+                                + message.targetName
+                                + ": " + message.message);
+            }
         }
         Player player = Bukkit.getServer().getPlayer(message.target);
         if (player == null) return;

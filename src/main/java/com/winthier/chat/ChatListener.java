@@ -68,6 +68,8 @@ public final class ChatListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
         event.setQuitMessage(null);
+        ChatPlugin.getInstance().getChatSpies()
+            .remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler

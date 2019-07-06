@@ -5,6 +5,7 @@ import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -101,8 +102,26 @@ public final class AdminCommand extends AbstractChatCommand {
             channel.announce(sb.toString());
             Msg.info(sender, "Announcement sent to %s", channel.getTitle());
         } else if (firstArg.equals("initdb") && args.length == 1) {
+            if (player != null) {
+                player.sendMessage("Only for console!");
+                return true;
+            }
             ChatPlugin.getInstance().initializeDatabase();
             Msg.info(sender, "Database initialized.");
+        } else if (firstArg.equals("spy")) {
+            if (player == null) {
+                sender.sendMessage("Player expected");
+                return true;
+            }
+            final UUID uuid = player.getUniqueId();
+            final ChatPlugin plugin = ChatPlugin.getInstance();
+            if (plugin.getChatSpies().contains(uuid)) {
+                plugin.getChatSpies().remove(uuid);
+                Msg.send(player, "&eChat spy disabled.");
+            } else {
+                plugin.getChatSpies().add(uuid);
+                Msg.send(player, "&eChat spy enabled.");
+            }
         }
         return true;
     }
@@ -116,5 +135,6 @@ public final class AdminCommand extends AbstractChatCommand {
         Msg.send(sender, "&e/chadm SetDefault &o<Channel> <Key> <Value> &7- &rChange channel default setting");
         Msg.send(sender, "&e/chadm Announce &o<Channel> <Message> &7- &rMake an announcement");
         Msg.send(sender, "&e/chadm InitDB &7- &rInitialize the Database");
+        Msg.send(sender, "&e/chadm Spy &7- &rToggle chat spy");
     }
 }
