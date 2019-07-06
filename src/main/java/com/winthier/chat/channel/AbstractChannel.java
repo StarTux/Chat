@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -208,17 +209,24 @@ public abstract class AbstractChannel implements Channel {
         } else {
             suffix = ChatPlugin.getInstance().getSuffix(message.sender);
         }
-        return Msg.button(senderColor,
-                          (useBrackets
-                           ? bracketColor + bracketType.opening + senderColor + message.senderDisplayName + suffix + bracketColor + bracketType.closing
-                           : message.senderDisplayName + suffix),
-                          message.senderName,
-                          message.senderName
-                          + (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "")
-                          + (message.senderServerDisplayName != null ? "\n&5&oServer&r " + message.senderServerDisplayName : "")
-                          + "\n&5&oChannel&r " + getTitle()
-                          + "\n&5&oTime&r " + timeFormat.format(new Date()),
-                          "/msg " + message.senderName + " ");
+        final ChatPlugin plugin = ChatPlugin.getInstance();
+        return Msg
+            .button(senderColor,
+                    (useBrackets
+                     ? bracketColor + bracketType.opening + senderColor + message.senderDisplayName + suffix + bracketColor + bracketType.closing
+                     : message.senderDisplayName + suffix),
+                    message.senderName,
+                    message.senderName
+                    + (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "")
+                    + (message.senderServerDisplayName != null ? "\n&5&oServer&r " + message.senderServerDisplayName : "")
+                    + "\n&5&oRank&r " + plugin.getVault()
+                    .groupOf(message.sender)
+                    + "\n&5&oJobs&r " + plugin.getVault()
+                    .groupSuffixes(message.sender).stream()
+                    .collect(Collectors.joining(" "))
+                    + "\n&5&oChannel&r " + getTitle()
+                    + "\n&5&oTime&r " + timeFormat.format(new Date()),
+                    "/msg " + message.senderName + " ");
     }
 
     final void appendMessage(List<Object> json, Message message, ChatColor textColor, boolean languageFilter) {
