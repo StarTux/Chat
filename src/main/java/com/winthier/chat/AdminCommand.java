@@ -40,16 +40,6 @@ public final class AdminCommand extends AbstractChatCommand {
             Msg.send(sender, "&8URLs &r%s", filter.toString());
             filter.colorize();
             Msg.send(sender, "&8Color &r%s", filter.toString());
-            filter.filterSpam();
-            Msg.send(sender, "&8Spam &r%s", filter.toString());
-            filter.filterLanguage();
-            Msg.send(sender, "&8Language &r%s", filter.toString());
-            if (player != null) {
-                MessageFilter filter2 = new MessageFilter(player.getUniqueId(), sb.toString());
-                filter2.process();
-                Msg.raw(player, filter2.getJson());
-                Msg.raw(player, filter2.getLanguageFilterJson());
-            }
         } else if (firstArg.equals("testpattern") && args.length >= 3) {
             StringBuilder sb = new StringBuilder(args[2]);
             for (int i = 3; i < args.length; ++i) {
@@ -122,6 +112,31 @@ public final class AdminCommand extends AbstractChatCommand {
                 plugin.getChatSpies().add(uuid);
                 Msg.send(player, "&eChat spy enabled.");
             }
+        } else if (firstArg.equals("prefix")) {
+            if (args.length < 2) return false;
+            Chatter target = ChatPlugin.getInstance().findOfflinePlayer(args[1]);
+            if (target == null) {
+                Msg.send(player, "&cPlayer not found: " + args[1]);
+                return true;
+            }
+            if (args.length == 2) {
+                SQLSetting setting = SQLSetting.find(target.getUuid(), null, "prefix");
+                Msg.send(sender, "Prefix of " + target.getName() + ": " + setting.getSettingValue());
+                return true;
+            }
+            if (args.length == 3 && args[2].equals("-reset")) {
+                SQLSetting.set(target.getUuid(), null, "prefix", null);
+                Msg.send(sender, "Prefix of " + target.getName() + " reset.");
+                return true;
+            }
+            StringBuilder sb = new StringBuilder(args[2]);
+            for (int i = 3; i < args.length; i += 1) {
+                sb.append(" ").append(args[i]);
+            }
+            String prefix = sb.toString();
+            SQLSetting.set(target.getUuid(), null, "prefix", prefix);
+            Msg.send(sender, "Prefix of " + target.getName() + "changed to " + prefix);
+            return true;
         }
         return true;
     }
@@ -136,5 +151,6 @@ public final class AdminCommand extends AbstractChatCommand {
         Msg.send(sender, "&e/chadm Announce &o<Channel> <Message> &7- &rMake an announcement");
         Msg.send(sender, "&e/chadm InitDB &7- &rInitialize the Database");
         Msg.send(sender, "&e/chadm Spy &7- &rToggle chat spy");
+        Msg.send(sender, "&e/chadm Prefix &o<Player> &e-reset&o|[Prefix] &7- &rChange or reset player prefix");
     }
 }

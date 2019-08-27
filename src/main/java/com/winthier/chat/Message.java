@@ -18,11 +18,7 @@ public final class Message {
     public String senderTitleDescription;
     public String senderServer;
     public String senderServerDisplayName;
-
     public String message;
-    public String languageFilterMessage;
-    public List<Object> json;
-    public List<Object> languageFilterJson;
 
     transient public Location location;
     transient public boolean shouldCancel = false;
@@ -70,9 +66,6 @@ public final class Message {
         store(map, "senderServer", senderServer);
         store(map, "senderServerDisplayName", senderServerDisplayName);
         store(map, "message", message);
-        store(map, "languageFilterMessage", languageFilterMessage);
-        store(map, "json", json);
-        store(map, "languageFilterJson", languageFilterJson);
         return map;
     }
 
@@ -89,9 +82,6 @@ public final class Message {
         senderServer = fetchString(map, "senderServer");
         senderServerDisplayName = fetchString(map, "senderServerDisplayName");
         message = fetchString(map, "message");
-        languageFilterMessage = fetchString(map, "languageFilterMessage");
-        json = fetchList(map, "json");
-        languageFilterJson = fetchList(map, "languageFilterJson");
     }
 
     public static Message deserialize(Map<String, Object> map) {

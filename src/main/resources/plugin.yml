@@ -107,3 +107,12 @@ permissions:
   chat.prefix:
     description: Use /prefix
     default: op
+  chat.ping:
+    description: Use pings in chat via @
+    default: op
+  chat.ping.player:
+    description: Ping staff via @staff
+    default: op
+  chat.ping.player:
+    description: Ping a player via @name
+    default: op

@@ -4,12 +4,16 @@ import com.cavetale.dirty.Dirty;
 import com.winthier.chat.sql.SQLPattern;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -23,8 +27,12 @@ public final class MessageFilter {
     private final List<Component> components = new ArrayList<>();
     // Output
     private List<Object> json = null;
-    private List<Object> languageFilterJson = null;
     private boolean shouldCancel = false;
+    static final Pattern PING_PATTERN = Pattern
+        .compile("@[0-9a-zA-Z_]{1,16}\\b");
+    @Setter private boolean staff = false;
+    @Setter private Player recipient = null;
+    private boolean pinging = false;
 
     public MessageFilter(UUID sender, String message) {
         this.sender = sender;
@@ -35,11 +43,9 @@ public final class MessageFilter {
     public void process() {
         findURLs();
         findItems();
+        findPings();
         colorize();
-        filterSpam();
         json = build();
-        filterLanguage();
-        languageFilterJson = build();
     }
 
     public void findURLs() {
@@ -68,23 +74,25 @@ public final class MessageFilter {
         }
     }
 
+    public void findPings() {
+        if (!ChatPlugin.getInstance().hasPermission(sender, "chat.ping")) {
+            return;
+        }
+        OUTER: while (true) {
+            for (Component component: new ArrayList<>(components)) {
+                if (component.findPing()) {
+                    continue OUTER;
+                }
+            }
+            break OUTER;
+        }
+    }
+
     public void colorize() {
         if (ChatPlugin.getInstance().hasPermission(sender, "chat.color")) {
             for (Component component: components) {
                 component.colorize();
             }
-        }
-    }
-
-    public void filterSpam() {
-        for (Component component: components) {
-            component.filterSpam();
-        }
-    }
-
-    public void filterLanguage() {
-        for (Component component: components) {
-            component.filterLanguage();
         }
     }
 
@@ -126,6 +134,31 @@ public final class MessageFilter {
             return false;
         }
 
+        boolean findPing() {
+            Matcher matcher = PING_PATTERN.matcher(message);
+            while (matcher.find()) {
+                String group = matcher.group();
+                String target = group.substring(1);
+                if (target.equals("staff")) {
+                    if (!ChatPlugin.getInstance()
+                        .hasPermission(sender, "chat.ping.staff")) {
+                        continue;
+                    }
+                } else {
+                    if (!ChatPlugin.getInstance()
+                        .hasPermission(sender, "chat.ping.player")) {
+                        continue;
+                    }
+                }
+                int index = components.indexOf(this);
+                components.add(index, new PingComponent(group, target));
+                components.add(index, new Component(message.substring(0, matcher.start())));
+                message = message.substring(matcher.end());
+                return true;
+            }
+            return false;
+        }
+
         boolean findItem() {
             for (SQLPattern pat: SQLPattern.find("item")) {
                 Matcher matcher = pat.getMatcher(message);
@@ -156,24 +189,6 @@ public final class MessageFilter {
             return false;
         }
 
-        void filterLanguage() {
-            for (SQLPattern pat: SQLPattern.find("Language")) {
-                message = pat.replaceWithAsterisks(message);
-            }
-        }
-
-        void filterSpam() {
-            for (SQLPattern pat: SQLPattern.find("Spam")) {
-                if (pat.getReplacement().isEmpty()) {
-                    if (pat.getMatcher(message).find()) {
-                        shouldCancel = true;
-                    }
-                } else {
-                    message = pat.replaceAll(message);
-                }
-            }
-        }
-
         Map<String, Object> toJson() {
             Map<String, Object> result = new HashMap<>();
             result.put("text", message);
@@ -199,7 +214,12 @@ public final class MessageFilter {
         @Override boolean findItem() {
             return false;
         }
+
         @Override boolean findURL() {
+            return false;
+        }
+
+        @Override boolean findPing() {
             return false;
         }
 
@@ -221,6 +241,50 @@ public final class MessageFilter {
         }
     }
 
+    private final class PingComponent extends Component {
+        private final String target;
+        PingComponent(final String message, final String target) {
+            super(message);
+            this.target = target;
+        }
+
+        @Override boolean findItem() {
+            return false;
+        }
+
+        @Override boolean findURL() {
+            return false;
+        }
+
+        @Override boolean findPing() {
+            return false;
+        }
+
+        @Override void colorize() { }
+
+        @Override Map<String, Object> toJson() {
+            Map<String, Object> json = new HashMap<>();
+            json.put("text", "@" + target);
+            boolean bolden = false;
+            if (target.equals("staff")) {
+                if (recipient != null
+                    && recipient.hasPermission("chat.staff")) {
+                    bolden = true;
+                }
+            } else {
+                if (recipient != null
+                    && recipient.getName().equals(target)) {
+                    bolden = true;
+                }
+            }
+            if (bolden) {
+                pinging = true;
+                json.put("bold", true);
+            }
+            return json;
+        }
+    }
+
     private final class RawComponent extends Component {
         private final Map<String, Object> raw;
 
@@ -233,6 +297,10 @@ public final class MessageFilter {
             return false;
         }
         @Override boolean findURL() {
+            return false;
+        }
+
+        @Override boolean findPing() {
             return false;
         }
 

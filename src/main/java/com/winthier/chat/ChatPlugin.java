@@ -393,14 +393,14 @@ public final class ChatPlugin extends JavaPlugin {
         return new Chatter(op.getUniqueId(), op.getName());
     }
 
-    public boolean announce(String channel, Object message) {
+    public boolean announce(String channel, String message) {
         Channel ch = findChannel(channel);
         if (ch == null) return false;
         ch.announce(message);
         return true;
     }
 
-    public boolean announceLocal(String channel, Object message) {
+    public boolean announceLocal(String channel, String message) {
         Channel ch = findChannel(channel);
         if (ch == null) return false;
         ch.announceLocal(message);

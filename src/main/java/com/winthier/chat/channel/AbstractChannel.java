@@ -90,9 +90,7 @@ public abstract class AbstractChannel implements Channel {
             Option.bracketOption("BracketType", "Brackets", "Appearance of brackets", "angle"),
 
             Option.soundOption("SoundCueChat", "Chat Cue", "Sound played when you receive a message", "off"),
-            Option.intOption("SoundCueChatVolume", "Chat Cue Volume", "Sound played when you receive a message", "10", 1, 10),
-
-            Option.booleanOption("LanguageFilter", "Language Filter", "Filter out foul language", "1")
+            Option.intOption("SoundCueChatVolume", "Chat Cue Volume", "Sound played when you receive a message", "10", 1, 10)
             );
     }
 
@@ -105,34 +103,17 @@ public abstract class AbstractChannel implements Channel {
     }
 
     @Override
-    public void announce(Object msg) {
+    public void announce(String msg) {
         announce(msg, false);
     }
 
     @Override
-    public void announceLocal(Object msg) {
+    public void announceLocal(String msg) {
         announce(msg, true);
     }
 
-    private void announce(Object msg, boolean local) {
-        Message message;
-        if (msg instanceof String) {
-            message = makeMessage(null, (String)msg);
-        } else {
-            List<Object> json;
-            if (msg instanceof List) {
-                @SuppressWarnings("unchecked")
-                List<Object> tmpson = (List<Object>)msg;
-                json = tmpson;
-            } else {
-                json = new ArrayList<>();
-                json.add(msg);
-            }
-            String str = Msg.jsonToString(msg);
-            message = makeMessage(null, str);
-            message.json = json;
-            message.languageFilterJson = json;
-        }
+    private void announce(String msg, boolean local) {
+        Message message = makeMessage(null, msg);
         message.local = local;
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
@@ -142,14 +123,6 @@ public abstract class AbstractChannel implements Channel {
         if (message.senderTitle == null && message.sender != null) {
             message.senderTitle = ChatPlugin.getInstance()
                 .getTitle(message.sender);
-        }
-        if (message.json == null || message.languageFilterJson == null) {
-            MessageFilter filter = new MessageFilter(message.sender, message.message);
-            filter.process();
-            message.json = filter.getJson();
-            message.languageFilterJson = filter.getLanguageFilterJson();
-            message.languageFilterMessage = filter.toString();
-            message.shouldCancel = filter.shouldCancel();
         }
     }
 
@@ -203,18 +176,15 @@ public abstract class AbstractChannel implements Channel {
 
     final Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
         if (message.senderName == null) return "";
-        String suffix = "";
         if (message.sender == null) {
             return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + ChatColor.RESET + bracketColor + bracketType.closing : message.senderName, null, null);
-        } else {
-            suffix = ChatPlugin.getInstance().getSuffix(message.sender);
         }
         final ChatPlugin plugin = ChatPlugin.getInstance();
         return Msg
             .button(senderColor,
                     (useBrackets
-                     ? bracketColor + bracketType.opening + senderColor + message.senderDisplayName + suffix + bracketColor + bracketType.closing
-                     : message.senderDisplayName + suffix),
+                     ? bracketColor + bracketType.opening + senderColor + message.senderDisplayName + bracketColor + bracketType.closing
+                     : message.senderDisplayName),
                     message.senderName,
                     message.senderName
                     + (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "")
@@ -229,8 +199,14 @@ public abstract class AbstractChannel implements Channel {
                     "/msg " + message.senderName + " ");
     }
 
-    final void appendMessage(List<Object> json, Message message, ChatColor textColor, boolean languageFilter) {
-        List<Object> sourceList = languageFilter ? message.languageFilterJson : message.json;
+    final void appendMessage(List<Object> json, Message message, ChatColor textColor, Player player) {
+        MessageFilter messageFilter = new MessageFilter(message.sender, message.message);
+        messageFilter.setRecipient(player);
+        messageFilter.process();
+        if (messageFilter.isPinging()) {
+            player.playSound(player.getEyeLocation(), SoundCue.DING.sound, 1.0f, 1.0f);
+        }
+        List<Object> sourceList = messageFilter.getJson();
         Map<String, Object> map = new HashMap<>();
         List<Object> extra = new ArrayList<>(sourceList);
         String colorValue = null;
@@ -259,7 +235,7 @@ public abstract class AbstractChannel implements Channel {
         if (strikethrough) map.put("strikethrough", true);
         if (obfuscated) map.put("obfuscated", true);
         map.put("extra", extra);
-        map.put("insertion", languageFilter ? message.languageFilterMessage : message.message);
+        map.put("insertion", message.message);
         json.add(map);
     }
 

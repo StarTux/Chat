@@ -129,7 +129,7 @@ public final class PrivateChannel extends AbstractChannel {
         if (!tagPlayerName && message.senderName != null) json.add(Msg.button(bracketColor, ":", null, null));
         json.add(" ");
         // Message
-        appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
+        appendMessage(json, message, textColor, player);
         Msg.raw(player, json);
         // Sound Cue
         if (!ack) {

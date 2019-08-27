@@ -14,8 +14,7 @@ public final class DynmapHandler implements Listener {
     }
 
     public void postPlayerMessage(Message message) {
-        String msg = message.languageFilterMessage;
-        if (msg == null) msg = message.message;
+        String msg = message.message;
         String sender = message.senderName;
         if (sender == null) sender = "Announcement";
         getDynmap().postPlayerMessageToWeb(sender, sender, msg);
