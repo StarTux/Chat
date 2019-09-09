@@ -154,7 +154,7 @@ public final class ChatPlugin extends JavaPlugin {
                 cmd = privateChannel;
             } else if ("party".equals(chan.getChannelKey())) {
                 commandResponders.add(new PartyCommand());
-                partyChannel = new PartyChannel();
+                partyChannel = new PartyChannel(this);
                 cmd = partyChannel;
             } else if ("reply".equals(chan.getChannelKey())) {
                 cmd = new ReplyCommand();

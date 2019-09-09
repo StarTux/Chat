@@ -9,11 +9,15 @@ import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+@RequiredArgsConstructor
 public final class PartyChannel extends AbstractChannel {
+    final ChatPlugin plugin;
+
     @Override
     public void playerDidUseCommand(PlayerCommandContext c) {
         if (getRange() < 0) return;
@@ -62,6 +66,20 @@ public final class PartyChannel extends AbstractChannel {
             if (shouldIgnore(player.getUniqueId(), message)) continue;
             if (!message.targetName.equals(getPartyName(player.getUniqueId()))) continue;
             send(message, player);
+        }
+        for (UUID uuid : plugin.getChatSpies()) {
+            if (uuid.equals(message.sender)) {
+                continue;
+            }
+            final Player spy = plugin.getServer().getPlayer(uuid);
+            if (spy == null) continue;
+            spy.sendMessage(ChatColor.YELLOW
+                            + "[Spy] "
+                            + message.senderName
+                            + "[Party-"
+                            + message.targetName
+                            + "]"
+                            + ": " + message.message);
         }
     }
 
