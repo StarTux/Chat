@@ -162,13 +162,13 @@ public final class ChatCommand extends AbstractChatCommand {
         json.add(Msg.format("&oCommands "));
         json.add(Msg.button(ChatColor.GOLD, "&6[List]", "/ch list\n&5&oChannel List.", "/ch list"));
         json.add(" ");
-        json.add(Msg.button(ChatColor.BLUE, "&6[Who]", "/ch who [channel]\n&5&oUser List", "/ch who "));
+        json.add(Msg.button(ChatColor.GOLD, "&6[Who]", "/ch who [channel]\n&5&oUser List", "/ch who "));
         json.add(" ");
-        json.add(Msg.button(ChatColor.GRAY, "&6[Set]", "/ch set\n&5&oChange channel preferences.", "/ch set"));
+        json.add(Msg.button(ChatColor.GOLD, "&6[Set]", "/ch set\n&5&oChange channel preferences.", "/ch set"));
         json.add(" ");
-        json.add(Msg.button(ChatColor.LIGHT_PURPLE, "&6[Reply]", "/reply <msg>\n&5&oReply to private messages.", "/reply "));
+        json.add(Msg.button(ChatColor.GOLD, "&6[Reply]", "/reply <msg>\n&5&oReply to private messages.", "/reply "));
         json.add(" ");
-        json.add(Msg.button(ChatColor.GREEN, "&6[Party]", "/party [name]\n&5&oSelect a named party,\n&5&oshow current party.", "/party "));
+        json.add(Msg.button(ChatColor.GOLD, "&6[Party]", "/party [name]\n&5&oSelect a named party,\n&5&oshow current party.", "/party "));
         json.add(" ");
         json.add(Msg.button(ChatColor.RED, "&c[Ignore]", "/ignore [user]\n&5&oIgnore, unignore, or\n&5&olist ignored users.", "/ignore "));
         Msg.raw(player, json);
