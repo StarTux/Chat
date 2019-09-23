@@ -123,11 +123,18 @@ public final class MessageFilter {
         boolean findURL() {
             for (SQLPattern pat: SQLPattern.find("URL")) {
                 Matcher matcher = pat.getMatcher(message);
-                if (matcher.find()) {
+                while (matcher.find()) {
+                    int start = matcher.start();
+                    int end = matcher.end();
+                    if (start > 0 && message.charAt(start - 1) == ChatColor.COLOR_CHAR) {
+                        start += 1;
+                        if (start >= end) continue;
+                    }
                     int index = components.indexOf(this);
-                    components.add(index, new URLComponent(matcher.group()));
-                    components.add(index, new Component(message.substring(0, matcher.start())));
-                    message = message.substring(matcher.end());
+                    String url = message.substring(start, matcher.end());
+                    components.add(index, new URLComponent(url));
+                    components.add(index, new Component(message.substring(0, start)));
+                    message = message.substring(end);
                     return true;
                 }
             }
