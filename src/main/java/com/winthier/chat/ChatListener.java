@@ -5,6 +5,7 @@ import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,13 +18,16 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+@RequiredArgsConstructor
 public final class ChatListener implements Listener {
+    private final ChatPlugin plugin;
+
     @EventHandler(ignoreCancelled = true)
     public void onPlayerChat(final PlayerChatEvent event) {
         event.setCancelled(true);
         final Player player = event.getPlayer();
         final String message = event.getMessage();
-        Channel channel = ChatPlugin.getInstance().getFocusChannel(player.getUniqueId());
+        Channel channel = plugin.getFocusChannel(player.getUniqueId());
         if (channel == null) return;
         if (!channel.hasPermission(player)) return;
         if (!ChatPlayerTalkEvent.call(player, channel, message)) return;
@@ -36,7 +40,7 @@ public final class ChatListener implements Listener {
         if (arr.length < 1) return;
         String firstArg = arr[0];
         if (firstArg.startsWith("/")) firstArg = firstArg.substring(1);
-        CommandResponder cmd = ChatPlugin.getInstance().findCommand(firstArg);
+        CommandResponder cmd = plugin.findCommand(firstArg);
         if (cmd == null) return;
         event.setCancelled(true);
         if (!cmd.hasPermission(event.getPlayer())) return;
@@ -51,7 +55,7 @@ public final class ChatListener implements Listener {
         if (arr.length == 0) return;
         String firstArg = arr[0];
         if (firstArg.startsWith("/")) firstArg = firstArg.substring(1);
-        CommandResponder cmd = ChatPlugin.getInstance().findCommand(firstArg);
+        CommandResponder cmd = plugin.findCommand(firstArg);
         if (cmd == null) return;
         event.setCancelled(true);
         if (arr.length < 2) return;
@@ -60,16 +64,18 @@ public final class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        SQLDB.clear(event.getPlayer().getUniqueId());
         event.setJoinMessage(null);
+        Player player = event.getPlayer();
+        if (player.hasPermission("chat.admin")) {
+            plugin.getChatSpies().add(player.getUniqueId());
+        }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
         event.setQuitMessage(null);
-        ChatPlugin.getInstance().getChatSpies()
-            .remove(event.getPlayer().getUniqueId());
+        plugin.getChatSpies().remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
@@ -79,7 +85,7 @@ public final class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerChatTabComplete(PlayerChatTabCompleteEvent event) {
-        for (String name: ChatPlugin.getInstance().completePlayerName(event.getLastToken())) {
+        for (String name: plugin.completePlayerName(event.getLastToken())) {
             if (!event.getTabCompletions().contains(name)) {
                 event.getTabCompletions().add(name);
             }

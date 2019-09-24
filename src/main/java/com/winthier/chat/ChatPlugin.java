@@ -44,7 +44,7 @@ public final class ChatPlugin extends JavaPlugin {
     private final List<CommandResponder> commandResponders = new ArrayList<>();
     private final List<Channel> channels = new ArrayList<>();
     private ConnectListener connectListener = null;
-    private ChatListener chatListener = new ChatListener();
+    private ChatListener chatListener = new ChatListener(this);
     private PrivateChannel privateChannel = null;
     private PartyChannel partyChannel = null;
     private PlayerCacheHandler playerCacheHandler = null;

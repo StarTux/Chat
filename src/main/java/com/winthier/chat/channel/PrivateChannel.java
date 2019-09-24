@@ -41,6 +41,7 @@ public final class PrivateChannel extends AbstractChannel {
                 }
                 final Player spy = plugin.getServer().getPlayer(uuid);
                 if (spy == null) continue;
+                if (!spy.hasPermission("chat.admin")) continue;
                 spy.sendMessage(ChatColor.YELLOW
                                 + "[Spy] "
                                 + message.senderName
