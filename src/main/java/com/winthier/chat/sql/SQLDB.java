@@ -18,7 +18,6 @@ public final class SQLDB {
             SQLSetting.class,
             SQLIgnore.class,
             SQLLog.class,
-            SQLPattern.class,
             SQLChannel.class
             );
     }
@@ -26,7 +25,6 @@ public final class SQLDB {
     public static void reload() {
         SQLSetting.clearCache();
         SQLIgnore.clearCache();
-        SQLPattern.clearCache();
     }
 
     public static void clear(UUID uuid) {

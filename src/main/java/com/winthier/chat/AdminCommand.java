@@ -2,7 +2,6 @@ package com.winthier.chat;
 
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.sql.SQLDB;
-import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.UUID;
@@ -40,22 +39,6 @@ public final class AdminCommand extends AbstractChatCommand {
             Msg.send(sender, "&8URLs &r%s", filter.toString());
             filter.colorize();
             Msg.send(sender, "&8Color &r%s", filter.toString());
-        } else if (firstArg.equals("testpattern") && args.length >= 3) {
-            StringBuilder sb = new StringBuilder(args[2]);
-            for (int i = 3; i < args.length; ++i) {
-                sb.append(" ").append(args[i]);
-            }
-            String category = args[1];
-            int matches = 0, count = 0;
-            for (SQLPattern pat: SQLPattern.find(category)) {
-                Matcher mat = pat.getMatcher(sb.toString());
-                count += 1;
-                if (mat.find()) {
-                    Msg.send(sender, "&8Id(&r%d&8), Regex(&r%s&8), Match(&r%s&8)", pat.getId(), pat.getRegex(), mat.group());
-                    matches += 1;
-                }
-            }
-            Msg.send(sender, "%d&8/&r%d&8 Matches", matches, count);
         } else if (firstArg.equals("listdefaults") && args.length == 2) {
             String channelArg = args[1];
             Channel channel = ChatPlugin.getInstance().findChannel(channelArg);

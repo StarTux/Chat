@@ -1,7 +1,6 @@
 package com.winthier.chat;
 
 import com.cavetale.dirty.Dirty;
-import com.winthier.chat.sql.SQLPattern;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,7 +41,6 @@ public final class MessageFilter {
 
     public void process() {
         findURLs();
-        findItems();
         findPings();
         colorize();
         json = build();
@@ -53,19 +51,6 @@ public final class MessageFilter {
         OUTER: while (true) {
                 for (Component component: new ArrayList<>(components)) {
                     if (component.findURL()) {
-                        continue OUTER;
-                    }
-                }
-                break OUTER;
-            }
-        }
-    }
-
-    public void findItems() {
-        if (ChatPlugin.getInstance().hasPermission(sender, "chat.item")) {
-        OUTER: while (true) {
-                for (Component component: new ArrayList<>(components)) {
-                    if (component.findItem()) {
                         continue OUTER;
                     }
                 }
@@ -121,24 +106,40 @@ public final class MessageFilter {
         }
 
         boolean findURL() {
-            for (SQLPattern pat: SQLPattern.find("URL")) {
-                Matcher matcher = pat.getMatcher(message);
-                while (matcher.find()) {
-                    int start = matcher.start();
-                    int end = matcher.end();
-                    if (start > 0 && message.charAt(start - 1) == ChatColor.COLOR_CHAR) {
-                        start += 1;
-                        if (start >= end) continue;
-                    }
-                    int index = components.indexOf(this);
-                    String url = message.substring(start, matcher.end());
-                    components.add(index, new URLComponent(url));
-                    components.add(index, new Component(message.substring(0, start)));
-                    message = message.substring(end);
-                    return true;
-                }
+            final String valid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=";
+            final String special = "~:/?#[]@!$&'()*+,;=";
+            int start = message.indexOf("http://");
+            int end = start + 7;
+            if (start < 0) {
+                start = message.indexOf("https://");
+                end = start + 8;
             }
-            return false;
+            if (start < 0) {
+                start = message.indexOf("www.");
+                end = start + 4;
+            }
+            if (start < 0) return false;
+            int slash = 0;
+            int dots = 0;
+            while (true) {
+                if (end >= message.length() - 1) break;
+                char c = message.charAt(end + 1);
+                if (c == '.') dots += 1;
+                if (c == '/') slash += 1;
+                if (special.indexOf(c) >= 0) {
+                    if (dots < 1 || slash < 1) return false;
+                }
+                if (valid.indexOf(c) < 0) break;
+                end += 1;
+            }
+            if (dots < 1) return false;
+            if (message.charAt(end) == '.') end -= 1;
+            String url = message.substring(start, end + 1);
+            int index = components.indexOf(this);
+            components.add(index, new URLComponent(url));
+            components.add(index, new Component(message.substring(0, start)));
+            message = message.substring(end + 1);
+            return true;
         }
 
         boolean findPing() {
@@ -166,36 +167,6 @@ public final class MessageFilter {
             return false;
         }
 
-        boolean findItem() {
-            for (SQLPattern pat: SQLPattern.find("item")) {
-                Matcher matcher = pat.getMatcher(message);
-                if (matcher.find()) {
-                    int index = components.indexOf(this);
-                    Map<String, Object> raw = new HashMap<>();
-                    raw.put("text", "[item]");
-                    Map<String, Object> hoverEvent = new HashMap<>();
-                    raw.put("hoverEvent", hoverEvent);
-                    hoverEvent.put("action", "show_item");
-                    Map<String, Object> value = new HashMap<>();
-                    Player player = Bukkit.getPlayer(sender);
-                    if (player != null) {
-                        ItemStack item = player.getInventory().getItemInMainHand();
-                        if (item != null) {
-                            value.put("id", "minecraft:" + item.getType().name().toLowerCase());
-                            value.put("Count", item.getAmount());
-                            value.put("tag", Dirty.getItemTag(item));
-                        }
-                    }
-                    hoverEvent.put("value", JSONValue.toJSONString(value));
-                    components.add(index, new RawComponent("[item]", raw));
-                    components.add(index, new Component(message.substring(0, matcher.start())));
-                    message = message.substring(matcher.end());
-                    return true;
-                }
-            }
-            return false;
-        }
-
         Map<String, Object> toJson() {
             Map<String, Object> result = new HashMap<>();
             result.put("text", message);
@@ -217,10 +188,6 @@ public final class MessageFilter {
 
         @Override
         void colorize() { }
-
-        @Override boolean findItem() {
-            return false;
-        }
 
         @Override boolean findURL() {
             return false;
@@ -244,6 +211,7 @@ public final class MessageFilter {
             Map<String, Object> hoverEvent = new HashMap<>();
             result.put("hoverEvent", hoverEvent);
             hoverEvent.put("action", "show_text");
+            hoverEvent.put("value", url);
             return result;
         }
     }
@@ -253,10 +221,6 @@ public final class MessageFilter {
         PingComponent(final String message, final String target) {
             super(message);
             this.target = target;
-        }
-
-        @Override boolean findItem() {
-            return false;
         }
 
         @Override boolean findURL() {
@@ -300,9 +264,6 @@ public final class MessageFilter {
             this.raw = raw;
         }
 
-        @Override boolean findItem() {
-            return false;
-        }
         @Override boolean findURL() {
             return false;
         }

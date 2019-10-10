@@ -17,7 +17,6 @@ import com.winthier.chat.playercache.PlayerCacheHandler;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
-import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
@@ -185,33 +184,6 @@ public final class ChatPlugin extends JavaPlugin {
     void initializeDatabase() {
         YamlConfiguration config;
         config = YamlConfiguration.loadConfiguration(new InputStreamReader(getResource("database.yml")));
-        ConfigurationSection patternSection = config.getConfigurationSection("patterns");
-        if (patternSection != null) {
-            for (String category: patternSection.getKeys(false)) {
-                for (Object o: patternSection.getList(category)) {
-                    if (o instanceof List) {
-                        List<Object> list = (List<Object>)o;
-                        if (list.size() >= 1) {
-                            SQLPattern pat = new SQLPattern();
-                            pat.setCategory(category);
-                            pat.setRegex(list.get(0).toString());
-                            if (list.size() >= 2) {
-                                pat.setReplacement(list.get(1).toString());
-                            } else {
-                                pat.setReplacement("");
-                            }
-                            getDb().save(pat);
-                        }
-                    } else if (o instanceof String) {
-                        SQLPattern pat = new SQLPattern();
-                        pat.setCategory(category);
-                        pat.setRegex((String)o);
-                        pat.setReplacement("");
-                        getDb().save(pat);
-                    }
-                }
-            }
-        }
         ConfigurationSection channelsSection = config.getConfigurationSection("channels");
         if (channelsSection != null) {
             for (String key: channelsSection.getKeys(false)) {
