@@ -113,17 +113,40 @@ public final class MessageFilter {
         }
 
         boolean findURL() {
-            for (SQLPattern pat: SQLPattern.find("URL")) {
-                Matcher matcher = pat.getMatcher(message);
-                if (matcher.find()) {
-                    int index = components.indexOf(this);
-                    components.add(index, new URLComponent(matcher.group()));
-                    components.add(index, new Component(message.substring(0, matcher.start())));
-                    message = message.substring(matcher.end());
-                    return true;
-                }
+            final String valid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=";
+            final String special = "~:/?#[]@!$&'()*+,;=";
+            int start = message.indexOf("http://");
+            int end = start + 7;
+            if (start < 0) {
+                start = message.indexOf("https://");
+                end = start + 8;
             }
-            return false;
+            if (start < 0) {
+                start = message.indexOf("www.");
+                end = start + 4;
+            }
+            if (start < 0) return false;
+            int slash = 0;
+            int dots = 0;
+            while (true) {
+                if (end >= message.length() - 1) break;
+                char c = message.charAt(end + 1);
+                if (c == '.') dots += 1;
+                if (c == '/') slash += 1;
+                if (special.indexOf(c) >= 0) {
+                    if (dots < 1 || slash < 1) return false;
+                }
+                if (valid.indexOf(c) < 0) break;
+                end += 1;
+            }
+            if (dots < 1) return false;
+            if (message.charAt(end) == '.') end -= 1;
+            String url = message.substring(start, end + 1);
+            int index = components.indexOf(this);
+            components.add(index, new URLComponent(url));
+            components.add(index, new Component(message.substring(0, start)));
+            message = message.substring(end + 1);
+            return true;
         }
 
         boolean findItem() {
