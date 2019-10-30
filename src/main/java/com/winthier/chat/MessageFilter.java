@@ -244,7 +244,7 @@ public final class MessageFilter {
                 }
             } else {
                 if (recipient != null
-                    && recipient.getName().equals(target)) {
+                    && recipient.getName().equalsIgnoreCase(target)) {
                     bolden = true;
                 }
             }
