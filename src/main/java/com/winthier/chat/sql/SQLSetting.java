@@ -50,7 +50,7 @@ public final class SQLSetting {
     private UUID uuid;
     @Column(nullable = true, length = 16) private String channel;
     @Column(nullable = false, length = 32) private String settingKey;
-    @Column(nullable = true, length = 64) private String settingValue;
+    @Column(nullable = true, length = 255) private String settingValue;
     @Version private Date version;
 
     public SQLSetting(UUID uuid, String channel, String key, Object value) {
