@@ -311,7 +311,13 @@ public final class ChatPlugin extends JavaPlugin {
         }
         if (dynmapHandler != null
             && SQLSetting.getBoolean(null, message.channel, "PostToDynmap", false)) {
-            dynmapHandler.postPlayerMessage(message);
+            try {
+                dynmapHandler.postPlayerMessage(message);
+            } catch (Exception e) {
+                dynmapHandler = null;
+                getLogger().warning("dynmap error");
+                e.printStackTrace();
+            }
         }
     }
 
