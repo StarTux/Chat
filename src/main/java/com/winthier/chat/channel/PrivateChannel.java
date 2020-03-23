@@ -17,12 +17,12 @@ import org.bukkit.entity.Player;
 @Getter
 public final class PrivateChannel extends AbstractChannel {
     @Override
-    public boolean hasPermission(Player player) {
-        return player.hasPermission("chat.pm");
+    public boolean canJoin(UUID player) {
+        return ChatPlugin.getInstance().hasPermission(player, "chat.pm");
     }
 
     @Override
-    public boolean hasPermission(UUID player) {
+    public boolean canTalk(UUID player) {
         return ChatPlugin.getInstance().hasPermission(player, "chat.pm");
     }
 

@@ -7,7 +7,7 @@ import lombok.Getter;
 import org.bukkit.entity.Player;
 
 @Getter
-public class ReplyCommand implements CommandResponder {
+public final class ReplyCommand implements CommandResponder {
     private final List<String> aliases = Arrays.<String>asList("reply", "r");
 
     @Override

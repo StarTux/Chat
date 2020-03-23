@@ -17,7 +17,8 @@ public interface Channel extends CommandResponder {
     void joinChannel(UUID player);
     void leaveChannel(UUID player);
     boolean isJoined(UUID player);
-    boolean hasPermission(UUID player);
+    boolean canJoin(UUID player);
+    boolean canTalk(UUID player);
     void handleMessage(Message message);
     List<Option> getOptions();
     void playerDidUseChat(PlayerCommandContext context);

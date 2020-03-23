@@ -146,7 +146,7 @@ public final class ChatPlugin extends JavaPlugin {
     void loadChannels() {
         commandResponders.clear();
         channels.clear();
-        for (SQLChannel chan: SQLChannel.fetch()) {
+        for (SQLChannel chan : SQLChannel.fetch()) {
             CommandResponder cmd;
             if ("pm".equals(chan.getChannelKey())) {
                 commandResponders.add(new ReplyCommand());

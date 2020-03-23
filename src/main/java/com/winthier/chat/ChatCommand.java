@@ -38,12 +38,12 @@ public final class ChatCommand extends AbstractChatCommand {
             listChannels(player);
         } else if (firstArg.equals("join") && args.length == 2) {
             Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
-            if (channel == null || !channel.hasPermission(player)) return false;
+            if (channel == null || !channel.canJoin(player.getUniqueId())) return false;
             channel.joinChannel(player.getUniqueId());
             listChannels(player);
         } else if (firstArg.equals("leave") && args.length == 2) {
             Channel channel = ChatPlugin.getInstance().findChannel(args[1]);
-            if (channel == null || !channel.hasPermission(player)) return false;
+            if (channel == null || !channel.canJoin(player.getUniqueId())) return false;
             channel.leaveChannel(player.getUniqueId());
             listChannels(player);
         } else if (firstArg.equals("ignore")) {
@@ -64,7 +64,7 @@ public final class ChatCommand extends AbstractChatCommand {
             } else {
                 return false;
             }
-            if (channel == null || !channel.hasPermission(player)) return true;
+            if (channel == null || !channel.canJoin(player.getUniqueId())) return true;
             StringBuilder sb = new StringBuilder();
             int count = 0;
             for (Chatter chatter: channel.getOnlineMembers()) {
@@ -85,7 +85,7 @@ public final class ChatCommand extends AbstractChatCommand {
         } else if (args.length == 1) {
             if (player == null) return false;
             Channel channel = ChatPlugin.getInstance().findChannel(firstArg);
-            if (channel == null || !channel.hasPermission(player)) return false;
+            if (channel == null || !channel.canTalk(player.getUniqueId())) return false;
             channel.joinChannel(player.getUniqueId());
             channel.setFocusChannel(player.getUniqueId());
             Msg.info(player, "Now focusing %s&r.", channel.getTitle());
@@ -112,7 +112,7 @@ public final class ChatCommand extends AbstractChatCommand {
         UUID uuid = player.getUniqueId();
         if (args.length == 0) return;
         Channel channel = ChatPlugin.getInstance().findChannel(args[0]);
-        if (channel == null || !channel.hasPermission(player)) return;
+        if (channel == null || !channel.canJoin(player.getUniqueId())) return;
         if (args.length == 2 && args[1].equals("reset")) {
             for (Option option: channel.getOptions()) {
                 SQLSetting.set(uuid, channel.getKey(), option.key, null);
@@ -134,7 +134,7 @@ public final class ChatCommand extends AbstractChatCommand {
         List<Object> json = new ArrayList<>();
         json.add(Msg.format("&oChannels"));
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
-            if (!channel.hasPermission(player)) continue;
+            if (!channel.canJoin(player.getUniqueId())) continue;
             if (SQLSetting.getBoolean(null, channel.getKey(), "MutePlayers", false)) continue;
             json.add(" ");
             ChatColor channelColor = SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE);
@@ -167,7 +167,7 @@ public final class ChatCommand extends AbstractChatCommand {
         List<Object> json = new ArrayList<>();
         json.add(Msg.format("&oChannel Settings"));
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
-            if (!channel.hasPermission(player)) continue;
+            if (!channel.canJoin(player.getUniqueId())) continue;
             json.add(" ");
             json.add(Msg.button("&r[" + SQLSetting.getChatColor(player.getUniqueId(), channel.getKey(), "ChannelColor", ChatColor.WHITE) + channel.getTag() + "&r]", channel.getTitle(), "/ch set " + channel.getAlias()));
         }
@@ -207,7 +207,7 @@ public final class ChatCommand extends AbstractChatCommand {
         Msg.info(player, "Channel List");
         for (Channel channel: ChatPlugin.getInstance().getChannels()) {
             List<Object> json = new ArrayList<>();
-            if (!channel.hasPermission(player)) continue;
+            if (!channel.canJoin(player.getUniqueId())) continue;
             json.add(" ");
             if (channel.isJoined(player.getUniqueId())) {
                 json.add(Msg.button(ChatColor.GREEN, "x", "Leave " + channel.getTitle(), "/ch leave " + channel.getAlias()));

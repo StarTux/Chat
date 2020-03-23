@@ -32,7 +32,7 @@ public final class ChatListener implements Listener {
         if (!player.isValid()) return;
         Channel channel = ChatPlugin.getInstance().getFocusChannel(player.getUniqueId());
         if (channel == null) return;
-        if (!channel.hasPermission(player)) return;
+        if (!channel.canTalk(player.getUniqueId())) return;
         if (!ChatPlayerTalkEvent.call(player, channel, message)) return;
         channel.playerDidUseChat(new PlayerCommandContext(player, null, message));
     }

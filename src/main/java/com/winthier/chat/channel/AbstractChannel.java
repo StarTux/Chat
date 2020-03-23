@@ -23,7 +23,10 @@ import org.bukkit.entity.Player;
 
 @Getter @Setter
 public abstract class AbstractChannel implements Channel {
-    private String title, key, tag, description;
+    private String title;
+    private String key;
+    private String tag;
+    private String description;
     private int range = 0;
     private final List<String> aliases = new ArrayList<>();
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
@@ -33,20 +36,25 @@ public abstract class AbstractChannel implements Channel {
         return getAliases().get(0);
     }
 
-    /**
-     * Override if channel has a special permission.
-     */
     @Override
     public boolean hasPermission(Player player) {
-        return player.hasPermission("chat.channel." + getKey()) || player.hasPermission("chat.channel.*");
+        return canTalk(player.getUniqueId());
     }
 
-    /**
-     * Override if channel has a special permission.
-     */
     @Override
-    public boolean hasPermission(UUID player) {
-        return ChatPlugin.getInstance().hasPermission(player, "chat.channel." + getKey()) || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+    public boolean canJoin(UUID player) {
+        String perm = "chat.channel." + key;
+        return ChatPlugin.getInstance().hasPermission(player, perm)
+            || ChatPlugin.getInstance().hasPermission(player, perm + ".join")
+            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+    }
+
+    @Override
+    public boolean canTalk(UUID player) {
+        String perm = "chat.channel." + key;
+        return ChatPlugin.getInstance().hasPermission(player, perm)
+            || ChatPlugin.getInstance().hasPermission(player, perm + ".talk")
+            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
     }
 
     @Override
@@ -234,7 +242,7 @@ public abstract class AbstractChannel implements Channel {
     public final List<Chatter> getOnlineMembers() {
         List<Chatter> result = new ArrayList<>();
         for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
-            if (!hasPermission(chatter.getUuid())) continue;
+            if (!canJoin(chatter.getUuid())) continue;
             if (!isJoined(chatter.getUuid())) continue;
             result.add(chatter);
         }
@@ -244,7 +252,7 @@ public abstract class AbstractChannel implements Channel {
     public final List<Player> getLocalMembers() {
         List<Player> result = new ArrayList<>();
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
-            if (!hasPermission(player)) continue;
+            if (!canJoin(player.getUniqueId())) continue;
             if (!isJoined(player.getUniqueId())) continue;
             result.add(player);
         }

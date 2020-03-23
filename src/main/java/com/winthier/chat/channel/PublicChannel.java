@@ -45,7 +45,7 @@ public final class PublicChannel extends AbstractChannel {
         if (message.shouldCancel && message.sender != null) return;
         ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s: %s", getTag(), message.senderServer, message.senderName, message.message));
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
-            if (!hasPermission(player)) continue;
+            if (!canJoin(player.getUniqueId())) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;
             int range = getRange();
