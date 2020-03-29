@@ -401,7 +401,7 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public void onBungeeJoin(UUID uuid, String name, String server) {
-        if (!name.equals(getServerName())) return;
+        if (!server.equals(getServerName())) return;
         if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
             getServer().getScheduler().runTask(this, () -> {
                     announce("info", ChatColor.GREEN + name + " joined");
@@ -410,7 +410,7 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public void onBungeeQuit(UUID uuid, String name, String server) {
-        if (!name.equals(getServerName())) return;
+        if (!server.equals(getServerName())) return;
         if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
             getServer().getScheduler().runTask(this, () -> {
                     announce("info", ChatColor.AQUA + name + " disconnected");
