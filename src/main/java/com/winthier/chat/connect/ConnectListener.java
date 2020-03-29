@@ -24,26 +24,29 @@ public final class ConnectListener implements Listener {
             Object o = event.getMessage().getPayload();
             if (o instanceof Map) {
                 @SuppressWarnings("unchecked")
-                    Map<String, Object> map = (Map<String, Object>)o;
+                    Map<String, Object> map = (Map<String, Object>) o;
                 Message message = Message.deserialize(map);
                 if (message == null) {
-                    ChatPlugin.getInstance().getLogger().warning("Failed to deserialize message: " + map);
+                    ChatPlugin.getInstance().getLogger()
+                        .warning("Failed to deserialize message: " + map);
                 } else {
                     ChatPlugin.getInstance().didReceiveMessage(message);
                 }
             }
         } else if (channel.equals("BUNGEE_PLAYER_JOIN")) {
             @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
-            UUID uuid = UUID.fromString((String)map.get("uuid"));
-            String name = (String)map.get("name");
-            ChatPlugin.getInstance().onBungeeJoin(uuid, name);
+            Map<String, Object> map = (Map<String, Object>) event.getMessage().getPayload();
+            UUID uuid = UUID.fromString((String) map.get("uuid"));
+            String name = (String) map.get("name");
+            String server = (String) map.get("server");
+            ChatPlugin.getInstance().onBungeeJoin(uuid, name, server);
         } else if (channel.equals("BUNGEE_PLAYER_QUIT")) {
             @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>)event.getMessage().getPayload();
-            UUID uuid = UUID.fromString((String)map.get("uuid"));
-            String name = (String)map.get("name");
-            ChatPlugin.getInstance().onBungeeQuit(uuid, name);
+            Map<String, Object> map = (Map<String, Object>) event.getMessage().getPayload();
+            UUID uuid = UUID.fromString((String) map.get("uuid"));
+            String name = (String) map.get("name");
+            String server = (String) map.get("server");
+            ChatPlugin.getInstance().onBungeeQuit(uuid, name, server);
         }
     }
 

@@ -101,7 +101,7 @@ public final class ChatPlugin extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         CommandResponder cmd = findCommand(label);
         if (cmd == null) return false;
-        Player player = sender instanceof Player ? (Player)sender : null;
+        Player player = sender instanceof Player ? (Player) sender : null;
         if (player != null && !cmd.hasPermission(player)) return true;
         String msg;
         if (args.length == 0) {
@@ -121,7 +121,8 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command,
+                                      String alias, String[] args) {
         if (args.length == 0) return null;
         String arg = args[args.length - 1];
         return completePlayerName(arg);
@@ -165,7 +166,7 @@ public final class ChatPlugin extends JavaPlugin {
                 cmd.getAliases().add(ali.toLowerCase());
             }
             if (cmd instanceof AbstractChannel) {
-                AbstractChannel channel = (AbstractChannel)cmd;
+                AbstractChannel channel = (AbstractChannel) cmd;
                 channel.setTag(chan.getTag());
                 channel.setKey(chan.getChannelKey());
                 channel.setTitle(chan.getTitle());
@@ -176,7 +177,7 @@ public final class ChatPlugin extends JavaPlugin {
             }
             commandResponders.add(cmd);
             if (cmd instanceof Channel) {
-                channels.add((Channel)cmd);
+                channels.add((Channel) cmd);
             }
         }
     }
@@ -184,13 +185,14 @@ public final class ChatPlugin extends JavaPlugin {
     @SuppressWarnings("unchecked")
     void initializeDatabase() {
         YamlConfiguration config;
-        config = YamlConfiguration.loadConfiguration(new InputStreamReader(getResource("database.yml")));
+        InputStreamReader isr = new InputStreamReader(getResource("database.yml"));
+        config = YamlConfiguration.loadConfiguration(isr);
         ConfigurationSection patternSection = config.getConfigurationSection("patterns");
         if (patternSection != null) {
             for (String category: patternSection.getKeys(false)) {
                 for (Object o: patternSection.getList(category)) {
                     if (o instanceof List) {
-                        List<Object> list = (List<Object>)o;
+                        List<Object> list = (List<Object>) o;
                         if (list.size() >= 1) {
                             SQLPattern pat = new SQLPattern();
                             pat.setCategory(category);
@@ -205,7 +207,7 @@ public final class ChatPlugin extends JavaPlugin {
                     } else if (o instanceof String) {
                         SQLPattern pat = new SQLPattern();
                         pat.setCategory(category);
-                        pat.setRegex((String)o);
+                        pat.setRegex((String) o);
                         pat.setReplacement("");
                         getDb().save(pat);
                     }
@@ -235,8 +237,9 @@ public final class ChatPlugin extends JavaPlugin {
         }
         for (Map<?, ?> tmpMap: config.getMapList("settings")) {
             @SuppressWarnings("unchecked")
-            Map<String, String> map = (Map<String, String>)tmpMap;
-            SQLSetting st = new SQLSetting((UUID)null, map.get("channel"), map.get("key"), (Object)map.get("value"));
+            Map<String, String> map = (Map<String, String>) tmpMap;
+            SQLSetting st = new SQLSetting((UUID) null, map.get("channel"),
+                                           map.get("key"), (Object) map.get("value"));
             getDb().save(st);
         }
     }
@@ -397,15 +400,21 @@ public final class ChatPlugin extends JavaPlugin {
         return SQLIgnore.doesIgnore(player, ignoree);
     }
 
-    public void onBungeeJoin(UUID uuid, String name) {
+    public void onBungeeJoin(UUID uuid, String name, String server) {
+        if (!name.equals(getServerName())) return;
         if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-            announceLocal("info", ChatColor.GREEN + name + " joined");
+            getServer().getScheduler().runTask(this, () -> {
+                    announce("info", ChatColor.GREEN + name + " joined");
+                });
         }
     }
 
-    public void onBungeeQuit(UUID uuid, String name) {
+    public void onBungeeQuit(UUID uuid, String name, String server) {
+        if (!name.equals(getServerName())) return;
         if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-            announceLocal("info", ChatColor.YELLOW + name + " disconnected");
+            getServer().getScheduler().runTask(this, () -> {
+                    announce("info", ChatColor.AQUA + name + " disconnected");
+                });
         }
     }
 }
