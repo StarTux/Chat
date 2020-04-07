@@ -14,6 +14,22 @@ import org.bukkit.entity.Player;
 
 public final class PublicChannel extends AbstractChannel {
     @Override
+    public boolean canJoin(UUID player) {
+        String perm = "chat.channel." + key;
+        return ChatPlugin.getInstance().hasPermission(player, perm)
+            || ChatPlugin.getInstance().hasPermission(player, perm + ".join")
+            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+    }
+
+    @Override
+    public boolean canTalk(UUID player) {
+        String perm = "chat.channel." + key;
+        return ChatPlugin.getInstance().hasPermission(player, perm)
+            || ChatPlugin.getInstance().hasPermission(player, perm + ".talk")
+            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+    }
+
+    @Override
     public void playerDidUseCommand(PlayerCommandContext c) {
         if (SQLSetting.getBoolean(null, getKey(), "MutePlayers", false)) return;
         if (!isJoined(c.player.getUniqueId())) {
@@ -43,15 +59,27 @@ public final class PublicChannel extends AbstractChannel {
     public void handleMessage(Message message) {
         fillMessage(message);
         if (message.shouldCancel && message.sender != null) return;
-        ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s: %s", getTag(), message.senderServer, message.senderName, message.message));
+        String log = "[" + getTag() + "]"
+            + "[" + message.senderServer + "]"
+            + (message.senderName != null
+               ? message.senderName
+               : "server")
+            + ": " + message.message;
+        ChatPlugin.getInstance().getLogger().info(log);
+        long maxDistance;
+        if (range > 0 && message.location != null) {
+            maxDistance = (long) range * range;
+        } else {
+            maxDistance = 0L;
+        }
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!canJoin(player.getUniqueId())) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;
-            int range = getRange();
-            if (range != 0 && message.location != null) {
+            if (maxDistance > 0L) {
                 if (!message.location.getWorld().equals(player.getWorld())) continue;
-                if (message.location.distanceSquared(player.getLocation()) > range * range) continue;
+                double dist = message.location.distanceSquared(player.getLocation());
+                if ((long) dist > maxDistance) continue;
             }
             send(message, player);
         }
@@ -68,12 +96,16 @@ public final class PublicChannel extends AbstractChannel {
         UUID uuid = player.getUniqueId();
         String key = getKey();
         List<Object> json = new ArrayList<>();
-        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", ChatColor.WHITE);
-        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", ChatColor.WHITE);
-        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", ChatColor.WHITE);
-        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", ChatColor.WHITE);
+        final ChatColor white = ChatColor.WHITE;
+        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", white);
+        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", white);
+        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", white);
+        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", white);
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
-        BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
+        String tmp = SQLSetting.getString(uuid, key, "BracketType", null);
+        BracketType bracketType = tmp != null
+            ? BracketType.of(tmp)
+            : BracketType.ANGLE;
         json.add("");
         if (message.prefix != null) json.add(message.prefix);
         // Channel Tag
@@ -90,10 +122,13 @@ public final class PublicChannel extends AbstractChannel {
         }
         // Player Name
         json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
-        if (!tagPlayerName && message.senderName != null) json.add(Msg.button(bracketColor, ":", null, null));
+        if (!tagPlayerName && message.senderName != null) {
+            json.add(Msg.button(bracketColor, ":", null, null));
+        }
         json.add(" ");
         // Message
-        appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
+        boolean languageFilter = SQLSetting.getBoolean(uuid, key, "LanguageFilter", true);
+        appendMessage(json, message, textColor, languageFilter);
         Msg.raw(player, json);
         // Sound Cue
         playSoundCue(player);

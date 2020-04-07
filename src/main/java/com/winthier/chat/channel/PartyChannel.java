@@ -15,6 +15,22 @@ import org.bukkit.entity.Player;
 
 public final class PartyChannel extends AbstractChannel {
     @Override
+    public boolean canJoin(UUID player) {
+        String perm = "chat.channel." + key;
+        return ChatPlugin.getInstance().hasPermission(player, perm)
+            || ChatPlugin.getInstance().hasPermission(player, perm + ".join")
+            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+    }
+
+    @Override
+    public boolean canTalk(UUID player) {
+        String perm = "chat.channel." + key;
+        return ChatPlugin.getInstance().hasPermission(player, perm)
+            || ChatPlugin.getInstance().hasPermission(player, perm + ".talk")
+            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+    }
+
+    @Override
     public void playerDidUseCommand(PlayerCommandContext c) {
         if (getRange() < 0) return;
         if (!isJoined(c.player.getUniqueId())) {
@@ -55,7 +71,11 @@ public final class PartyChannel extends AbstractChannel {
     public void handleMessage(Message message) {
         fillMessage(message);
         if (message.shouldCancel && message.sender != null) return;
-        ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s][%s]%s: %s", getTag(), message.targetName, message.senderServer, message.senderName, message.message));
+        String log = String.format("[%s][%s][%s]%s: %s",
+                                   getTag(), message.targetName,
+                                   message.senderServer, message.senderName,
+                                   message.message);
+        ChatPlugin.getInstance().getLogger().info(log);
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
@@ -78,12 +98,16 @@ public final class PartyChannel extends AbstractChannel {
         String key = getKey();
         String partyName = message.targetName;
         List<Object> json = new ArrayList<>();
-        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", ChatColor.WHITE);
-        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", ChatColor.WHITE);
-        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", ChatColor.WHITE);
-        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", ChatColor.WHITE);
+        final ChatColor white = ChatColor.WHITE;
+        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", white);
+        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", white);
+        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", white);
+        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", white);
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
-        BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
+        String tmp = SQLSetting.getString(uuid, key, "BracketType", null);
+        BracketType bracketType = tmp != null
+            ? BracketType.of(tmp)
+            : BracketType.ANGLE;
         json.add("");
         if (message.prefix != null) json.add(message.prefix);
         // Channel Tag
@@ -91,10 +115,11 @@ public final class PartyChannel extends AbstractChannel {
             json.add(channelTag(channelColor, bracketColor, bracketType));
         }
         // Party Name Tag
-        json.add(Msg.button(channelColor,
-                            bracketColor + bracketType.opening + channelColor + partyName + bracketColor + bracketType.closing,
-                            null,
-                            "/p "));
+        String text = ""
+            + bracketColor + bracketType.opening
+            + channelColor + partyName
+            + bracketColor + bracketType.closing;
+        json.add(Msg.button(channelColor, text, null, "/p "));
         // Server Tag
         if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", false)) {
             json.add(serverTag(message, channelColor, bracketColor, bracketType));
@@ -105,10 +130,13 @@ public final class PartyChannel extends AbstractChannel {
         }
         // Player Name
         json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
-        if (!tagPlayerName && message.senderName != null) json.add(Msg.button(bracketColor, ":", null, null));
+        if (!tagPlayerName && message.senderName != null) {
+            json.add(Msg.button(bracketColor, ":", null, null));
+        }
         json.add(" ");
         // Message
-        appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
+        boolean languageFilter = SQLSetting.getBoolean(uuid, key, "LanguageFilter", true);
+        appendMessage(json, message, textColor, languageFilter);
         Msg.raw(player, json);
         // Sound Cue
         playSoundCue(player);
@@ -123,7 +151,9 @@ public final class PartyChannel extends AbstractChannel {
     }
 
     void partyCommand(PlayerCommandContext context) {
-        final String[] args = context.message == null ? new String[0] : context.message.split("\\s+");
+        final String[] args = context.message == null
+            ? new String[0]
+            : context.message.split("\\s+");
         UUID uuid = context.player.getUniqueId();
         String partyName = getPartyName(uuid);
         if (args.length == 0) {
@@ -157,7 +187,8 @@ public final class PartyChannel extends AbstractChannel {
     void listPlayers(Player player, String partyName) {
         List<Object> json = new ArrayList<>();
         json.add(Msg.format("&oParty &a%s&r:", partyName));
-        ChatColor senderColor = SQLSetting.getChatColor(player.getUniqueId(), getKey(), "SenderColor", ChatColor.WHITE);
+        ChatColor senderColor = SQLSetting
+            .getChatColor(player.getUniqueId(), getKey(), "SenderColor", ChatColor.WHITE);
         for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
             String otherPartyName = getPartyName(chatter.getUuid());
             if (otherPartyName != null && otherPartyName.equals(partyName)) {

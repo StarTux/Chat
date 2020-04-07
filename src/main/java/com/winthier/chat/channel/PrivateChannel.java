@@ -28,7 +28,11 @@ public final class PrivateChannel extends AbstractChannel {
 
     public void handleMessage(Message message) {
         if (message.special == null) {
-            ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s]%s->%s: %s", getTag(), message.senderServer, message.senderName, message.targetName, message.message));
+            String log = String.format("[%s][%s]%s->%s: %s",
+                                       getTag(), message.senderServer,
+                                       message.senderName, message.targetName,
+                                       message.message);
+            ChatPlugin.getInstance().getLogger().info(log);
         }
         Player player = Bukkit.getServer().getPlayer(message.target);
         if (player == null) return;
@@ -82,12 +86,16 @@ public final class PrivateChannel extends AbstractChannel {
         UUID uuid = player.getUniqueId();
         String key = getKey();
         List<Object> json = new ArrayList<>();
-        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", ChatColor.WHITE);
-        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", ChatColor.WHITE);
-        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", ChatColor.WHITE);
-        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", ChatColor.WHITE);
+        final ChatColor white = ChatColor.WHITE;
+        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", white);
+        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", white);
+        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", white);
+        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", white);
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
-        BracketType bracketType = BracketType.of(SQLSetting.getString(uuid, key, "BracketType", "angle"));
+        String tmp = SQLSetting.getString(uuid, key, "BracketType", null);
+        BracketType bracketType = tmp != null
+            ? BracketType.of(tmp)
+            : BracketType.ANGLE;
         json.add("");
         if (message.prefix != null) json.add(message.prefix);
         // Channel Tag
@@ -107,10 +115,13 @@ public final class PrivateChannel extends AbstractChannel {
         }
         // Player Name
         json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
-        if (!tagPlayerName && message.senderName != null) json.add(Msg.button(bracketColor, ":", null, null));
+        if (!tagPlayerName && message.senderName != null) {
+            json.add(Msg.button(bracketColor, ":", null, null));
+        }
         json.add(" ");
         // Message
-        appendMessage(json, message, textColor, SQLSetting.getBoolean(uuid, key, "LanguageFilter", true));
+        boolean languageFilter = SQLSetting.getBoolean(uuid, key, "LanguageFilter", true);
+        appendMessage(json, message, textColor, languageFilter);
         Msg.raw(player, json);
         // Sound Cue
         if (!ack) {
@@ -164,7 +175,8 @@ public final class PrivateChannel extends AbstractChannel {
 
     @Override
     public void playerDidUseChat(PlayerCommandContext context) {
-        String focusName = SQLSetting.getString(context.player.getUniqueId(), getKey(), "FocusName", null);
+        String focusName = SQLSetting
+            .getString(context.player.getUniqueId(), getKey(), "FocusName", null);
         if (focusName == null) return;
         Chatter target = ChatPlugin.getInstance().getOnlinePlayer(focusName);
         if (target == null) {
@@ -175,7 +187,8 @@ public final class PrivateChannel extends AbstractChannel {
     }
 
     void reply(PlayerCommandContext context) {
-        String replyName = SQLSetting.getString(context.player.getUniqueId(), getKey(), "ReplyName", null);
+        String replyName = SQLSetting
+            .getString(context.player.getUniqueId(), getKey(), "ReplyName", null);
         if (replyName == null) return;
         Chatter target = ChatPlugin.getInstance().getOnlinePlayer(replyName);
         if (target == null) {
