@@ -1,6 +1,8 @@
 package com.winthier.chat;
 
 import com.cavetale.dirty.Dirty;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.winthier.chat.sql.SQLPattern;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +17,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.json.simple.JSONValue;
 
 @Getter
 public final class MessageFilter {
@@ -26,6 +27,8 @@ public final class MessageFilter {
     private List<Object> json = null;
     private List<Object> languageFilterJson = null;
     private boolean shouldCancel = false;
+    // Helper
+    static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     public MessageFilter(final UUID sender, final String message) {
         this.sender = sender;
@@ -177,7 +180,7 @@ public final class MessageFilter {
                             }
                         }
                     }
-                    hoverEvent.put("value", JSONValue.toJSONString(value));
+                    hoverEvent.put("value", GSON.toJson(value));
                     components.add(index, new RawComponent("[item]", raw));
                     components.add(index, new Component(message.substring(0, matcher.start())));
                     message = message.substring(matcher.end());

@@ -1,5 +1,7 @@
 package com.winthier.chat.util;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.winthier.chat.ChatPlugin;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,10 +11,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.json.simple.JSONValue;
 
 public final class Msg {
     private Msg() { }
+    static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     public static String format(String msg, Object... args) {
         if (msg == null) return "";
@@ -46,13 +48,15 @@ public final class Msg {
     public static void raw(Player player, Object... obj) {
         if (obj.length == 0) return;
         if (obj.length == 1) {
-            consoleCommand("minecraft:tellraw %s %s", player.getName(), JSONValue.toJSONString(obj[0]));
+            consoleCommand("minecraft:tellraw %s %s", player.getName(), GSON.toJson(obj[0]));
         } else {
-            consoleCommand("minecraft:tellraw %s %s", player.getName(), JSONValue.toJSONString(Arrays.asList(obj)));
+            consoleCommand("minecraft:tellraw %s %s",
+                           player.getName(), GSON.toJson(Arrays.asList(obj)));
         }
     }
 
-    public static Object button(ChatColor color, String chat, String insertion, String tooltip, String command) {
+    public static Object button(ChatColor color, String chat, String insertion,
+                                String tooltip, String command) {
         Map<String, Object> map = new HashMap<>();
         map.put("text", format(chat));
         map.put("color", color.name().toLowerCase());
@@ -97,18 +101,18 @@ public final class Msg {
             return "";
         } else if (json instanceof List) {
             StringBuilder sb = new StringBuilder();
-            for (Object o: (List)json) {
+            for (Object o: (List) json) {
                 sb.append(jsonToString(o));
             }
             return sb.toString();
         } else if (json instanceof Map) {
-            Map map = (Map)json;
+            Map map = (Map) json;
             StringBuilder sb = new StringBuilder();
             sb.append(map.get("text"));
             sb.append(map.get("extra"));
             return sb.toString();
         } else if (json instanceof String) {
-            return (String)json;
+            return (String) json;
         } else {
             return json.toString();
         }
