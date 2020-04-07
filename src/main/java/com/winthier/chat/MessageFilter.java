@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.json.simple.JSONValue;
 
 @Getter
@@ -26,7 +27,7 @@ public final class MessageFilter {
     private List<Object> languageFilterJson = null;
     private boolean shouldCancel = false;
 
-    public MessageFilter(UUID sender, String message) {
+    public MessageFilter(final UUID sender, final String message) {
         this.sender = sender;
         this.message = message;
         components.add(new Component(message));
@@ -107,14 +108,17 @@ public final class MessageFilter {
     @AllArgsConstructor
     private class Component {
         private String message;
+        static final String URL_VALID = ""
+                + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                + "abcdefghijklmnopqrstuvwxyz"
+                + "0123456789-._~:/?#[]@!$&'()*+,;=";
+        static final String URL_SPECIAL = "~:/?#[]@!$&'()*+,;=";
 
         void colorize() {
             message = ChatColor.translateAlternateColorCodes('&', message);
         }
 
         boolean findURL() {
-            final String valid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=";
-            final String special = "~:/?#[]@!$&'()*+,;=";
             int start = message.indexOf("http://");
             int end = start + 7;
             if (start < 0) {
@@ -133,10 +137,10 @@ public final class MessageFilter {
                 char c = message.charAt(end + 1);
                 if (c == '.') dots += 1;
                 if (c == '/') slash += 1;
-                if (special.indexOf(c) >= 0) {
+                if (URL_SPECIAL.indexOf(c) >= 0) {
                     if (dots < 1 || slash < 1) return false;
                 }
-                if (valid.indexOf(c) < 0) break;
+                if (URL_VALID.indexOf(c) < 0) break;
                 end += 1;
             }
             if (dots < 1) return false;
@@ -167,6 +171,10 @@ public final class MessageFilter {
                             value.put("id", "minecraft:" + item.getType().name().toLowerCase());
                             value.put("Count", item.getAmount());
                             value.put("tag", Dirty.getItemTag(item));
+                            String name = getItemDisplayName(item);
+                            if (name != null) {
+                                raw.put("text", "[" + name + "]");
+                            }
                         }
                     }
                     hoverEvent.put("value", JSONValue.toJSONString(value));
@@ -207,12 +215,12 @@ public final class MessageFilter {
     private final class URLComponent extends Component {
         private final String url;
 
-        URLComponent(String message, String url) {
+        URLComponent(final String message, final String url) {
             super(message);
             this.url = url;
         }
 
-        URLComponent(String message) {
+        URLComponent(final String message) {
             this(message, message);
         }
 
@@ -247,7 +255,7 @@ public final class MessageFilter {
     private final class RawComponent extends Component {
         private final Map<String, Object> raw;
 
-        RawComponent(String message, Map<String, Object> raw) {
+        RawComponent(final String message, final Map<String, Object> raw) {
             super(message);
             this.raw = raw;
         }
@@ -268,5 +276,35 @@ public final class MessageFilter {
 
     public boolean shouldCancel() {
         return shouldCancel;
+    }
+
+    /**
+     * Helper function for Component.
+     */
+    static String filterLanguage(String in) {
+        for (SQLPattern pat: SQLPattern.find("Language")) {
+            in = pat.replaceWithAsterisks(in);
+        }
+        return in;
+    }
+
+    /**
+     * Helper function for Component::findItem.
+     */
+    static String getItemDisplayName(ItemStack item) {
+        if (item.hasItemMeta()) {
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null && meta.hasDisplayName()) {
+                String name = meta.getDisplayName();
+                if (name != null && !name.isEmpty()) {
+                    return filterLanguage(name);
+                }
+            }
+        }
+        String name = item.getI18NDisplayName();
+        if (name != null) {
+            return name;
+        }
+        return null;
     }
 }
