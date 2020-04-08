@@ -62,9 +62,9 @@ public final class PublicChannel extends AbstractChannel {
         String log = "[" + getTag() + "]"
             + "[" + message.senderServer + "]"
             + (message.senderName != null
-               ? message.senderName
-               : "server")
-            + ": " + message.message;
+               ? message.senderName + ": "
+               : "")
+            + message.message;
         ChatPlugin.getInstance().getLogger().info(log);
         long maxDistance;
         if (range > 0 && message.location != null) {
