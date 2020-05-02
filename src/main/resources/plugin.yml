@@ -89,6 +89,8 @@ permissions:
     default: false
   chat.channel.admin:
     default: false
+  chat.channel.admin.join:
+    default: false
   chat.channel.information:
     default: false
   chat.channel.mini:
