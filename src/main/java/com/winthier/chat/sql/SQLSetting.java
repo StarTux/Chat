@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 
 @Entity
 @Table(name = "settings",
