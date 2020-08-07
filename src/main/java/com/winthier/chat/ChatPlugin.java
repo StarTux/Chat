@@ -365,14 +365,14 @@ public final class ChatPlugin extends JavaPlugin {
         return new Chatter(op.getUniqueId(), op.getName());
     }
 
-    public boolean announce(String channel, String message) {
+    public boolean announce(String channel, Object message) {
         Channel ch = findChannel(channel);
         if (ch == null) return false;
         ch.announce(message);
         return true;
     }
 
-    public boolean announceLocal(String channel, String message) {
+    public boolean announceLocal(String channel, Object message) {
         Channel ch = findChannel(channel);
         if (ch == null) return false;
         ch.announceLocal(message);
@@ -385,13 +385,13 @@ public final class ChatPlugin extends JavaPlugin {
 
     public void onBungeeJoin(UUID uuid, String name) {
         if (hasPermission(uuid, "chat.joinmessage")) {
-            announceLocal("info", ChatColor.GREEN + name + " joined");
+            announceLocal("info", ChatColor.GREEN + "[+] " + name);
         }
     }
 
     public void onBungeeQuit(UUID uuid, String name) {
         if (hasPermission(uuid, "chat.joinmessage")) {
-            announceLocal("info", ChatColor.YELLOW + name + " disconnected");
+            announceLocal("info", ChatColor.YELLOW + "[-] " + name);
         }
     }
 }

@@ -103,17 +103,33 @@ public abstract class AbstractChannel implements Channel {
     }
 
     @Override
-    public void announce(String msg) {
+    public final void announce(Object msg) {
         announce(msg, false);
     }
 
     @Override
-    public void announceLocal(String msg) {
+    public final void announceLocal(Object msg) {
         announce(msg, true);
     }
 
-    private void announce(String msg, boolean local) {
-        Message message = makeMessage(null, msg);
+    private void announce(Object msg, boolean local) {
+        Message message;
+        if (msg instanceof String) {
+            message = makeMessage(null, (String) msg);
+        } else {
+            List<Object> json;
+            if (msg instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> tmpson = (List<Object>) msg;
+                json = tmpson;
+            } else {
+                json = new ArrayList<>();
+                json.add(msg);
+            }
+            String str = Msg.jsonToString(msg);
+            message = makeMessage(null, str);
+            message.json = json;
+        }
         message.local = local;
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
@@ -200,13 +216,18 @@ public abstract class AbstractChannel implements Channel {
     }
 
     final void appendMessage(List<Object> json, Message message, ChatColor textColor, Player player) {
-        MessageFilter messageFilter = new MessageFilter(message.sender, message.message);
-        messageFilter.setRecipient(player);
-        messageFilter.process();
-        if (messageFilter.isPinging()) {
-            player.playSound(player.getEyeLocation(), SoundCue.DING.sound, 1.0f, 1.0f);
+        List<Object> sourceList;
+        if (message.json != null) {
+            sourceList = message.json;
+        } else {
+            MessageFilter messageFilter = new MessageFilter(message.sender, message.message);
+            messageFilter.setRecipient(player);
+            messageFilter.process();
+            if (messageFilter.isPinging()) {
+                player.playSound(player.getEyeLocation(), SoundCue.DING.sound, 1.0f, 1.0f);
+            }
+            sourceList = messageFilter.getJson();
         }
-        List<Object> sourceList = messageFilter.getJson();
         Map<String, Object> map = new HashMap<>();
         List<Object> extra = new ArrayList<>(sourceList);
         String colorValue = null;

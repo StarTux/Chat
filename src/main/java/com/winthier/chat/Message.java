@@ -19,6 +19,7 @@ public final class Message {
     public String senderServer;
     public String senderServerDisplayName;
     public String message;
+    public List<Object> json;
 
     transient public Location location;
     transient public boolean shouldCancel = false;
@@ -66,6 +67,7 @@ public final class Message {
         store(map, "senderServer", senderServer);
         store(map, "senderServerDisplayName", senderServerDisplayName);
         store(map, "message", message);
+        store(map, "json", json);
         return map;
     }
 
@@ -82,6 +84,7 @@ public final class Message {
         senderServer = fetchString(map, "senderServer");
         senderServerDisplayName = fetchString(map, "senderServerDisplayName");
         message = fetchString(map, "message");
+        json = fetchList(map, "json");
     }
 
     public static Message deserialize(Map<String, Object> map) {
