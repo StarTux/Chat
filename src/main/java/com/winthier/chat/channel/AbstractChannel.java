@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -196,6 +197,18 @@ public abstract class AbstractChannel implements Channel {
             return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + ChatColor.RESET + bracketColor + bracketType.closing : message.senderName, null, null);
         }
         final ChatPlugin plugin = ChatPlugin.getInstance();
+        String certs;
+        Player player = message.sender != null
+            ? Bukkit.getPlayer(message.sender)
+            : null;
+        if (player != null) {
+            final String horseCertificates = "%horse_certificates%";
+            certs = PlaceholderAPI.setPlaceholders(player, horseCertificates);
+            if (certs.equals(horseCertificates)) certs = null;
+        } else {
+            System.out.println("Not found: " + message.sender);
+            certs = null;
+        }
         return Msg
             .button(senderColor,
                     (useBrackets
@@ -211,7 +224,10 @@ public abstract class AbstractChannel implements Channel {
                     .groupSuffixes(message.sender).stream()
                     .collect(Collectors.joining(" "))
                     + "\n&5&oChannel&r " + getTitle()
-                    + "\n&5&oTime&r " + timeFormat.format(new Date()),
+                    + "\n&5&oTime&r " + timeFormat.format(new Date())
+                    + (certs != null
+                       ? "\n&5&oCertificates&r " + certs
+                       : ""),
                     "/msg " + message.senderName + " ");
     }
 

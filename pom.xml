@@ -32,6 +32,13 @@
       <id>dynmap-repo</id>
       <url>http://repo.mikeprimm.com</url>
     </repository>
+
+    <!-- PlacerholderAPI Repo -->
+    <repository>
+      <id>placeholderapi</id>
+      <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+    </repository>
+
   </repositories>
   <dependencies>
 
@@ -103,6 +110,15 @@
       <artifactId>VaultAPI</artifactId>
       <version>1.6</version>
       <scope>provided</scope>
+    </dependency>
+
+    <!-- PlaceholderAPI -->
+    <dependency>
+      <groupId>me.clip</groupId>
+      <artifactId>placeholderapi</artifactId>
+      <version>2.10.6</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
 
   </dependencies>
