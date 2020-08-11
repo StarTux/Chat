@@ -206,7 +206,6 @@ public abstract class AbstractChannel implements Channel {
             certs = PlaceholderAPI.setPlaceholders(player, horseCertificates);
             if (certs.equals(horseCertificates)) certs = null;
         } else {
-            System.out.println("Not found: " + message.sender);
             certs = null;
         }
         return Msg
