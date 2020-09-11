@@ -63,26 +63,26 @@ public final class ChatPlugin extends JavaPlugin {
         for (Class<?> clazz: SQLDB.getDatabaseClasses()) db.registerTable(clazz);
         db.createAllTables();
         loadChannels();
-        if (getServer().getPluginManager().getPlugin("Connect") != null) {
+        if (getServer().getPluginManager().isPluginEnabled("Connect")) {
             connectListener = new ConnectListener();
             getServer().getPluginManager().registerEvents(connectListener, this);
             getLogger().info("Connect plugin found!");
         } else {
             getLogger().warning("Connect plugin NOT found!");
         }
-        if (getServer().getPluginManager().getPlugin("Title") != null) {
+        if (getServer().getPluginManager().isPluginEnabled("Title")) {
             titleHandler = new TitleHandler();
             getLogger().info("Title plugin found!");
         } else {
             getLogger().warning("Title plugin NOT found!");
         }
-        if (getServer().getPluginManager().getPlugin("PlayerCache") != null) {
+        if (getServer().getPluginManager().isPluginEnabled("PlayerCache")) {
             playerCacheHandler = new PlayerCacheHandler();
             getLogger().info("PlayerCache plugin found!");
         } else {
             getLogger().warning("PlayerCache plugin NOT found!");
         }
-        if (getServer().getPluginManager().getPlugin("dynmap") != null) {
+        if (getServer().getPluginManager().isPluginEnabled("dynmap")) {
             dynmapHandler = new DynmapHandler();
             getServer().getPluginManager().registerEvents(dynmapHandler, this);
             getLogger().info("Dynmap plugin found!");
