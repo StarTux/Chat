@@ -8,7 +8,7 @@ import com.winthier.chat.sql.SQLDB;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -19,7 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public final class ChatListener implements Listener {
     @EventHandler
-    public void onAsyncPlayerChat(final PlayerChatEvent event) {
+    public void onAsyncPlayerChat(final AsyncPlayerChatEvent event) {
         event.setCancelled(true);
         new BukkitRunnable() {
             @Override public void run() {
