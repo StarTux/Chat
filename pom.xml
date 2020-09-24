@@ -5,7 +5,7 @@
   <groupId>com.winthier.chat</groupId>
   <artifactId>chat</artifactId>
   <packaging>jar</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>mc1.12-0.1-SNAPSHOT</version>
 
   <name>Chat</name>
   <url>https://cavetale.com</url>
@@ -54,7 +54,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.14.8</version>
+      <version>1.18.12</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
