@@ -59,8 +59,11 @@ public final class PartyChannel extends AbstractChannel {
     public void handleMessage(Message message) {
         fillMessage(message);
         if (message.shouldCancel && message.sender != null) return;
-        ChatPlugin.getInstance().getLogger().info(String.format("[%s][%s][%s]%s: %s", getTag(), message.targetName, message.senderServer, message.senderName, message.message));
+        String log = String.format("[%s][%s][%s]%s: %s",
+                                   getTag(), message.targetName, message.senderServer, message.senderName, message.message);
+        ChatPlugin.getInstance().getLogger().info(log);
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
+            if (plugin.isChatPaused(player)) continue;
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;

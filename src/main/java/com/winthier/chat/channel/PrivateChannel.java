@@ -8,7 +8,6 @@ import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -52,6 +51,7 @@ public final class PrivateChannel extends AbstractChannel {
         }
         Player player = Bukkit.getServer().getPlayer(message.target);
         if (player == null) return;
+        if (ChatPlugin.getInstance().isChatPaused(player)) return;
         if (message.special == null) {
             if (!hasPermission(player)) return;
             if (!isJoined(player.getUniqueId())) return;

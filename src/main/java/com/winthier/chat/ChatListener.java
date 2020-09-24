@@ -16,7 +16,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 @RequiredArgsConstructor
 public final class ChatListener implements Listener {
@@ -76,11 +75,13 @@ public final class ChatListener implements Listener {
         SQLDB.clear(event.getPlayer().getUniqueId());
         event.setQuitMessage(null);
         plugin.getChatSpies().remove(event.getPlayer().getUniqueId());
+        plugin.unpauseChat(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event) {
         event.setLeaveMessage(null);
+        plugin.unpauseChat(event.getPlayer());
     }
 
     @EventHandler

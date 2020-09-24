@@ -53,6 +53,7 @@ public final class ChatPlugin extends JavaPlugin {
     private SQLDatabase db;
     private Vault vault;
     private Set<UUID> chatSpies = new HashSet<>();
+    private Set<UUID> chatPaused = new HashSet<>();
 
     @Override
     public void onEnable() {
@@ -100,7 +101,7 @@ public final class ChatPlugin extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         CommandResponder cmd = findCommand(label);
         if (cmd == null) return false;
-        Player player = sender instanceof Player ? (Player)sender : null;
+        Player player = sender instanceof Player ? (Player) sender : null;
         if (player != null && !cmd.hasPermission(player)) return true;
         String msg;
         if (args.length == 0) {
@@ -164,7 +165,7 @@ public final class ChatPlugin extends JavaPlugin {
                 cmd.getAliases().add(ali.toLowerCase());
             }
             if (cmd instanceof AbstractChannel) {
-                AbstractChannel channel = (AbstractChannel)cmd;
+                AbstractChannel channel = (AbstractChannel) cmd;
                 channel.setTag(chan.getTag());
                 channel.setKey(chan.getChannelKey());
                 channel.setTitle(chan.getTitle());
@@ -175,7 +176,7 @@ public final class ChatPlugin extends JavaPlugin {
             }
             commandResponders.add(cmd);
             if (cmd instanceof Channel) {
-                channels.add((Channel)cmd);
+                channels.add((Channel) cmd);
             }
         }
     }
@@ -207,8 +208,8 @@ public final class ChatPlugin extends JavaPlugin {
         }
         for (Map<?, ?> tmpMap: config.getMapList("settings")) {
             @SuppressWarnings("unchecked")
-            Map<String, String> map = (Map<String, String>)tmpMap;
-            SQLSetting st = new SQLSetting((UUID)null, map.get("channel"), map.get("key"), (Object)map.get("value"));
+            Map<String, String> map = (Map<String, String>) tmpMap;
+            SQLSetting st = new SQLSetting((UUID) null, map.get("channel"), map.get("key"), (Object) map.get("value"));
             getDb().save(st);
         }
     }
@@ -393,5 +394,17 @@ public final class ChatPlugin extends JavaPlugin {
         if (hasPermission(uuid, "chat.joinmessage")) {
             announceLocal("info", ChatColor.YELLOW + "[-] " + name);
         }
+    }
+
+    public void pauseChat(Player player) {
+        chatPaused.add(player.getUniqueId());
+    }
+
+    public void unpauseChat(Player player) {
+        chatPaused.remove(player.getUniqueId());
+    }
+
+    public boolean isChatPaused(Player player) {
+        return chatPaused.contains(player.getUniqueId());
     }
 }
