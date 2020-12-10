@@ -64,7 +64,8 @@ public final class ChatCommand extends AbstractChatCommand {
             } else {
                 return false;
             }
-            if (channel == null || !channel.canJoin(player.getUniqueId())) return true;
+            if (channel == null) return true;
+            if (player != null && !channel.canJoin(player.getUniqueId())) return true;
             StringBuilder sb = new StringBuilder();
             int count = 0;
             for (Chatter chatter: channel.getOnlineMembers()) {
