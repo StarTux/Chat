@@ -33,4 +33,22 @@ public final class SQLDB {
         SQLSetting.clearCache(uuid);
         SQLIgnore.clearCache(uuid);
     }
+
+    public static void clear() {
+        SQLPattern.clearCache();
+        SQLSetting.clearCache();
+        SQLIgnore.clearCache();
+    }
+
+    /**
+     * Load player database in the cache, hopefully async!
+     */
+    public static void load(UUID uuid) {
+        SQLSetting.findSettings(uuid);
+        SQLIgnore.findIgnores(uuid);
+    }
+
+    public static void load() {
+        SQLPattern.load();
+    }
 }

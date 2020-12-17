@@ -24,6 +24,9 @@ public final class SQLChannel {
     @Column(nullable = false, length = 255) private String description;
     private Integer localRange;
 
+    /**
+     * Called through ChatPlugin::onEnable() and AdminCommand /reload.
+     */
     public static List<SQLChannel> fetch() {
         return SQLDB.get().find(SQLChannel.class).findList();
     }

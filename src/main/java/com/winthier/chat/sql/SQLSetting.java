@@ -1,6 +1,5 @@
 package com.winthier.chat.sql;
 
-import com.winthier.chat.ChatPlugin;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
@@ -37,8 +35,9 @@ public final class SQLSetting {
         private final Map<Key, SQLSetting> map = new HashMap<>();
         private final long created = System.currentTimeMillis();
         private boolean tooOld() {
-            return System.currentTimeMillis() - created > 1000 * 60;
+            return !neverTooOld && System.currentTimeMillis() - created > 1000 * 60;
         }
+        private boolean neverTooOld = false;
     }
 
     // Cache
@@ -53,7 +52,7 @@ public final class SQLSetting {
     @Column(nullable = true, length = 64) private String settingValue;
     @Version private Date version;
 
-    public SQLSetting(UUID uuid, String channel, String key, Object value) {
+    public SQLSetting(final UUID uuid, final String channel, final String key, final Object value) {
         setUuid(uuid);
         setChannel(channel);
         setSettingKey(key);
@@ -64,12 +63,12 @@ public final class SQLSetting {
         if (value == null) {
             setSettingValue(null);
         } else if (value instanceof String) {
-            setSettingValue((String)value);
+            setSettingValue((String) value);
         } else if (value instanceof Boolean) {
-            Boolean bv = (Boolean)value;
+            Boolean bv = (Boolean) value;
             setSettingValue(bv ? "1" : "0");
         } else if (value instanceof ChatColor) {
-            ChatColor color = (ChatColor)value;
+            ChatColor color = (ChatColor) value;
             setSettingValue(color.name().toLowerCase());
         } else {
             setSettingValue(value.toString());
@@ -86,17 +85,40 @@ public final class SQLSetting {
     }
 
     public static Settings getDefaultSettings() {
-        if (defaultSettings == null || defaultSettings.tooOld()) {
-            defaultSettings = makeSettings(SQLDB.get().find(SQLSetting.class).where().isNull("uuid").findList());
+        boolean refresh = false;
+        if (defaultSettings == null) {
+            refresh = true;
+            defaultSettings = new Settings();
+            defaultSettings.neverTooOld = true;
+        } else if (defaultSettings.tooOld()) {
+            refresh = true;
+            defaultSettings.neverTooOld = true;
+        }
+        if (refresh) {
+            SQLDB.get().find(SQLSetting.class).where().isNull("uuid").findListAsync(list -> {
+                    defaultSettings = makeSettings(list);
+                });
         }
         return defaultSettings;
     }
 
-    private static Settings findSettings(UUID uuid) {
+    protected static Settings findSettings(final UUID uuid) {
         Settings result = CACHE.get(uuid);
-        if (result == null || result.tooOld()) {
-            result = makeSettings(SQLDB.get().find(SQLSetting.class).where().eq("uuid", uuid).findList());
+        boolean refresh = false;
+        if (result == null) {
+            refresh = true;
+            result = new Settings();
+            result.neverTooOld = true;
             CACHE.put(uuid, result);
+        } else if (result.tooOld()) {
+            refresh = true;
+            result.neverTooOld = true;
+        }
+        if (refresh) {
+            SQLDB.get().find(SQLSetting.class).where().eq("uuid", uuid).findListAsync(list -> {
+                    Settings settings = makeSettings(list);
+                    CACHE.put(uuid, settings);
+                });
         }
         return result;
     }
@@ -128,20 +150,10 @@ public final class SQLSetting {
             } else {
                 findSettings(uuid).map.put(new Key(uuid, channel, key), result);
             }
-            try {
-                SQLDB.get().save(result);
-            } catch (PersistenceException pe) {
-                clearCache(uuid);
-                ChatPlugin.getInstance().getLogger().warning(String.format("SQLSetting: Persistence Exception while storing %s,%s,%s. Clearing cache.", uuid, channel, key));
-            }
+            SQLDB.get().saveAsync(result, null);
         } else {
             result.setGenericValue(value);
-            try {
-                SQLDB.get().save(result);
-            } catch (PersistenceException pe) {
-                clearCache(uuid);
-                ChatPlugin.getInstance().getLogger().warning(String.format("SQLSetting: Persistence Exception while storing %s,%s,%s. Clearing cache.", uuid, channel, key));
-            }
+            SQLDB.get().saveAsync(result, null);
         }
         return result;
     }

@@ -30,6 +30,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -95,6 +96,16 @@ public final class ChatPlugin extends JavaPlugin {
         getCommand("join").setExecutor(new JoinLeaveCommand(true));
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
         getCommand("ignore").setExecutor(new IgnoreCommand());
+        SQLDB.load();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            SQLDB.load(player.getUniqueId());
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        SQLDB.clear();
+        instance = null;
     }
 
     @Override
@@ -242,11 +253,6 @@ public final class ChatPlugin extends JavaPlugin {
                                            map.get("key"), (Object) map.get("value"));
             getDb().save(st);
         }
-    }
-
-    @Override
-    public void onDisable() {
-        instance = null;
     }
 
     public CommandResponder findCommand(String nameOrAlias) {

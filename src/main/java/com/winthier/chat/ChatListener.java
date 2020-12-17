@@ -67,7 +67,7 @@ public final class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        SQLDB.clear(event.getPlayer().getUniqueId());
+        SQLDB.load(event.getPlayer().getUniqueId());
         event.setJoinMessage(null);
     }
 

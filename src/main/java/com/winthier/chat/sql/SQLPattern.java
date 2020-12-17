@@ -60,18 +60,17 @@ public final class SQLPattern {
         return sb.toString();
     }
 
-    public static List<SQLPattern> find(String category) {
-        if (cache == null) {
-            cache = new HashMap<>();
-            for (SQLPattern entry: SQLDB.get().find(SQLPattern.class).findList()) {
-                List<SQLPattern> list = cache.get(entry.getCategory());
-                if (list == null) {
-                    list = new ArrayList<>();
-                    cache.put(entry.getCategory(), list);
+    protected static void load() {
+        cache = new HashMap<>();
+        SQLDB.get().find(SQLPattern.class).findListAsync(list -> {
+                for (SQLPattern entry : list) {
+                    cache.computeIfAbsent(entry.getCategory(), k -> new ArrayList<>()).add(entry);
                 }
-                list.add(entry);
-            }
-        }
+            });
+    }
+
+    public static List<SQLPattern> find(String category) {
+        if (cache == null) load();
         List<SQLPattern> result = cache.get(category);
         if (result != null) return result;
         return new ArrayList<>();
