@@ -103,14 +103,14 @@ public final class MessageFilter {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Component component: components) {
-            sb.append(component.message);
+            sb.append(component.text);
         }
         return sb.toString();
     }
 
     @AllArgsConstructor
     private class Component {
-        private String message;
+        protected String text;
         static final String URL_VALID = ""
                 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 + "abcdefghijklmnopqrstuvwxyz"
@@ -118,26 +118,26 @@ public final class MessageFilter {
         static final String URL_SPECIAL = "~:/?#[]@!$&'()*+,;=";
 
         void colorize() {
-            message = ChatColor.translateAlternateColorCodes('&', message);
+            text = ChatColor.translateAlternateColorCodes('&', text);
         }
 
         boolean findURL() {
-            int start = message.indexOf("http://");
+            int start = text.indexOf("http://");
             int end = start + 7;
             if (start < 0) {
-                start = message.indexOf("https://");
+                start = text.indexOf("https://");
                 end = start + 8;
             }
             if (start < 0) {
-                start = message.indexOf("www.");
+                start = text.indexOf("www.");
                 end = start + 4;
             }
             if (start < 0) return false;
             int slash = 0;
             int dots = 0;
             while (true) {
-                if (end >= message.length() - 1) break;
-                char c = message.charAt(end + 1);
+                if (end >= text.length() - 1) break;
+                char c = text.charAt(end + 1);
                 if (c == '.') dots += 1;
                 if (c == '/') slash += 1;
                 if (URL_SPECIAL.indexOf(c) >= 0) {
@@ -147,18 +147,18 @@ public final class MessageFilter {
                 end += 1;
             }
             if (dots < 1) return false;
-            if (message.charAt(end) == '.') end -= 1;
-            String url = message.substring(start, end + 1);
+            if (text.charAt(end) == '.') end -= 1;
+            String url = text.substring(start, end + 1);
             int index = components.indexOf(this);
             components.add(index, new URLComponent(url));
-            components.add(index, new Component(message.substring(0, start)));
-            message = message.substring(end + 1);
+            components.add(index, new Component(text.substring(0, start)));
+            text = text.substring(end + 1);
             return true;
         }
 
         boolean findItem() {
             for (SQLPattern pat: SQLPattern.find("item")) {
-                Matcher matcher = pat.getMatcher(message);
+                Matcher matcher = pat.getMatcher(text);
                 if (matcher.find()) {
                     int index = components.indexOf(this);
                     Map<String, Object> raw = new HashMap<>();
@@ -207,8 +207,8 @@ public final class MessageFilter {
                     components.add(index, new RawComponent("]", ChatColor.RESET + "]"));
                     components.add(index, new RawComponent("[item]", raw));
                     components.add(index, new RawComponent("[", "["));
-                    components.add(index, new Component(message.substring(0, matcher.start())));
-                    message = message.substring(matcher.end());
+                    components.add(index, new Component(text.substring(0, matcher.start())));
+                    text = text.substring(matcher.end());
                     return true;
                 }
             }
@@ -217,25 +217,25 @@ public final class MessageFilter {
 
         void filterLanguage() {
             for (SQLPattern pat: SQLPattern.find("Language")) {
-                message = pat.replaceWithAsterisks(message);
+                text = pat.replaceWithAsterisks(text);
             }
         }
 
         void filterSpam() {
             for (SQLPattern pat: SQLPattern.find("Spam")) {
                 if (pat.getReplacement().isEmpty()) {
-                    if (pat.getMatcher(message).find()) {
+                    if (pat.getMatcher(text).find()) {
                         shouldCancel = true;
                     }
                 } else {
-                    message = pat.replaceAll(message);
+                    text = pat.replaceAll(text);
                 }
             }
         }
 
         Object toJson() {
             Map<String, Object> result = new HashMap<>();
-            result.put("text", message);
+            result.put("text", text);
             return result;
         }
     }
@@ -243,13 +243,13 @@ public final class MessageFilter {
     private final class URLComponent extends Component {
         private final String url;
 
-        URLComponent(final String message, final String url) {
-            super(message);
+        URLComponent(final String text, final String url) {
+            super(text);
             this.url = url;
         }
 
-        URLComponent(final String message) {
-            this(message, message);
+        URLComponent(final String url) {
+            this(url, url);
         }
 
         @Override
@@ -258,6 +258,7 @@ public final class MessageFilter {
         @Override boolean findItem() {
             return false;
         }
+
         @Override boolean findURL() {
             return false;
         }
@@ -265,7 +266,7 @@ public final class MessageFilter {
         @Override
         Object toJson() {
             Map<String, Object> result = new HashMap<>();
-            result.put("text", message);
+            result.put("text", text);
             Map<String, Object> clickEvent = new HashMap<>();
             result.put("clickEvent", clickEvent);
             clickEvent.put("action", "open_url");
@@ -277,6 +278,7 @@ public final class MessageFilter {
             Map<String, Object> hoverEvent = new HashMap<>();
             result.put("hoverEvent", hoverEvent);
             hoverEvent.put("action", "show_text");
+            hoverEvent.put("value", "url");
             return result;
         }
     }
@@ -284,14 +286,15 @@ public final class MessageFilter {
     private final class RawComponent extends Component {
         private final Object raw;
 
-        RawComponent(final String message, final Object raw) {
-            super(message);
+        RawComponent(final String text, final Object raw) {
+            super(text);
             this.raw = raw;
         }
 
         @Override boolean findItem() {
             return false;
         }
+
         @Override boolean findURL() {
             return false;
         }
