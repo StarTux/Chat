@@ -69,7 +69,7 @@ public final class SQLSetting {
             setSettingValue(bv ? "1" : "0");
         } else if (value instanceof ChatColor) {
             ChatColor color = (ChatColor) value;
-            setSettingValue(color.name().toLowerCase());
+            setSettingValue(color.getName().toLowerCase());
         } else {
             setSettingValue(value.toString());
         }
@@ -177,7 +177,7 @@ public final class SQLSetting {
         String v = getSettingValue();
         if (v == null) return null;
         try {
-            return ChatColor.valueOf(v.toUpperCase());
+            return ChatColor.of(v.toUpperCase());
         } catch (IllegalArgumentException iae) {
             return null;
         }

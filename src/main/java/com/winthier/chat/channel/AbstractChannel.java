@@ -254,7 +254,7 @@ public abstract class AbstractChannel implements Channel {
         Map<String, Object> map = new HashMap<>();
         List<Object> extra = new ArrayList<>(sourceList);
         map.put("text", "");
-        map.put("color", textColor.name().toLowerCase());
+        map.put("color", textColor.getName().toLowerCase());
         map.put("extra", extra);
         map.put("insertion", languageFilter ? message.languageFilterMessage : message.message);
         json.add(map);

@@ -59,7 +59,7 @@ public final class Msg {
                                 String tooltip, String command) {
         Map<String, Object> map = new HashMap<>();
         map.put("text", format(chat));
-        map.put("color", color.name().toLowerCase());
+        map.put("color", color.getName().toLowerCase());
         if (insertion != null) {
             map.put("insertion", insertion);
         }
