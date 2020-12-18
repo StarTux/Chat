@@ -162,7 +162,7 @@ public final class MessageFilter {
                 if (matcher.find()) {
                     int index = components.indexOf(this);
                     Map<String, Object> raw = new HashMap<>();
-                    raw.put("text", "[item]");
+                    raw.put("text", "item");
                     Map<String, Object> hoverEvent = new HashMap<>();
                     raw.put("hoverEvent", hoverEvent);
                     hoverEvent.put("action", "show_item");
@@ -170,18 +170,43 @@ public final class MessageFilter {
                     Player player = Bukkit.getPlayer(sender);
                     if (player != null) {
                         ItemStack item = player.getInventory().getItemInMainHand();
-                        if (item != null) {
-                            value.put("id", "minecraft:" + item.getType().name().toLowerCase());
+                        if (item != null && item.getAmount() > 0) {
+                            value.put("id", item.getType().getKey().toString());
                             value.put("Count", item.getAmount());
-                            value.put("tag", Dirty.getItemTag(item));
-                            String name = getItemDisplayName(item);
-                            if (name != null) {
-                                raw.put("text", "[" + name + "]");
+                            Map<String, Object> tag = Dirty.getItemTag(item);
+                            boolean hasDisplayName = false;
+                            if (tag != null) {
+                                value.put("tag", tag);
+                                Object o = tag.get("display");
+                                if (o instanceof Map) {
+                                    @SuppressWarnings("unchecked")
+                                    Map<String, Object> displayTag = (Map<String, Object>) o;
+                                    Object nameTag = displayTag.get("Name");
+                                    if (nameTag != null) {
+                                        if (nameTag instanceof String) {
+                                            nameTag = GSON.fromJson((String) nameTag, Object.class);
+                                        }
+                                        if (nameTag instanceof Map) {
+                                            @SuppressWarnings("unchecked")
+                                            Map<String, Object> extraMap = (Map<String, Object>) nameTag;
+                                            Object extraTag = extraMap.get("extra");
+                                            if (extraTag != null) nameTag = extraTag;
+                                        }
+                                        raw.put("text", "");
+                                        raw.put("extra", nameTag);
+                                        hasDisplayName = true;
+                                    }
+                                }
+                            }
+                            if (!hasDisplayName) {
+                                raw.put("text", item.getI18NDisplayName());
                             }
                         }
                     }
                     hoverEvent.put("value", GSON.toJson(value));
+                    components.add(index, new RawComponent("]", ChatColor.RESET + "]"));
                     components.add(index, new RawComponent("[item]", raw));
+                    components.add(index, new RawComponent("[", "["));
                     components.add(index, new Component(message.substring(0, matcher.start())));
                     message = message.substring(matcher.end());
                     return true;
@@ -208,7 +233,7 @@ public final class MessageFilter {
             }
         }
 
-        Map<String, Object> toJson() {
+        Object toJson() {
             Map<String, Object> result = new HashMap<>();
             result.put("text", message);
             return result;
@@ -238,8 +263,9 @@ public final class MessageFilter {
         }
 
         @Override
-        Map<String, Object> toJson() {
-            Map<String, Object> result = super.toJson();
+        Object toJson() {
+            Map<String, Object> result = new HashMap<>();
+            result.put("text", message);
             Map<String, Object> clickEvent = new HashMap<>();
             result.put("clickEvent", clickEvent);
             clickEvent.put("action", "open_url");
@@ -256,9 +282,9 @@ public final class MessageFilter {
     }
 
     private final class RawComponent extends Component {
-        private final Map<String, Object> raw;
+        private final Object raw;
 
-        RawComponent(final String message, final Map<String, Object> raw) {
+        RawComponent(final String message, final Object raw) {
             super(message);
             this.raw = raw;
         }
@@ -272,8 +298,8 @@ public final class MessageFilter {
 
         @Override void colorize() { }
 
-        @Override Map<String, Object> toJson() {
-            return this.raw;
+        @Override Object toJson() {
+            return raw;
         }
     }
 
