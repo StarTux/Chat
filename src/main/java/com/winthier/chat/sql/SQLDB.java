@@ -44,11 +44,12 @@ public final class SQLDB {
      * Load player database in the cache, hopefully async!
      */
     public static void load(UUID uuid) {
-        SQLSetting.findSettings(uuid);
-        SQLIgnore.findIgnores(uuid);
+        SQLSetting.loadSettingsAsync(uuid);
+        SQLIgnore.loadIgnoresAsync(uuid);
     }
 
     public static void load() {
         SQLPattern.load();
+        SQLSetting.loadDefaultSettingsAsync();
     }
 }

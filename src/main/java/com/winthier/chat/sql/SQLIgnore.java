@@ -22,11 +22,6 @@ public final class SQLIgnore {
     // Cache
     private static class Ignores {
         private final Map<UUID, SQLIgnore> map = new HashMap<>();
-        private final long created = System.currentTimeMillis();
-        private boolean tooOld() {
-            return !neverTooOld && System.currentTimeMillis() - created > 1000 * 60;
-        }
-        private boolean neverTooOld = false;
     }
     private static final Map<UUID, Ignores> CACHE = new HashMap<>();
 
@@ -40,28 +35,8 @@ public final class SQLIgnore {
         setIgnoree(ignoree);
     }
 
-    public static Ignores findIgnores(final UUID player) {
-        Ignores result = CACHE.get(player);
-        boolean refresh = false;
-        if (result == null) {
-            refresh = true;
-            result = new Ignores();
-            result.neverTooOld = true;
-            CACHE.put(player, result);
-        } else if (result.tooOld()) {
-            refresh = true;
-            result.neverTooOld = true;
-        }
-        if (refresh) {
-            SQLDB.get().find(SQLIgnore.class).where().eq("player", player).findListAsync(list -> {
-                    Ignores ignores = new Ignores();
-                    for (SQLIgnore ignore : list) {
-                        ignores.map.put(ignore.getIgnoree(), ignore);
-                    }
-                    CACHE.put(player, ignores);
-                });
-        }
-        return result;
+    public static Ignores findIgnores(final UUID uuid) {
+        return CACHE.computeIfAbsent(uuid, u -> new Ignores());
     }
 
     public static boolean ignore(UUID player, UUID ignoree, boolean shouldIgnore) {
@@ -104,5 +79,19 @@ public final class SQLIgnore {
 
     static void clearCache() {
         CACHE.clear();
+    }
+
+    public static void loadIgnoresAsync(UUID uuid) {
+        SQLDB.get().find(SQLIgnore.class).where().eq("player", uuid).findListAsync(list -> {
+                Ignores old = CACHE.get(uuid);
+                Ignores ignores = new Ignores();
+                for (SQLIgnore ignore : list) {
+                    ignores.map.put(ignore.getIgnoree(), ignore);
+                }
+                CACHE.put(uuid, ignores);
+                if (old != null) {
+                    ignores.map.putAll(old.map);
+                }
+            });
     }
 }

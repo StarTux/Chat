@@ -33,16 +33,11 @@ public final class SQLSetting {
     @Getter @RequiredArgsConstructor
     public static final class Settings {
         private final Map<Key, SQLSetting> map = new HashMap<>();
-        private final long created = System.currentTimeMillis();
-        private boolean tooOld() {
-            return !neverTooOld && System.currentTimeMillis() - created > 1000 * 60;
-        }
-        private boolean neverTooOld = false;
     }
 
     // Cache
     private static final Map<UUID, Settings> CACHE = new HashMap<>();
-    private static Settings defaultSettings = null;
+    @Getter private static Settings defaultSettings = new Settings();
 
     // Content
     @Id private Integer id;
@@ -84,48 +79,11 @@ public final class SQLSetting {
         return result;
     }
 
-    public static Settings getDefaultSettings() {
-        boolean refresh = false;
-        if (defaultSettings == null) {
-            refresh = true;
-            defaultSettings = new Settings();
-            defaultSettings.neverTooOld = true;
-        } else if (defaultSettings.tooOld()) {
-            refresh = true;
-            defaultSettings.neverTooOld = true;
-        }
-        if (refresh) {
-            SQLDB.get().find(SQLSetting.class).where().isNull("uuid").findListAsync(list -> {
-                    defaultSettings = makeSettings(list);
-                });
-        }
-        return defaultSettings;
-    }
-
-    protected static Settings findSettings(final UUID uuid) {
-        Settings result = CACHE.get(uuid);
-        boolean refresh = false;
-        if (result == null) {
-            refresh = true;
-            result = new Settings();
-            result.neverTooOld = true;
-            CACHE.put(uuid, result);
-        } else if (result.tooOld()) {
-            refresh = true;
-            result.neverTooOld = true;
-        }
-        if (refresh) {
-            SQLDB.get().find(SQLSetting.class).where().eq("uuid", uuid).findListAsync(list -> {
-                    Settings settings = makeSettings(list);
-                    CACHE.put(uuid, settings);
-                });
-        }
-        return result;
-    }
-
     public static SQLSetting find(UUID uuid, String channel, String key) {
-        if (uuid == null) return getDefaultSettings().map.get(new Key(uuid, channel, key));
-        return findSettings(uuid).map.get(new Key(uuid, channel, key));
+        if (uuid == null) return defaultSettings.map.get(new Key(uuid, channel, key));
+        Settings settings = CACHE.get(uuid);
+        if (settings == null) return null;
+        return settings.map.get(new Key(uuid, channel, key));
     }
 
     static void clearCache(UUID uuid) {
@@ -146,9 +104,14 @@ public final class SQLSetting {
         if (result == null) {
             result = new SQLSetting(uuid, channel, key, value);
             if (uuid == null) {
-                getDefaultSettings().map.put(new Key(uuid, channel, key), result);
+                defaultSettings.map.put(new Key(uuid, channel, key), result);
             } else {
-                findSettings(uuid).map.put(new Key(uuid, channel, key), result);
+                Settings settings = CACHE.get(uuid);
+                if (settings == null) {
+                    settings = new Settings();
+                    CACHE.put(uuid, settings);
+                }
+                settings.map.put(new Key(uuid, channel, key), result);
             }
             SQLDB.get().saveAsync(result, null);
         } else {
@@ -246,5 +209,22 @@ public final class SQLSetting {
         setting = find(null, channel, key);
         if (setting != null && setting.getSettingUuid() != null) return setting.getSettingUuid();
         return dfl;
+    }
+
+    protected static void loadDefaultSettingsAsync() {
+        SQLDB.get().find(SQLSetting.class).where().isNull("uuid").findListAsync(list -> {
+                defaultSettings = makeSettings(list);
+            });
+    }
+
+    protected static void loadSettingsAsync(UUID uuid) {
+        SQLDB.get().find(SQLSetting.class).where().eq("uuid", uuid).findListAsync(list -> {
+                Settings old = CACHE.get(uuid);
+                Settings settings = makeSettings(list);
+                CACHE.put(uuid, settings);
+                if (old != null) {
+                    settings.map.putAll(old.map);
+                }
+            });
     }
 }
