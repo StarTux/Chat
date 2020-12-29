@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.winthier.chat.sql.SQLPattern;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -191,6 +192,9 @@ public final class MessageFilter {
                                             Map<String, Object> extraMap = (Map<String, Object>) nameTag;
                                             Object extraTag = extraMap.get("extra");
                                             if (extraTag != null) nameTag = extraTag;
+                                        }
+                                        if (!(nameTag instanceof List)) {
+                                            nameTag = Arrays.asList(nameTag);
                                         }
                                         raw.put("text", "");
                                         raw.put("extra", nameTag);
