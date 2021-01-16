@@ -297,4 +297,9 @@ public abstract class AbstractChannel implements Channel {
         player.playSound(player.getEyeLocation(), soundCue.sound, vol, 1.0f);
         return true;
     }
+
+    protected final boolean shouldCancelMessage(Player player, String message) {
+        if (player.hasPermission("chat.nocancel")) return false;
+        return message.strip().length() <= 1;
+    }
 }

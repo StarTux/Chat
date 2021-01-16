@@ -103,3 +103,6 @@ permissions:
   chat.item:
     description: Paste items in chat
     default: op
+  chat.nocancel:
+    description: Never cancel sent messages
+    default: op

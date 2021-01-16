@@ -44,14 +44,14 @@ public final class PartyChannel extends AbstractChannel {
         if (c.message == null || c.message.isEmpty()) {
             setFocusChannel(c.player.getUniqueId());
             Msg.info(c.player, "Now focusing party %s&r", partyName);
-        } else {
-            SQLLog.store(c.player, this, partyName, c.message);
-            Message message = makeMessage(c.player, c.message);
-            if (message.shouldCancel) return;
-            message.targetName = partyName;
-            ChatPlugin.getInstance().didCreateMessage(this, message);
-            handleMessage(message);
+            return;
         }
+        SQLLog.store(c.player, this, partyName, c.message);
+        Message message = makeMessage(c.player, c.message);
+        if (message.shouldCancel) return;
+        message.targetName = partyName;
+        ChatPlugin.getInstance().didCreateMessage(this, message);
+        handleMessage(message);
     }
 
     @Override
