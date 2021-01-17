@@ -312,7 +312,7 @@ public abstract class AbstractChannel implements Channel {
         }
         if (len <= 1) return true;
         for (int i = 1; i < nlen; i += 1) {
-            char d = nmessage.charAt(i);
+            char d = Character.toLowerCase(nmessage.charAt(i));
             if (c != d) return false;
         }
         return true;
