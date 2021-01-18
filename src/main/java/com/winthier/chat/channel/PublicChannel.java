@@ -40,7 +40,6 @@ public final class PublicChannel extends AbstractChannel {
             Msg.info(c.player, "Now focusing %s&r.", getTitle());
             return;
         }
-        if (shouldCancelMessage(c.player, c.message)) return;
         SQLLog.store(c.player, this, null, c.message);
         Message message = makeMessage(c.player, c.message);
         if (message.shouldCancel) return;

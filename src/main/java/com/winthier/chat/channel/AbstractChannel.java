@@ -297,24 +297,4 @@ public abstract class AbstractChannel implements Channel {
         player.playSound(player.getEyeLocation(), soundCue.sound, vol, 1.0f);
         return true;
     }
-
-    protected final boolean shouldCancelMessage(Player player, String message) {
-        if (player.hasPermission("chat.nocancel")) return false;
-        message = message.strip();
-        int len = message.length();
-        char c = Character.toLowerCase(message.charAt(0));
-        if (c >= '0' && c <= '9') return false; // any number
-        if ((c < 'a' || c > 'z') && c != '.') return false; // not a letter
-        String nmessage = message.replace(" ", "");
-        int nlen = nmessage.length();
-        if (nlen <= 3) {
-            if (c == 'k' || c == 'g') return false; // gg or kk
-        }
-        if (len <= 1) return true;
-        for (int i = 1; i < nlen; i += 1) {
-            char d = Character.toLowerCase(nmessage.charAt(i));
-            if (c != d) return false;
-        }
-        return true;
-    }
 }
