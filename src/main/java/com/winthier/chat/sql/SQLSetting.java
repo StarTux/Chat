@@ -1,6 +1,5 @@
 package com.winthier.chat.sql;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +43,6 @@ public final class SQLSetting {
     @Column(nullable = true, length = 16) private String channel;
     @Column(nullable = false, length = 32) private String settingKey;
     @Column(nullable = true, length = 64) private String settingValue;
-    @Version private Date version;
 
     public SQLSetting(final UUID uuid, final String channel, final String key, final Object value) {
         setUuid(uuid);
