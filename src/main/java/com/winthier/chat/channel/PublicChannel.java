@@ -41,7 +41,20 @@ public final class PublicChannel extends AbstractChannel {
             return;
         }
         SQLLog.store(c.player, this, null, c.message);
-        Message message = makeMessage(c.player, c.message);
+        String cMessage = c.message;
+        if (cMessage.length() > 3 && !c.player.hasPermission("chat.caps")) {
+            boolean allCaps = true;
+            for (int i = 0; i < cMessage.length(); i += 1) {
+                if (Character.isLowerCase(cMessage.charAt(i))) {
+                    allCaps = false;
+                    break;
+                }
+            }
+            if (allCaps) {
+                cMessage = cMessage.toLowerCase();
+            }
+        }
+        Message message = makeMessage(c.player, cMessage);
         if (message.shouldCancel) return;
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
