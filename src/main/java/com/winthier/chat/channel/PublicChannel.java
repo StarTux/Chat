@@ -94,8 +94,13 @@ public final class PublicChannel extends AbstractChannel {
                 if ((long) dist > maxDistance) continue;
             }
             send(message, player);
-            if (player.getGameMode() != GameMode.SPECTATOR && sender != null && !sender.equals(player) && sender.canSee(player)) {
-                seenCount += 1;
+            // Being in GM3 only doesn't count you if you also have
+            // the chat.invisible permission. Otherwise, legitimate
+            // spectators wouldn't count.
+            if (ranged && sender != null && !sender.equals(player) && sender.canSee(player)) {
+                boolean invisible = !sender.canSee(player)
+                    || (player.getGameMode() == GameMode.SPECTATOR && player.hasPermission("chat.invisible"));
+                if (!invisible) seenCount += 1;
             }
         }
         if (ranged && sender != null && seenCount == 0) {

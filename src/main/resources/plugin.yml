@@ -106,3 +106,6 @@ permissions:
   chat.caps:
     description: Override the all-caps check
     default: op
+  chat.invisible:
+    description: Do not count for the local chat warning while invisible
+    default: false
