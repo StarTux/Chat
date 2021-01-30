@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 public final class PublicChannel extends AbstractChannel {
@@ -79,22 +80,26 @@ public final class PublicChannel extends AbstractChannel {
                : "")
             + message.message;
         ChatPlugin.getInstance().getLogger().info(log);
-        long maxDistance;
-        if (range > 0 && message.location != null) {
-            maxDistance = (long) range * range;
-        } else {
-            maxDistance = 0L;
-        }
+        final boolean ranged = range > 0 && message.location != null;
+        long maxDistance = ranged ? (long) range * range : 0L;
+        Player sender = message.sender != null ? Bukkit.getPlayer(message.sender) : null;
+        int seenCount = 0;
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!canJoin(player.getUniqueId())) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;
-            if (maxDistance > 0L) {
+            if (ranged) {
                 if (!message.location.getWorld().equals(player.getWorld())) continue;
                 double dist = message.location.distanceSquared(player.getLocation());
                 if ((long) dist > maxDistance) continue;
             }
             send(message, player);
+            if (player.getGameMode() != GameMode.SPECTATOR && sender != null && !sender.equals(player) && sender.canSee(player)) {
+                seenCount += 1;
+            }
+        }
+        if (ranged && sender != null && seenCount == 0) {
+            sender.sendMessage(ChatColor.WHITE + "[Chat] " + ChatColor.YELLOW + "Nobody is in range to hear you");
         }
     }
 
