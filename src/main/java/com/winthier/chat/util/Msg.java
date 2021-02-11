@@ -13,8 +13,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public final class Msg {
+    public static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+
     private Msg() { }
-    static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     public static String format(String msg, Object... args) {
         if (msg == null) return "";
@@ -55,8 +56,7 @@ public final class Msg {
         }
     }
 
-    public static Object button(ChatColor color, String chat, String insertion,
-                                String tooltip, String command) {
+    public static Object button(ChatColor color, String chat, String insertion, String tooltip, String command, List<Object> extra) {
         Map<String, Object> map = new HashMap<>();
         map.put("text", format(chat));
         map.put("color", color.getName().toLowerCase());
@@ -75,7 +75,14 @@ public final class Msg {
             hoverEvent.put("action", "show_text");
             hoverEvent.put("value", format(tooltip));
         }
+        if (extra != null) {
+            map.put("extra", extra);
+        }
         return map;
+    }
+
+    public static Object button(ChatColor color, String chat, String insertion, String tooltip, String command) {
+        return button(color, chat, insertion, tooltip, command, null);
     }
 
     public static Object button(ChatColor color, String chat, String tooltip, String command) {

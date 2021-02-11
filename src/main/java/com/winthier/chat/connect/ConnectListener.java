@@ -22,16 +22,12 @@ public final class ConnectListener implements Listener {
         String channel = event.getMessage().getChannel();
         if (channel.equals(CHANNEL)) {
             Object o = event.getMessage().getPayload();
-            if (o instanceof Map) {
-                @SuppressWarnings("unchecked")
-                    Map<String, Object> map = (Map<String, Object>) o;
-                Message message = Message.deserialize(map);
-                if (message == null) {
-                    ChatPlugin.getInstance().getLogger()
-                        .warning("Failed to deserialize message: " + map);
-                } else {
-                    ChatPlugin.getInstance().didReceiveMessage(message);
-                }
+            if (!(o instanceof String)) return;
+            Message message = Message.deserialize((String) o);
+            if (message == null) {
+                ChatPlugin.getInstance().getLogger().warning("Failed to deserialize message: " + o);
+            } else {
+                ChatPlugin.getInstance().didReceiveMessage(message);
             }
         } else if (channel.equals("BUNGEE_PLAYER_JOIN")) {
             @SuppressWarnings("unchecked")

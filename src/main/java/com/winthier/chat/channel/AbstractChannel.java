@@ -156,7 +156,7 @@ public abstract class AbstractChannel implements Channel {
     }
 
     final void fillMessage(Message message) {
-        if (message.senderTitle == null) {
+        if (message.senderTitle == null && message.senderTitleJson == null) {
             ChatPlugin.getInstance().loadTitle(message);
         }
         if (message.json == null || message.languageFilterJson == null) {
@@ -211,15 +211,26 @@ public abstract class AbstractChannel implements Channel {
     }
 
     final Object senderTitleTag(Message message, ChatColor bracketColor, BracketType bracketType) {
-        if (message.senderTitle == null) return "";
-        String text = bracketColor + bracketType.opening
-            + Msg.format(message.senderTitle)
-            + bracketColor + bracketType.closing;
-        String tooltip = Msg.format(message.senderTitle)
-            + (message.senderTitleDescription != null
-               ? "\n&5&o" + message.senderTitleDescription
-               : "");
-        return Msg.button(bracketColor, text, tooltip, null);
+         if (message.senderTitleJson != null) {
+            List<Object> list = (List<Object>) Msg.GSON.fromJson(message.senderTitleJson, List.class);
+            if (list == null) return "";
+            List<Object> extra = new ArrayList<>();
+            extra.add(Msg.button(bracketColor, bracketType.opening, null, null));
+            extra.addAll(list);
+            extra.add(Msg.button(bracketColor, bracketType.closing, null, null));
+            return Msg.button(bracketColor, "", null, ChatColor.RESET + message.senderTitleDescription, null, extra);
+         } else if (message.senderTitle != null) {
+            String text = bracketColor + bracketType.opening
+                + Msg.format(message.senderTitle)
+                + bracketColor + bracketType.closing;
+            String tooltip = Msg.format(message.senderTitle)
+                + (message.senderTitleDescription != null
+                   ? "\n&r" + message.senderTitleDescription
+                   : "");
+            return Msg.button(bracketColor, text, tooltip, null);
+        } else {
+            return "";
+        }
     }
 
     final Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor,

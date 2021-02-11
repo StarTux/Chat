@@ -1,5 +1,6 @@
 package com.winthier.chat;
 
+import com.winthier.chat.util.Msg;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ public final class Message {
     public String targetName;
     public String senderTitle;
     public String senderTitleDescription;
+    public String senderTitleJson;
     public String senderServer;
     public String senderServerDisplayName;
 
@@ -55,45 +57,11 @@ public final class Message {
         return result instanceof List ? (List<Object>)result : null;
     }
 
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        store(map, "sender", sender);
-        store(map, "senderName", senderName);
-        store(map, "channel", channel);
-        store(map, "special", special);
-        store(map, "target", target);
-        store(map, "targetName", targetName);
-        store(map, "senderTitle", senderTitle);
-        store(map, "senderTitleDescription", senderTitleDescription);
-        store(map, "senderServer", senderServer);
-        store(map, "senderServerDisplayName", senderServerDisplayName);
-        store(map, "message", message);
-        store(map, "languageFilterMessage", languageFilterMessage);
-        store(map, "json", json);
-        store(map, "languageFilterJson", languageFilterJson);
-        return map;
+    public String serialize() {
+        return Msg.GSON.toJson(this);
     }
 
-    private void read(Map<String, Object> map) {
-        sender = fetchUuid(map, "sender");
-        senderName = fetchString(map, "senderName");
-        channel = fetchString(map, "channel");
-        special = fetchString(map, "special");
-        target = fetchUuid(map, "target");
-        targetName = fetchString(map, "targetName");
-        senderTitle = fetchString(map, "senderTitle");
-        senderTitleDescription = fetchString(map, "senderTitleDescription");
-        senderServer = fetchString(map, "senderServer");
-        senderServerDisplayName = fetchString(map, "senderServerDisplayName");
-        message = fetchString(map, "message");
-        languageFilterMessage = fetchString(map, "languageFilterMessage");
-        json = fetchList(map, "json");
-        languageFilterJson = fetchList(map, "languageFilterJson");
-    }
-
-    public static Message deserialize(Map<String, Object> map) {
-        Message result = new Message();
-        result.read(map);
-        return result;
+    public static Message deserialize(String in) {
+        return Msg.GSON.fromJson(in, Message.class);
     }
 }

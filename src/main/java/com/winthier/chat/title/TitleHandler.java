@@ -10,6 +10,7 @@ public final class TitleHandler {
         Title title = TitlePlugin.getInstance().getPlayerTitle(message.sender);
         if (title == null) return;
         message.senderTitle = title.getTitle();
+        message.senderTitleJson = title.getTitleJson();
         message.senderTitleDescription = title.getDescription();
     }
 }

@@ -138,6 +138,7 @@ public final class PrivateChannel extends AbstractChannel {
         message.sender = player.getUniqueId();
         message.senderName = player.getName();
         message.senderTitle = null;
+        message.senderTitleJson = null;
         message.senderTitleDescription = null;
         message.senderServer = ChatPlugin.getInstance().getServerName();
         message.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
