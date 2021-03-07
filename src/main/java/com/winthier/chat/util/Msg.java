@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.winthier.chat.ChatPlugin;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.md_5.bungee.api.ChatColor;
@@ -57,20 +57,20 @@ public final class Msg {
     }
 
     public static Object button(ChatColor color, String chat, String insertion, String tooltip, String command, List<Object> extra) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         map.put("text", format(chat));
         map.put("color", color.getName().toLowerCase());
         if (insertion != null) {
             map.put("insertion", insertion);
         }
         if (command != null) {
-            Map<String, Object> clickEvent = new HashMap<>();
+            Map<String, Object> clickEvent = new LinkedHashMap<>();
             map.put("clickEvent", clickEvent);
             clickEvent.put("action", command.endsWith(" ") ? "suggest_command" : "run_command");
             clickEvent.put("value", command);
         }
         if (tooltip != null) {
-            Map<String, Object> hoverEvent = new HashMap<>();
+            Map<String, Object> hoverEvent = new LinkedHashMap<>();
             map.put("hoverEvent", hoverEvent);
             hoverEvent.put("action", "show_text");
             hoverEvent.put("value", format(tooltip));
@@ -78,6 +78,13 @@ public final class Msg {
         if (extra != null) {
             map.put("extra", extra);
         }
+        return map;
+    }
+
+    public static Object extra(Object x) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("text", "");
+        map.put("extra", x);
         return map;
     }
 

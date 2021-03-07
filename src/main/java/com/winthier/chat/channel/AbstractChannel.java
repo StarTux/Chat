@@ -218,14 +218,29 @@ public abstract class AbstractChannel implements Channel {
             extra.add(Msg.button(bracketColor, bracketType.opening, null, null));
             extra.addAll(list);
             extra.add(Msg.button(bracketColor, bracketType.closing, null, null));
-            return Msg.button(bracketColor, "", null, ChatColor.RESET + message.senderTitleDescription, null, extra);
+            List<Object> tooltip = new ArrayList<>();
+            tooltip.add(Msg.extra(list));
+            if (message.senderTitleDescription != null) {
+                Map<String, Object> tooltip2 = new HashMap<>();
+                tooltip2.put("text", "\n" + Msg.format(message.senderTitleDescription));
+                tooltip.add(tooltip2);
+            }
+            Map<String, Object> hoverEvent = new HashMap<>();
+            hoverEvent.put("action", "show_text");
+            hoverEvent.put("value", tooltip);
+            Map<String, Object> result = new HashMap<>();
+            result.put("color", bracketColor.getName().toLowerCase());
+            result.put("text", "");
+            result.put("extra", extra);
+            result.put("hoverEvent", hoverEvent);
+            return result;
          } else if (message.senderTitle != null) {
             String text = bracketColor + bracketType.opening
                 + Msg.format(message.senderTitle)
                 + bracketColor + bracketType.closing;
             String tooltip = Msg.format(message.senderTitle)
                 + (message.senderTitleDescription != null
-                   ? "\n&r" + message.senderTitleDescription
+                   ? "\n&f" + message.senderTitleDescription
                    : "");
             return Msg.button(bracketColor, text, tooltip, null);
         } else {
