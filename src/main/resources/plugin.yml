@@ -32,7 +32,7 @@ commands:
     aliases: [ l ]
     permission: chat.channel.local
   trusted:
-    aliases: [ tr, st ]
+    aliases: [ tr ]
     permission: chat.channel.trusted
   moderator:
     aliases: [ mc ]

@@ -33,7 +33,7 @@ channels:
   trusted:
     tag: Tr
     title: Trusted
-    aliases: [ tr, st ]
+    aliases: [ tr ]
     description: Trusted chat
   information:
     tag: Info
