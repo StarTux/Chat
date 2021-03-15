@@ -5,6 +5,7 @@ import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -78,6 +79,6 @@ public final class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event) {
-        event.setLeaveMessage(null);
+        event.leaveMessage(Component.empty());
     }
 }
