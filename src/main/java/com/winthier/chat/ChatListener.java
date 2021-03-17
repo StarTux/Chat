@@ -12,6 +12,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -101,7 +102,7 @@ public final class ChatListener implements Listener {
         Channel localChannel = plugin.findChannel("local");
         if (localChannel != null && localChannel instanceof AbstractChannel) {
             AbstractChannel channel = (AbstractChannel) localChannel;
-            Message message = channel.makeMessage(player, deathMessage.toString());
+            Message message = channel.makeMessage(player, PlainComponentSerializer.plain().serialize(deathMessage));
             String string = GsonComponentSerializer.gson().serialize(deathMessage);
             Object obj = Msg.GSON.fromJson(string, Object.class);
             List<Object> json = obj instanceof List ? (List<Object>) obj : Arrays.asList(obj);
