@@ -103,7 +103,7 @@ public final class PublicChannel extends AbstractChannel {
                 if (!invisible) seenCount += 1;
             }
         }
-        if (ranged && sender != null && seenCount == 0) {
+        if (!message.isPassive() && ranged && sender != null && seenCount == 0) {
             sender.sendMessage(ChatColor.WHITE + "[Chat] " + ChatColor.YELLOW + "Nobody is in range to hear you");
         }
     }
@@ -132,28 +132,37 @@ public final class PublicChannel extends AbstractChannel {
         json.add("");
         if (message.prefix != null) json.add(message.prefix);
         // Channel Tag
+        boolean tagsShown = false;
         if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false)) {
             json.add(channelTag(channelColor, bracketColor, bracketType));
+            tagsShown = true;
         }
-        // Server Tag
-        if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", false)) {
-            json.add(serverTag(message, channelColor, bracketColor, bracketType));
+        if (!message.isHideSenderTags()) {
+            // Server Tag
+            if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", false)) {
+                json.add(serverTag(message, channelColor, bracketColor, bracketType));
+            tagsShown = true;
+            }
+            // Player Title
+            if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", true)) {
+                json.add(senderTitleTag(message, bracketColor, bracketType));
+            tagsShown = true;
+            }
+            // Player Name
+            json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
+            if (!tagPlayerName && message.senderName != null) {
+                json.add(Msg.button(bracketColor, ":", null, null));
+            tagsShown = true;
+            }
         }
-        // Player Title
-        if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", true)) {
-            json.add(senderTitleTag(message, bracketColor, bracketType));
+        if (tagsShown) {
+            json.add(" ");
         }
-        // Player Name
-        json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
-        if (!tagPlayerName && message.senderName != null) {
-            json.add(Msg.button(bracketColor, ":", null, null));
-        }
-        json.add(" ");
         // Message
         boolean languageFilter = SQLSetting.getBoolean(uuid, key, "LanguageFilter", true);
         appendMessage(json, message, textColor, languageFilter);
         Msg.raw(player, json);
         // Sound Cue
-        playSoundCue(player);
+        if (!message.isPassive()) playSoundCue(player);
     }
 }

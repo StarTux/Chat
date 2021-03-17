@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.Data;
 import org.bukkit.Location;
 
+@Data
 public final class Message {
     public UUID sender;
     public String senderName;
@@ -24,6 +26,9 @@ public final class Message {
     public String languageFilterMessage;
     public List<Object> json;
     public List<Object> languageFilterJson;
+
+    protected boolean hideSenderTags;
+    protected boolean passive;
 
     transient public Location location;
     transient public boolean shouldCancel = false;

@@ -159,17 +159,21 @@ public abstract class AbstractChannel implements Channel {
         if (message.senderTitle == null && message.senderTitleJson == null) {
             ChatPlugin.getInstance().loadTitle(message);
         }
-        if (message.json == null || message.languageFilterJson == null) {
+        if (message.message != null && (message.json == null || message.languageFilterJson == null)) {
             MessageFilter filter = new MessageFilter(message.sender, message.message);
             filter.process();
-            message.json = filter.getJson();
-            message.languageFilterJson = filter.getLanguageFilterJson();
+            if (message.json == null) {
+                message.json = filter.getJson();
+            }
+            if (message.languageFilterJson == null) {
+                message.languageFilterJson = filter.getLanguageFilterJson();
+            }
             message.languageFilterMessage = filter.toString();
             message.shouldCancel = filter.shouldCancel();
         }
     }
 
-    final Message makeMessage(Player player, String text) {
+    public final Message makeMessage(Player player, String text) {
         Message message = new Message();
         message.channel = getKey();
         if (player != null) {

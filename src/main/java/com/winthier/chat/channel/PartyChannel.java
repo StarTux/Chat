@@ -111,8 +111,10 @@ public final class PartyChannel extends AbstractChannel {
         json.add("");
         if (message.prefix != null) json.add(message.prefix);
         // Channel Tag
+        boolean tagsShown = false;
         if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false)) {
             json.add(channelTag(channelColor, bracketColor, bracketType));
+            tagsShown = true;
         }
         // Party Name Tag
         String text = ""
@@ -120,20 +122,27 @@ public final class PartyChannel extends AbstractChannel {
             + channelColor + partyName
             + bracketColor + bracketType.closing;
         json.add(Msg.button(channelColor, text, null, "/p "));
-        // Server Tag
-        if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", false)) {
-            json.add(serverTag(message, channelColor, bracketColor, bracketType));
+        if (!message.isHideSenderTags()) {
+            // Server Tag
+            if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", false)) {
+                json.add(serverTag(message, channelColor, bracketColor, bracketType));
+                tagsShown = true;
+            }
+            // Player Title
+            if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", false)) {
+                json.add(senderTitleTag(message, bracketColor, bracketType));
+                tagsShown = true;
+            }
+            // Player Name
+            json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
+            if (!tagPlayerName && message.senderName != null) {
+                json.add(Msg.button(bracketColor, ":", null, null));
+                tagsShown = true;
+            }
         }
-        // Player Title
-        if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", false)) {
-            json.add(senderTitleTag(message, bracketColor, bracketType));
+        if (tagsShown) {
+            json.add(" ");
         }
-        // Player Name
-        json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
-        if (!tagPlayerName && message.senderName != null) {
-            json.add(Msg.button(bracketColor, ":", null, null));
-        }
-        json.add(" ");
         // Message
         boolean languageFilter = SQLSetting.getBoolean(uuid, key, "LanguageFilter", true);
         appendMessage(json, message, textColor, languageFilter);
