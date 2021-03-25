@@ -324,7 +324,7 @@ public abstract class AbstractChannel implements Channel {
         if (soundCue == null) return false;
         int volume = SQLSetting.getInt(player.getUniqueId(), getKey(), "SoundCueChatVolume", 10);
         float vol = (float) volume / 10.0f;
-        player.playSound(player.getEyeLocation(), soundCue.sound, vol, 1.0f);
+        player.playSound(player.getLocation(), soundCue.sound, vol, 1.0f);
         return true;
     }
 }
