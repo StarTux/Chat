@@ -84,12 +84,22 @@ permissions:
   chat.channel.local:
     default: false
   chat.channel.trusted:
+    description: Trusted channel
+    default: false
+  chat.channel.trusted.join:
+    description: Join the Trusted channel
     default: false
   chat.channel.moderator:
+    description: Moderator channel
+    default: false
+  chat.channel.moderator.join:
+    description: Join the Moderator channel
     default: false
   chat.channel.admin:
+    description: Admin channel
     default: false
   chat.channel.admin.join:
+    description: Join the Admin channel
     default: false
   chat.channel.information:
     default: false
