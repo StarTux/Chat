@@ -233,7 +233,6 @@ public abstract class AbstractChannel implements Channel {
             hoverEvent.put("action", "show_text");
             hoverEvent.put("value", tooltip);
             Map<String, Object> result = new HashMap<>();
-            result.put("color", bracketColor.getName().toLowerCase());
             result.put("text", "");
             result.put("extra", extra);
             result.put("hoverEvent", hoverEvent);
