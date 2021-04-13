@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -99,6 +100,7 @@ public final class ChatListener implements Listener {
         if (deathMessage == null) return;
         Player player = event.getEntity();
         event.deathMessage(Component.empty());
+        if (!player.getWorld().getGameRuleValue(GameRule.SHOW_DEATH_MESSAGES)) return;
         Channel localChannel = plugin.findChannel("local");
         if (localChannel != null && localChannel instanceof AbstractChannel) {
             AbstractChannel channel = (AbstractChannel) localChannel;
