@@ -44,14 +44,12 @@ public final class PrivateChannel extends AbstractChannel {
             if (!hasPermission(player)) return;
             if (!isJoined(player.getUniqueId())) return;
         }
-        Component component = makeOutput(message, player);
         if (special != null || !shouldIgnore(player.getUniqueId(), message)) {
-            player.sendMessage(component);
+            send(message, player);
         }
         if (special == null) {
             SQLSetting.set(player.getUniqueId(), getKey(), "ReplyName", message.getSenderName());
-            sendAck(message, player, component);
-            playSoundCue(player);
+            sendAck(message, player);
         }
     }
 
@@ -113,30 +111,33 @@ public final class PrivateChannel extends AbstractChannel {
         BracketType bracketType = tmp != null ? BracketType.of(tmp) : BracketType.ANGLE;
         TextComponent.Builder cb = Component.text();
         if (showChannelTag) {
-            cb = cb.append(makeChannelTag(channelColor, bracketColor, bracketType));
+            cb.append(makeChannelTag(channelColor, bracketColor, bracketType));
         }
         if (showServer) {
-            cb = cb.append(makeServerTag(message, channelColor, bracketColor, bracketType));
+            cb.append(makeServerTag(message, channelColor, bracketColor, bracketType));
         }
         // From/To
-        cb = cb.append(Component.text((ack ? "To " : "From "), senderColor));
+        cb.append(Component.text((ack ? "To " : "From "), senderColor));
         if (showPlayerTitle) {
-            cb = cb.append(makeTitleTag(message, bracketColor, bracketType));
+            cb.append(makeTitleTag(message, bracketColor, bracketType));
         }
-        cb = cb.append(makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
+        cb.append(makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
         if (!tagPlayerName) {
-            cb = cb.append(Component.text(":", bracketColor));
+            cb.append(Component.text(":", bracketColor));
         }
         cb.append(Component.text(" "));
-        cb = cb.append(makeMessageComponent(message, target, textColor, languageFilter));
+        Component messageComponent = makeMessageComponent(message, target, textColor, languageFilter);
+        cb.append(messageComponent);
+        message.message(messageComponent);
         return cb.build();
     }
 
-    void sendAck(Message old, Player player, Component component) {
-        Message message = new Message().init(this).player(player).message(component);
+    void sendAck(Message old, Player player) {
+        Message message = new Message().init(this).player(player);
         message.setSpecial("Ack");
         message.setTarget(old.getSender());
         message.setTargetName(old.getSenderName());
+        message.setMessageJson(old.getMessageJson());
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
