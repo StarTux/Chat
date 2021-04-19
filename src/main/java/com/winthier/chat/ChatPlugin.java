@@ -373,6 +373,7 @@ public final class ChatPlugin extends JavaPlugin {
         message.setSenderName(name);
         message.setLocal(true);
         message.setPassive(true);
+        message.setHideSenderTags(true);
         channel.handleMessage(message);
     }
 
@@ -386,6 +387,7 @@ public final class ChatPlugin extends JavaPlugin {
         message.setSenderName(name);
         message.setLocal(true);
         message.setPassive(true);
+        message.setHideSenderTags(true);
         channel.handleMessage(message);
     }
 }
