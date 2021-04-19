@@ -113,8 +113,8 @@ public final class PublicChannel extends AbstractChannel {
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
         boolean languageFilter = SQLSetting.getBoolean(uuid, null, "LanguageFilter", true);
         boolean showServer = SQLSetting.getBoolean(uuid, key, "ShowServer", false);
-        boolean showPlayerTitle = SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", false);
-        boolean showChannelTag = SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false);
+        boolean showPlayerTitle = SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", true);
+        boolean showChannelTag = SQLSetting.getBoolean(uuid, key, "ShowChannelTag", true);
         String tmp = SQLSetting.getString(uuid, key, "BracketType", null);
         BracketType bracketType = tmp != null ? BracketType.of(tmp) : BracketType.ANGLE;
         TextComponent.Builder cb = Component.text();
