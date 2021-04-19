@@ -215,7 +215,7 @@ public abstract class AbstractChannel implements Channel {
             .append(Component.text("\nTime ", kcolor)).append(Component.text(timeFormat.format(new Date(message.getTime())), vcolor))
             .decoration(TextDecoration.ITALIC, false)
             .build();
-        TextComponent.Builder cb = Component.text();
+        TextComponent.Builder cb = Component.text().color(senderColor);
         if (useBrackets) {
             cb = cb.append(Component.text(bracketType.opening, bracketColor));
         }
