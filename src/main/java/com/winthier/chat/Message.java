@@ -1,66 +1,45 @@
 package com.winthier.chat;
 
+import com.winthier.chat.channel.Channel;
+import com.winthier.chat.util.Filter;
 import com.winthier.chat.util.Msg;
-import java.util.HashMap;
+import com.winthier.title.Title;
+import com.winthier.title.TitlePlugin;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import lombok.Data;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 @Data
 public final class Message {
-    public UUID sender;
-    public String senderName;
-    public String channel;
-    public String special;
-    public UUID target;
-    public String targetName;
-    public String senderTitle;
-    public String senderTitleDescription;
-    public String senderTitleJson;
-    public String senderServer;
-    public String senderServerDisplayName;
+    private long time;
+    private UUID sender;
+    private String senderName;
+    private String senderDisplayNameJson;
+    private String channel;
+    private String special;
+    private UUID target; // PM
+    private String targetName; // PM, Party
+    private String senderServer;
+    private String senderServerDisplayName;
+    private Title title;
 
-    public String message;
-    public String languageFilterMessage;
-    public List<Object> json;
-    public List<Object> languageFilterJson;
+    private String message;
+    private String messageJson;
+    private List<String> urls;
 
-    protected boolean hideSenderTags;
-    protected boolean passive;
+    private boolean hideSenderTags;
+    private boolean passive;
 
-    transient public Location location;
-    transient public boolean shouldCancel = false;
-    transient public String prefix = null;
+    private String itemJson;
 
-    transient public boolean local;
-
-    private static void store(Map<String, Object> map, String key, Object value) {
-        if (value == null) return;
-        if (value instanceof UUID) {
-            map.put(key, ((UUID)value).toString());
-        } else {
-            map.put(key, value);
-        }
-    }
-
-    private static String fetchString(Map<String, Object> map, String key) {
-        Object result = map.get(key);
-        return result == null ? null : result.toString();
-    }
-
-    private static UUID fetchUuid(Map<String, Object> map, String key) {
-        String result = fetchString(map, key);
-        return result == null ? null : UUID.fromString(result);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<Object> fetchList(Map<String, Object> map, String key) {
-        Object result = map.get(key);
-        if (result == null) return null;
-        return result instanceof List ? (List<Object>)result : null;
-    }
+    private transient Location location;
+    private transient boolean local;
 
     public String serialize() {
         return Msg.GSON.toJson(this);
@@ -68,5 +47,101 @@ public final class Message {
 
     public static Message deserialize(String in) {
         return Msg.GSON.fromJson(in, Message.class);
+    }
+
+    public Message init(Channel theChannel) {
+        this.channel = theChannel.getKey();
+        this.time = System.currentTimeMillis();
+        this.senderServer = ChatPlugin.getInstance().getServerName();
+        this.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
+        return this;
+    }
+
+    public Message player(final Player player) {
+        this.sender = player.getUniqueId();
+        this.senderName = player.getName();
+        Component displayName = player.displayName();
+        if (displayName != null) this.senderDisplayNameJson = Msg.toJson(displayName);
+        this.location = player.getLocation();
+        this.title = TitlePlugin.getInstance().getPlayerTitle(player);
+        return this;
+    }
+
+    public Message player(final Player player, String msg) {
+        player(player);
+        if (!player.hasPermission("chat.caps")) {
+            msg = Filter.filterCaps(msg);
+        }
+        if (!player.hasPermission("chat.unicode")) {
+            msg = Filter.filterUnicode(msg);
+        }
+        boolean color = player.hasPermission("chat.color");
+        boolean format = player.hasPermission("chat.format");
+        boolean obfuscate = player.hasPermission("chat.obfuscate");
+        if (color || format || obfuscate) {
+            msg = Filter.filterLegacyColors(msg, color, format, obfuscate);
+        }
+        if (player.hasPermission("chat.item") && msg.contains("[item]")) {
+            ItemStack itemStack = player.getInventory().getItemInMainHand();
+            if (itemStack != null) {
+                Component itemName;
+                if (itemStack.hasItemMeta()) {
+                    ItemMeta itemMeta = itemStack.getItemMeta();
+                    itemName = itemMeta.hasDisplayName()
+                        ? itemMeta.displayName()
+                        : Component.text(itemStack.getI18NDisplayName());
+                } else {
+                    itemName = Component.text(itemStack.getI18NDisplayName());
+                }
+                Component itemComponent = Component.text()
+                    .append(Component.text("[", NamedTextColor.WHITE))
+                    .append(itemName)
+                    .append(Component.text("]", NamedTextColor.WHITE))
+                    .hoverEvent(itemStack.asHoverEvent())
+                    .build();
+                itemJson = Msg.toJson(itemComponent);
+            }
+        }
+        if (player.hasPermission("chat.url")) {
+            this.urls = Filter.findUrls(msg);
+        }
+        this.message = msg;
+        return this;
+    }
+
+    public Message player(final Player player, final Component msg) {
+        player(player);
+        this.messageJson = Msg.toJson(msg);
+        this.message = Msg.plain(msg);
+        return this;
+    }
+
+    public Message console(final String msg) {
+        this.sender = null;
+        this.senderName = "Console";
+        this.message = msg;
+        this.urls = Filter.findUrls(msg);
+        return this;
+    }
+
+    public Message message(Component component) {
+        this.messageJson = Msg.toJson(component);
+        this.message = Msg.plain(component);
+        return this;
+    }
+
+    public Component getSenderDisplayName() {
+        if (senderDisplayNameJson == null) return null;
+        return Msg.parseComponent(senderDisplayNameJson);
+    }
+
+    public Component getMessageComponent() {
+        if (messageJson == null) return null;
+        return Msg.parseComponent(messageJson);
+    }
+
+    public Component getItemComponent() {
+        if (itemJson == null) return null;
+        return Msg.parseComponent(itemJson);
     }
 }

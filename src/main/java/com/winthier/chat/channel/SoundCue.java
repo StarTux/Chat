@@ -19,7 +19,7 @@ public enum SoundCue {
     DONKEY(Sound.ENTITY_DONKEY_AMBIENT),
     VILLAGER(Sound.ENTITY_VILLAGER_TRADE);
 
-    SoundCue(Sound sound) {
+    SoundCue(final Sound sound) {
         this.sound = sound;
     }
 

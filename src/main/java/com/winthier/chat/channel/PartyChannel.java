@@ -8,12 +8,41 @@ import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public final class PartyChannel extends AbstractChannel {
+    private final Component usage = TextComponent
+        .ofChildren(Component.text("Usage", NamedTextColor.GRAY, TextDecoration.ITALIC),
+                    Component.text("\n"),
+                    Component.text("/party ", NamedTextColor.GREEN),
+                    Component.text("<name>", NamedTextColor.GREEN, TextDecoration.ITALIC),
+                    Component.text(" - ", NamedTextColor.DARK_GRAY),
+                    Component.text("Join a party", NamedTextColor.WHITE),
+                    Component.text("\n"),
+                    Component.text("/party ", NamedTextColor.GREEN),
+                    Component.text("quit", NamedTextColor.GREEN, TextDecoration.ITALIC),
+                    Component.text(" - ", NamedTextColor.DARK_GRAY),
+                    Component.text("Quit any party", NamedTextColor.WHITE),
+                    Component.text("\n"),
+                    Component.text("/p ", NamedTextColor.GREEN),
+                    Component.text("<message>", NamedTextColor.GREEN, TextDecoration.ITALIC),
+                    Component.text(" - ", NamedTextColor.DARK_GRAY),
+                    Component.text("Send a message", NamedTextColor.WHITE),
+                    Component.text("\n"),
+                    Component.text("/p ", NamedTextColor.GREEN),
+                    Component.text(" - ", NamedTextColor.DARK_GRAY),
+                    Component.text("Focus party chat", NamedTextColor.WHITE));
+
     @Override
     public boolean canJoin(UUID player) {
         String perm = "chat.channel." + key;
@@ -33,23 +62,24 @@ public final class PartyChannel extends AbstractChannel {
     @Override
     public void playerDidUseCommand(PlayerCommandContext c) {
         if (getRange() < 0) return;
-        if (!isJoined(c.player.getUniqueId())) {
-            joinChannel(c.player.getUniqueId());
+        Player player = c.getPlayer();
+        String msg = c.getMessage();
+        if (!isJoined(player.getUniqueId())) {
+            joinChannel(player.getUniqueId());
         }
-        String partyName = getPartyName(c.player.getUniqueId());
+        String partyName = getPartyName(player.getUniqueId());
         if (partyName == null) {
-            Msg.warn(c.player, "Join a party first.");
+            Msg.warn(player, Component.text("You're not in a party", NamedTextColor.RED));
             return;
         }
-        if (c.message == null || c.message.isEmpty()) {
-            setFocusChannel(c.player.getUniqueId());
-            Msg.info(c.player, "Now focusing party %s&r", partyName);
+        if (msg == null || msg.isEmpty()) {
+            setFocusChannel(player.getUniqueId());
+            Msg.info(player, Component.text("Now focusing party " + partyName, NamedTextColor.WHITE));
             return;
         }
-        SQLLog.store(c.player, this, partyName, c.message);
-        Message message = makeMessage(c.player, c.message);
-        if (message.shouldCancel) return;
-        message.targetName = partyName;
+        SQLLog.store(player, this, partyName, msg);
+        Message message = new Message().init(this).player(player, msg);
+        message.setTargetName(partyName);
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
@@ -60,95 +90,93 @@ public final class PartyChannel extends AbstractChannel {
         if (arr.length != 2) return;
         String target = arr[0];
         msg = arr[1];
-        Message message = makeMessage(null, msg);
-        message.senderName = "Console";
-        message.targetName = target;
+        Message message = new Message().init(this).console(msg);
         SQLLog.store("Console", this, target, msg);
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
 
+    @Override
     public void handleMessage(Message message) {
-        fillMessage(message);
-        if (message.shouldCancel && message.sender != null) return;
         String log = String.format("[%s][%s][%s]%s: %s",
-                                   getTag(), message.targetName,
-                                   message.senderServer, message.senderName,
-                                   message.message);
+                                   getTag(), message.getTargetName(),
+                                   message.getSenderServer(), message.getSenderName(),
+                                   message.getMessage());
         ChatPlugin.getInstance().getLogger().info(log);
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;
-            if (!message.targetName.equals(getPartyName(player.getUniqueId()))) continue;
+            String playerParty = getPartyName(player.getUniqueId());
+            if (!Objects.equals(message.getTargetName(), playerParty)) continue;
             send(message, player);
         }
     }
 
     @Override
-    public void exampleOutput(Player player) {
-        Message message = makeMessage(player, "Hello World");
-        message.targetName = "Example";
-        message.prefix = (Msg.format(" &7&oPreview&r "));
-        send(message, player);
+    public Component makeExampleOutput(Player player) {
+        Message message = new Message().init(this).player(player, "Hello World");
+        message.setTargetName("Example");
+        return makeOutput(message, player);
     }
 
-    void send(Message message, Player player) {
+    @Override
+    public Component makeOutput(Message message, Player player) {
         UUID uuid = player.getUniqueId();
         String key = getKey();
-        String partyName = message.targetName;
-        List<Object> json = new ArrayList<>();
-        final ChatColor white = ChatColor.WHITE;
-        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", white);
-        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", white);
-        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", white);
-        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", white);
+        String partyName = message.getTargetName();
+        final TextColor white = NamedTextColor.WHITE;
+        TextColor channelColor = SQLSetting.getTextColor(uuid, key, "ChannelColor", white);
+        TextColor textColor = SQLSetting.getTextColor(uuid, key, "TextColor", white);
+        TextColor senderColor = SQLSetting.getTextColor(uuid, key, "SenderColor", white);
+        TextColor bracketColor = SQLSetting.getTextColor(uuid, key, "BracketColor", white);
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
+        boolean languageFilter = SQLSetting.getBoolean(uuid, null, "LanguageFilter", true);
+        boolean showServer = SQLSetting.getBoolean(uuid, key, "ShowServer", false);
+        boolean showPlayerTitle = SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", false);
+        boolean showChannelTag = SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false);
         String tmp = SQLSetting.getString(uuid, key, "BracketType", null);
-        BracketType bracketType = tmp != null
-            ? BracketType.of(tmp)
-            : BracketType.ANGLE;
-        json.add("");
-        if (message.prefix != null) json.add(message.prefix);
-        // Channel Tag
-        boolean tagsShown = false;
-        if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false)) {
-            json.add(channelTag(channelColor, bracketColor, bracketType));
-            tagsShown = true;
+        BracketType bracketType = tmp != null ? BracketType.of(tmp) : BracketType.ANGLE;
+        TextComponent.Builder cb = Component.text();
+        if (showChannelTag) {
+            cb = cb.append(makeChannelTag(channelColor, bracketColor, bracketType));
         }
-        // Party Name Tag
-        String text = ""
-            + bracketColor + bracketType.opening
-            + channelColor + partyName
-            + bracketColor + bracketType.closing;
-        json.add(Msg.button(channelColor, text, null, "/p "));
+        cb = cb.append(makePartyTag(partyName, bracketType, bracketColor, channelColor));
         if (!message.isHideSenderTags()) {
             // Server Tag
-            if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", false)) {
-                json.add(serverTag(message, channelColor, bracketColor, bracketType));
-                tagsShown = true;
+            if (showServer) {
+                cb = cb.append(makeServerTag(message, channelColor, bracketColor, bracketType));
             }
             // Player Title
-            if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", false)) {
-                json.add(senderTitleTag(message, bracketColor, bracketType));
-                tagsShown = true;
+            if (showPlayerTitle) {
+                cb = cb.append(makeTitleTag(message, bracketColor, bracketType));
             }
             // Player Name
-            json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
-            if (!tagPlayerName && message.senderName != null) {
-                json.add(Msg.button(bracketColor, ":", null, null));
-                tagsShown = true;
+            Component senderTag = makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName);
+            if (!Objects.equals(senderTag, Component.empty())) {
+                cb = cb.append(senderTag);
+                if (!tagPlayerName) {
+                    cb = cb.append(Component.text(": ", bracketColor));
+                }
             }
         }
-        if (tagsShown) {
-            json.add(" ");
-        }
-        // Message
-        boolean languageFilter = SQLSetting.getBoolean(uuid, key, "LanguageFilter", true);
-        appendMessage(json, message, textColor, languageFilter);
-        Msg.raw(player, json);
-        // Sound Cue
-        playSoundCue(player);
+        cb.append(Component.text(" "));
+        cb = cb.append(makeMessageComponent(message, player, textColor, languageFilter));
+        return cb.build();
+    }
+
+    Component makePartyTag(String partyName, BracketType bracketType, TextColor bracketColor, TextColor channelColor) {
+        Component tooltip = Component.text()
+            .append(Component.text("Party ", NamedTextColor.GRAY)).append(Component.text(partyName, NamedTextColor.WHITE))
+            .decoration(TextDecoration.ITALIC, false)
+            .build();
+        return Component.text()
+            .append(Component.text(bracketType.opening, bracketColor))
+            .append(Component.text(partyName, channelColor))
+            .append(Component.text(bracketType.closing, bracketColor))
+            .clickEvent(ClickEvent.suggestCommand("/p "))
+            .hoverEvent(HoverEvent.showText(tooltip))
+            .build();
     }
 
     String getPartyName(UUID uuid) {
@@ -160,51 +188,52 @@ public final class PartyChannel extends AbstractChannel {
     }
 
     void partyCommand(PlayerCommandContext context) {
-        final String[] args = context.message == null
-            ? new String[0]
-            : context.message.split("\\s+");
-        UUID uuid = context.player.getUniqueId();
+        String msg = context.getMessage();
+        Player player = context.getPlayer();
+        final String[] args = msg == null ? new String[0] : msg.split("\\s+");
+        UUID uuid = player.getUniqueId();
         String partyName = getPartyName(uuid);
         if (args.length == 0) {
             if (partyName == null) {
-                usage(context.player);
+                usage(player);
             } else {
-                listPlayers(context.player, partyName);
+                listPlayers(player, partyName);
             }
         } else if (args.length == 1) {
             String arg = args[0];
             if ("quit".equalsIgnoreCase(arg) || "q".equalsIgnoreCase(arg)) {
                 if (partyName == null) {
-                    Msg.warn(context.player, "You are not in a party.");
+                    Msg.warn(player, Component.text("You're not in a party.", NamedTextColor.RED));
                 } else {
                     setPartyName(uuid, null);
-                    Msg.info(context.player, "Quit party %s.", partyName);
+                    Msg.info(player, Component.text("You left party " + partyName, NamedTextColor.YELLOW));
                 }
             } else {
                 setPartyName(uuid, arg);
-                Msg.info(context.player, "Joined party %s.", arg);
+                Msg.info(player, Component.text("You joined party " + arg, NamedTextColor.WHITE));
             }
         } else {
-            usage(context.player);
+            usage(player);
         }
     }
 
     void usage(Player player) {
-        Msg.send(player, "&oUsage:&r &a/Party <&oName&a>&r|&aQuit");
+        Msg.info(player, usage);
     }
 
     void listPlayers(Player player, String partyName) {
-        List<Object> json = new ArrayList<>();
-        json.add(Msg.format("&oParty &a%s&r:", partyName));
-        ChatColor senderColor = SQLSetting
-            .getChatColor(player.getUniqueId(), getKey(), "SenderColor", ChatColor.WHITE);
+        TextColor senderColor = SQLSetting.getTextColor(player.getUniqueId(), getKey(), "SenderColor", NamedTextColor.WHITE);
+        TextColor channelColor = SQLSetting.getTextColor(player.getUniqueId(), getKey(), "ChannelColor", NamedTextColor.WHITE);
+        List<Component> chatters = new ArrayList<>();
         for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
             String otherPartyName = getPartyName(chatter.getUuid());
-            if (otherPartyName != null && otherPartyName.equals(partyName)) {
-                json.add(" ");
-                json.add(Msg.button(senderColor, chatter.getName(), null, null));
+            if (Objects.equals(partyName, otherPartyName)) {
+                chatters.add(Component.text(chatter.getName(), senderColor));
             }
         }
-        Msg.raw(player, json);
+        TextComponent.Builder cb = Component.text();
+        cb = cb.append(Component.text("Party " + partyName + "(" + chatters.size() + "): ", channelColor));
+        cb = cb.append(Component.join(Component.text(", ", NamedTextColor.DARK_GRAY), chatters));
+        player.sendMessage(cb.build());
     }
 }

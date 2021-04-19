@@ -2,18 +2,14 @@ package com.winthier.chat.sql;
 
 import java.util.List;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Entity
 @Table(name = "channels",
        uniqueConstraints = @UniqueConstraint(columnNames = {"channel_key"}))
-@Getter @Setter @NoArgsConstructor
+@Data
 public final class SQLChannel {
     // Content
     @Id private Integer id;
@@ -22,7 +18,7 @@ public final class SQLChannel {
     @Column(nullable = false, length = 16) private String title;
     @Column(nullable = false, length = 64) private String aliases;
     @Column(nullable = false, length = 255) private String description;
-    private Integer localRange;
+    @Column(nullable = false) private int localRange;
 
     /**
      * Called through ChatPlugin::onEnable() and AdminCommand /reload.

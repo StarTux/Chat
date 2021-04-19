@@ -24,12 +24,14 @@ public final class SQLLog {
     @Column(nullable = false) private Date time;
     @Column(nullable = false, length = 16) private String server;
     private String world;
-    private Integer x, y, z;
+    private Integer x;
+    private Integer y;
+    private Integer z;
     @Column(nullable = false, length = 16) private String channel;
     private String target;
     @Column(nullable = false, length = 511) private String message;
 
-    private SQLLog(String sender, Channel channel, String target, String message) {
+    private SQLLog(final String sender, final Channel channel, final String target, final String message) {
         setTime(new Date());
         setServer(ChatPlugin.getInstance().getServerName());
         setSender(sender);
@@ -38,7 +40,7 @@ public final class SQLLog {
         setMessage(message);
     }
 
-    private SQLLog(Player player, Channel channel, String target, String message) {
+    private SQLLog(final Player player, final Channel channel, final String target, final String message) {
         setTime(new Date());
         setServer(ChatPlugin.getInstance().getServerName());
         setPlayer(player.getUniqueId());

@@ -5,9 +5,10 @@ version: 0.1
 api-version: 1.13
 website: https://cavetale.com
 main: com.winthier.chat.ChatPlugin
-depend: [SQL, GenericEvents, Dirty]
-softdepend: [Connect, Title, PlayerCache, dynmap]
+depend: [SQL, GenericEvents, Core, Title]
+softdepend: [Connect, PlayerCache, dynmap]
 commands:
+
   chat:
     aliases: [ ch ]
     description: Command interface
@@ -54,21 +55,48 @@ commands:
     permission: chat.channel.party
   p:
     permission: chat.channel.party
+
 permissions:
+
   chat.chat:
     description: Use /chat
     default: op
   chat.admin:
     description: Use /chatadmin
     default: op
+
   chat.pm:
+    description: Send and receive private messages
     default: false
+  chat.joinmessage:
+    description: Display join and leave messages
+    default: false
+  chat.invisible:
+    description: Do not count for the local chat warning while invisible
+    default: false
+
   chat.url:
-    default: false
+    description: Pose clickable links in chat
+    default: op
   chat.color:
-    default: false
-  chat.staff:
-    default: false
+    description: Use legacy color codes
+    default: op
+  chat.format:
+    description: Use legacy formatting codes
+    default: op
+  chat.unicode:
+    description: Use any unicode character
+    default: op
+  chat.obfuscate:
+    description: Use legacy magic code
+    default: op
+  chat.item:
+    description: Paste items in chat
+    default: op
+  chat.caps:
+    description: Override the all-caps check
+    default: op
+
   chat.channel.*:
     default: false
     children:
@@ -106,16 +134,4 @@ permissions:
   chat.channel.mini:
     default: false
   chat.channel.party:
-    default: false
-  chat.joinmessage:
-    description: Display join and leave messages
-    default: op
-  chat.item:
-    description: Paste items in chat
-    default: op
-  chat.caps:
-    description: Override the all-caps check
-    default: op
-  chat.invisible:
-    description: Do not count for the local chat warning while invisible
     default: false

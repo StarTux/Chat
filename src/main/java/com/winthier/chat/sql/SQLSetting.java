@@ -5,21 +5,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.Value;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.ChatColor;
 
-@Entity
 @Table(name = "settings",
        uniqueConstraints = @UniqueConstraint(columnNames = {"uuid", "channel", "setting_key"}))
-@Getter @Setter @NoArgsConstructor
+@Data @NoArgsConstructor
 public final class SQLSetting {
     @Value
     private static final class Key {
@@ -28,7 +27,7 @@ public final class SQLSetting {
         private final String key;
     }
 
-    @Getter @RequiredArgsConstructor
+    @Value
     public static final class Settings {
         private final Map<Key, SQLSetting> map = new HashMap<>();
     }
@@ -61,7 +60,7 @@ public final class SQLSetting {
             setSettingValue(bv ? "1" : "0");
         } else if (value instanceof ChatColor) {
             ChatColor color = (ChatColor) value;
-            setSettingValue(color.getName().toLowerCase());
+            setSettingValue(color.name().toLowerCase());
         } else {
             setSettingValue(value.toString());
         }
@@ -137,7 +136,17 @@ public final class SQLSetting {
         String v = getSettingValue();
         if (v == null) return null;
         try {
-            return ChatColor.of(v.toUpperCase());
+            return ChatColor.valueOf(v.toUpperCase());
+        } catch (IllegalArgumentException iae) {
+            return null;
+        }
+    }
+
+    TextColor getTextColor() {
+        String v = getSettingValue();
+        if (v == null) return null;
+        try {
+            return NamedTextColor.NAMES.value(v);
         } catch (IllegalArgumentException iae) {
             return null;
         }
@@ -194,6 +203,23 @@ public final class SQLSetting {
         }
         setting = find(null, channel, key);
         if (setting != null && setting.getChatColor() != null) return setting.getChatColor();
+        return dfl;
+    }
+
+    public static TextColor getTextColor(UUID uuid, String channel, String key, TextColor dfl) {
+        SQLSetting setting;
+        if (uuid != null) {
+            setting = find(uuid, channel, key);
+            if (setting != null) {
+                TextColor textColor = setting.getTextColor();
+                if (textColor != null) return textColor;
+            }
+        }
+        setting = find(null, channel, key);
+        if (setting != null) {
+            TextColor textColor = setting.getTextColor();
+            if (textColor != null) return textColor;
+        }
         return dfl;
     }
 

@@ -106,10 +106,10 @@
       <optional>true</optional>
     </dependency>
 
-    <!-- Dirty -->
+    <!-- Core -->
     <dependency>
-      <groupId>com.cavetale.dirty</groupId>
-      <artifactId>dirty</artifactId>
+      <groupId>com.cavetale.core</groupId>
+      <artifactId>core</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
       <optional>true</optional>

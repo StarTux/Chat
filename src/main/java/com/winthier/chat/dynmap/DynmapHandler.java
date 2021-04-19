@@ -9,14 +9,14 @@ import org.dynmap.DynmapAPI;
 public final class DynmapHandler implements Listener {
     DynmapAPI getDynmap() {
         Plugin pl = Bukkit.getServer().getPluginManager().getPlugin("dynmap");
-        if (pl != null && pl instanceof DynmapAPI) return (DynmapAPI)pl;
+        if (pl != null && pl instanceof DynmapAPI) return (DynmapAPI) pl;
         return null;
     }
 
     public void postPlayerMessage(Message message) {
-        String msg = message.languageFilterMessage;
-        if (msg == null) msg = message.message;
-        String sender = message.senderName;
+        String msg = message.getMessage();
+        if (msg == null) return;
+        String sender = message.getSenderName();
         if (sender == null) sender = "Announcement";
         getDynmap().postPlayerMessageToWeb(sender, sender, msg);
     }

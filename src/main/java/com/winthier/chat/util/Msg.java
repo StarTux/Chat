@@ -2,102 +2,36 @@ package com.winthier.chat.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.winthier.chat.ChatPlugin;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 public final class Msg {
     public static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     private Msg() { }
 
-    public static String format(String msg, Object... args) {
-        if (msg == null) return "";
-        msg = ChatColor.translateAlternateColorCodes('&', msg);
-        if (args.length > 0) {
-            msg = String.format(msg, args);
-        }
-        return msg;
+    public static void info(CommandSender to, Component content) {
+        to.sendMessage(TextComponent.ofChildren(Component.text().content("[Chat]").color(NamedTextColor.DARK_AQUA)
+                                                .clickEvent(ClickEvent.suggestCommand("/ch"))
+                                                .hoverEvent(HoverEvent.showText(Component.text("/ch", NamedTextColor.DARK_AQUA)))
+                                                .build(),
+                                                Component.text(" "),
+                                                content));
     }
 
-    public static void send(CommandSender to, String msg, Object... args) {
-        to.sendMessage(format(msg, args));
-    }
-
-    public static void info(CommandSender to, String msg, Object... args) {
-        to.sendMessage(format("&r[&3Chat&r] ") + format(msg, args));
-    }
-
-    public static void warn(CommandSender to, String msg, Object... args) {
-        to.sendMessage(format("&r[&cChat&r] &c") + format(msg, args));
-    }
-
-    static void consoleCommand(String cmd, Object... args) {
-        if (args.length > 0) cmd = String.format(cmd, args);
-        if (ChatPlugin.getInstance().isDebugMode()) {
-            ChatPlugin.getInstance().getLogger().info("Running console command: " + cmd);
-        }
-        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
-    }
-
-    public static void raw(Player player, Object... obj) {
-        if (obj.length == 0) return;
-        if (obj.length == 1) {
-            consoleCommand("minecraft:tellraw %s %s", player.getName(), GSON.toJson(obj[0]));
-        } else {
-            consoleCommand("minecraft:tellraw %s %s",
-                           player.getName(), GSON.toJson(Arrays.asList(obj)));
-        }
-    }
-
-    public static Object button(ChatColor color, String chat, String insertion, String tooltip, String command, List<Object> extra) {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("text", format(chat));
-        map.put("color", color.getName().toLowerCase());
-        if (insertion != null) {
-            map.put("insertion", insertion);
-        }
-        if (command != null) {
-            Map<String, Object> clickEvent = new LinkedHashMap<>();
-            map.put("clickEvent", clickEvent);
-            clickEvent.put("action", command.endsWith(" ") ? "suggest_command" : "run_command");
-            clickEvent.put("value", command);
-        }
-        if (tooltip != null) {
-            Map<String, Object> hoverEvent = new LinkedHashMap<>();
-            map.put("hoverEvent", hoverEvent);
-            hoverEvent.put("action", "show_text");
-            hoverEvent.put("value", format(tooltip));
-        }
-        if (extra != null) {
-            map.put("extra", extra);
-        }
-        return map;
-    }
-
-    public static Object extra(Object x) {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("text", "");
-        map.put("extra", x);
-        return map;
-    }
-
-    public static Object button(ChatColor color, String chat, String insertion, String tooltip, String command) {
-        return button(color, chat, insertion, tooltip, command, null);
-    }
-
-    public static Object button(ChatColor color, String chat, String tooltip, String command) {
-        return button(color, chat, null, tooltip, command);
-    }
-
-    public static Object button(String chat, String tooltip, String command) {
-        return button(ChatColor.WHITE, chat, null, tooltip, command);
+    public static void warn(CommandSender to, Component content) {
+        to.sendMessage(TextComponent.ofChildren(Component.text().content("[Chat]").color(NamedTextColor.DARK_RED)
+                                                .clickEvent(ClickEvent.suggestCommand("/ch"))
+                                                .hoverEvent(HoverEvent.showText(Component.text("/ch", NamedTextColor.DARK_RED)))
+                                                .build(),
+                                                Component.text(" "),
+                                                content));
     }
 
     public static String camelCase(String msg) {
@@ -110,25 +44,15 @@ public final class Msg {
         return sb.toString();
     }
 
-    public static String jsonToString(Object json) {
-        if (json == null) {
-            return "";
-        } else if (json instanceof List) {
-            StringBuilder sb = new StringBuilder();
-            for (Object o: (List) json) {
-                sb.append(jsonToString(o));
-            }
-            return sb.toString();
-        } else if (json instanceof Map) {
-            Map map = (Map) json;
-            StringBuilder sb = new StringBuilder();
-            sb.append(map.get("text"));
-            sb.append(map.get("extra"));
-            return sb.toString();
-        } else if (json instanceof String) {
-            return (String) json;
-        } else {
-            return json.toString();
-        }
+    public static String plain(Component component) {
+        return PlainComponentSerializer.plain().serialize(component);
+    }
+
+    public static String toJson(Component component) {
+        return GsonComponentSerializer.gson().serialize(component);
+    }
+
+    public static Component parseComponent(String in) {
+        return GsonComponentSerializer.gson().deserialize(in);
     }
 }

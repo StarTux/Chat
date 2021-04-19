@@ -17,9 +17,7 @@ import com.winthier.chat.playercache.PlayerCacheHandler;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
-import com.winthier.chat.sql.SQLPattern;
 import com.winthier.chat.sql.SQLSetting;
-import com.winthier.chat.title.TitleHandler;
 import com.winthier.generic_events.GenericEvents;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
@@ -29,7 +27,9 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -45,13 +45,12 @@ public final class ChatPlugin extends JavaPlugin {
     private final List<CommandResponder> commandResponders = new ArrayList<>();
     private final List<Channel> channels = new ArrayList<>();
     private ConnectListener connectListener = null;
-    private TitleHandler titleHandler = null;
     private ChatListener chatListener = new ChatListener(this);
     private PrivateChannel privateChannel = null;
     private PartyChannel partyChannel = null;
     private PlayerCacheHandler playerCacheHandler = null;
     private DynmapHandler dynmapHandler = null;
-    private ChatCommand chatCommand = new ChatCommand();
+    private ChatCommand chatCommand = new ChatCommand(this);
     @Setter private boolean debugMode = false;
     private SQLDatabase db;
 
@@ -71,12 +70,6 @@ public final class ChatPlugin extends JavaPlugin {
         } else {
             getLogger().warning("Connect plugin NOT found!");
         }
-        if (getServer().getPluginManager().isPluginEnabled("Title")) {
-            titleHandler = new TitleHandler();
-            getLogger().info("Title plugin found!");
-        } else {
-            getLogger().warning("Title plugin NOT found!");
-        }
         if (getServer().getPluginManager().isPluginEnabled("PlayerCache")) {
             playerCacheHandler = new PlayerCacheHandler();
             getLogger().info("PlayerCache plugin found!");
@@ -91,8 +84,8 @@ public final class ChatPlugin extends JavaPlugin {
             getLogger().warning("Dynmap plugin NOT found!");
         }
         getServer().getPluginManager().registerEvents(chatListener, this);
-        getCommand("chatadmin").setExecutor(new AdminCommand());
-        getCommand("chat").setExecutor(chatCommand);
+        new AdminCommand(this).enable();
+        chatCommand.enable();
         getCommand("join").setExecutor(new JoinLeaveCommand(true));
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
         getCommand("ignore").setExecutor(new IgnoreCommand());
@@ -182,9 +175,7 @@ public final class ChatPlugin extends JavaPlugin {
                 channel.setKey(chan.getChannelKey());
                 channel.setTitle(chan.getTitle());
                 channel.setDescription(chan.getDescription());
-                if (chan.getLocalRange() != null) {
-                    channel.setRange(chan.getLocalRange());
-                }
+                channel.setRange(chan.getLocalRange());
             }
             commandResponders.add(cmd);
             if (cmd instanceof Channel) {
@@ -198,33 +189,6 @@ public final class ChatPlugin extends JavaPlugin {
         YamlConfiguration config;
         InputStreamReader isr = new InputStreamReader(getResource("database.yml"));
         config = YamlConfiguration.loadConfiguration(isr);
-        ConfigurationSection patternSection = config.getConfigurationSection("patterns");
-        if (patternSection != null) {
-            for (String category: patternSection.getKeys(false)) {
-                for (Object o: patternSection.getList(category)) {
-                    if (o instanceof List) {
-                        List<Object> list = (List<Object>) o;
-                        if (list.size() >= 1) {
-                            SQLPattern pat = new SQLPattern();
-                            pat.setCategory(category);
-                            pat.setRegex(list.get(0).toString());
-                            if (list.size() >= 2) {
-                                pat.setReplacement(list.get(1).toString());
-                            } else {
-                                pat.setReplacement("");
-                            }
-                            getDb().save(pat);
-                        }
-                    } else if (o instanceof String) {
-                        SQLPattern pat = new SQLPattern();
-                        pat.setCategory(category);
-                        pat.setRegex((String) o);
-                        pat.setReplacement("");
-                        getDb().save(pat);
-                    }
-                }
-            }
-        }
         ConfigurationSection channelsSection = config.getConfigurationSection("channels");
         if (channelsSection != null) {
             for (String key: channelsSection.getKeys(false)) {
@@ -305,21 +269,14 @@ public final class ChatPlugin extends JavaPlugin {
         return getConfig().getString("ServerDisplayName", "N/A");
     }
 
-    public void loadTitle(Message message) {
-        if (titleHandler != null) {
-            titleHandler.loadTitle(message);
-        }
-    }
-
     public void didCreateMessage(Channel channel, Message message) {
         if (!ChatMessageEvent.call(channel, message)) {
             return;
         }
-        if (!message.local && connectListener != null && channel.getRange() == 0) {
+        if (!message.isLocal() && connectListener != null && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
         }
-        if (dynmapHandler != null
-            && SQLSetting.getBoolean(null, message.channel, "PostToDynmap", false)) {
+        if (dynmapHandler != null && SQLSetting.getBoolean(null, message.getChannel(), "PostToDynmap", false)) {
             try {
                 dynmapHandler.postPlayerMessage(message);
             } catch (Exception e) {
@@ -331,9 +288,9 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public void didReceiveMessage(Message message) {
-        Channel channel = findChannel(message.channel);
+        Channel channel = findChannel(message.getChannel());
         if (channel == null) {
-            getLogger().warning("Could not find message channel: '" + message.channel + "'");
+            getLogger().warning("Could not find message channel: '" + message.getChannel() + "'");
         } else {
             channel.handleMessage(message);
         }
@@ -388,14 +345,14 @@ public final class ChatPlugin extends JavaPlugin {
         return new Chatter(op.getUniqueId(), op.getName());
     }
 
-    public boolean announce(String channel, Object message) {
+    public boolean announce(String channel, Component message) {
         Channel ch = findChannel(channel);
         if (ch == null) return false;
         ch.announce(message);
         return true;
     }
 
-    public boolean announceLocal(String channel, Object message) {
+    public boolean announceLocal(String channel, Component message) {
         Channel ch = findChannel(channel);
         if (ch == null) return false;
         ch.announceLocal(message);
@@ -407,20 +364,28 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public void onBungeeJoin(UUID uuid, String name, String server) {
-        if (!server.equals(getServerName())) return;
-        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-            getServer().getScheduler().runTask(this, () -> {
-                    announce("info", ChatColor.GREEN + name + " joined");
-                });
-        }
+        if (!hasPermission(uuid, "chat.joinmessage")) return;
+        Channel channel = findChannel("info");
+        if (channel == null) return;
+        Message message = new Message().init(channel)
+            .message(Component.text(name + " joined", TextColor.color(0x00FF00), TextDecoration.ITALIC));
+        message.setSender(uuid);
+        message.setSenderName(name);
+        message.setLocal(true);
+        message.setPassive(true);
+        channel.handleMessage(message);
     }
 
     public void onBungeeQuit(UUID uuid, String name, String server) {
-        if (!server.equals(getServerName())) return;
-        if (GenericEvents.playerHasPermission(uuid, "chat.joinmessage")) {
-            getServer().getScheduler().runTask(this, () -> {
-                    announce("info", ChatColor.AQUA + name + " disconnected");
-                });
-        }
+        if (!hasPermission(uuid, "chat.joinmessage")) return;
+        Channel channel = findChannel("info");
+        if (channel == null) return;
+        Message message = new Message().init(channel)
+            .message(Component.text(name + " disconnected", TextColor.color(0xFF0000), TextDecoration.ITALIC));
+        message.setSender(uuid);
+        message.setSenderName(name);
+        message.setLocal(true);
+        message.setPassive(true);
+        channel.handleMessage(message);
     }
 }

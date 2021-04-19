@@ -6,10 +6,10 @@ public enum BracketType {
     CURLY("{", "}"),
     ANGLE("<", ">");
 
-    final String opening;
-    final String closing;
+    public final String opening;
+    public final String closing;
 
-    BracketType(String opening, String closing) {
+    BracketType(final String opening, final String closing) {
         this.opening = opening;
         this.closing = closing;
     }

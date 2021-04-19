@@ -3,23 +3,30 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
-import com.winthier.chat.MessageFilter;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
+import com.winthier.title.Title;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+/**
+ * Implements common methods and fields of all channels.
+ */
 @Getter @Setter
 public abstract class AbstractChannel implements Channel {
     protected String title;
@@ -32,50 +39,39 @@ public abstract class AbstractChannel implements Channel {
     protected final List<Option> options = new ArrayList<>();
 
     AbstractChannel() {
-        options.add(Option
-                    .booleanOption("ShowChannelTag", "Show Channel Tag",
-                                   "Show the channel tag at the beginning of every message",
-                                   "0"));
-        options.add(Option
-                    .booleanOption("ShowPlayerTitle", "Show Player Title",
-                                   "Show a player's current title in every message",
-                                   "1"));
-        options.add(Option
-                    .booleanOption("ShowServer", "Show Server",
-                                   "Show a player's server in every message",
-                                   "0"));
-        options.add(Option
-                    .colorOption("ChannelColor", "Channel Color",
-                                 "Main channel color",
-                                 "white"));
-        options.add(Option
-                    .colorOption("TextColor", "Text Color",
-                                 "Color of chat messages",
-                                 "white"));
-        options.add(Option
-                    .colorOption("SenderColor", "Player Color",
-                                 "Color of player names",
-                                 "white"));
-        options.add(Option
-                    .colorOption("BracketColor", "Bracket Color",
-                                 "Color of brackets and punctuation",
-                                 "white"));
-        options.add(Option
-                    .bracketOption("BracketType", "Brackets",
-                                   "Appearance of brackets",
-                                   "angle"));
-        options.add(Option
-                    .soundOption("SoundCueChat", "Chat Cue",
-                                 "Sound played when you receive a message",
-                                 "off"));
-        options.add(Option
-                    .intOption("SoundCueChatVolume", "Chat Cue Volume",
+        Option[] opts = {
+            Option.booleanOption("ShowChannelTag", "Show Channel Tag",
+                                 "Show the channel tag at the beginning of every message",
+                                 "0"),
+            Option.booleanOption("ShowPlayerTitle", "Show Player Title",
+                                 "Show a player's current title in every message",
+                                 "1"),
+            Option.booleanOption("ShowServer", "Show Server",
+                                 "Show a player's server in every message",
+                                 "0"),
+            Option.colorOption("ChannelColor", "Channel Color",
+                               "Main channel color",
+                               "white"),
+            Option.colorOption("TextColor", "Text Color",
+                               "Color of chat messages",
+                               "white"),
+            Option.colorOption("SenderColor", "Player Color",
+                               "Color of player names",
+                               "white"),
+            Option.colorOption("BracketColor", "Bracket Color",
+                               "Color of brackets and punctuation",
+                               "white"),
+            Option.bracketOption("BracketType", "Brackets",
+                                 "Appearance of brackets",
+                                 "angle"),
+            Option.soundOption("SoundCueChat", "Chat Cue",
                                "Sound played when you receive a message",
-                               "10", 1, 10));
-        options.add(Option
-                    .booleanOption("LanguageFilter", "Language Filter",
-                                   "Filter out foul language",
-                                   "1"));
+                               "off"),
+            Option.intOption("SoundCueChatVolume", "Chat Cue Volume",
+                             "Sound played when you receive a message",
+                             "10", 1, 10)
+        };
+        for (Option option : opts) options.add(option);
     }
 
     @Override
@@ -122,178 +118,151 @@ public abstract class AbstractChannel implements Channel {
     }
 
     @Override
-    public final void announce(Object msg) {
+    public final void announce(Component msg) {
         announce(msg, false);
     }
 
     @Override
-    public final void announceLocal(Object msg) {
+    public final void announceLocal(Component msg) {
         announce(msg, true);
     }
 
-    private void announce(Object msg, boolean local) {
-        Message message;
-        if (msg instanceof String) {
-            message = makeMessage(null, (String) msg);
-        } else {
-            List<Object> json;
-            if (msg instanceof List) {
-                @SuppressWarnings("unchecked")
-                List<Object> tmpson = (List<Object>) msg;
-                json = tmpson;
-            } else {
-                json = new ArrayList<>();
-                json.add(msg);
-            }
-            String str = Msg.jsonToString(msg);
-            message = makeMessage(null, str);
-            message.json = json;
-            message.languageFilterJson = json;
-        }
-        message.local = local;
+    private void announce(Component msg, boolean local) {
+        Message message = new Message().init(this).message(msg);
+        message.setLocal(local);
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
 
-    final void fillMessage(Message message) {
-        if (message.senderTitle == null && message.senderTitleJson == null) {
-            ChatPlugin.getInstance().loadTitle(message);
-        }
-        if (message.message != null && (message.json == null || message.languageFilterJson == null)) {
-            MessageFilter filter = new MessageFilter(message.sender, message.message);
-            filter.process();
-            if (message.json == null) {
-                message.json = filter.getJson();
-            }
-            if (message.languageFilterJson == null) {
-                message.languageFilterJson = filter.getLanguageFilterJson();
-            }
-            message.languageFilterMessage = filter.toString();
-            message.shouldCancel = filter.shouldCancel();
-        }
+    /**
+     * Default implementation. Applies to all channels without side
+     * effects. Meaning, all except PM.
+     */
+    protected void send(Message message, Player player) {
+        Component component = makeOutput(message, player);
+        player.sendMessage(component);
+        playSoundCue(player);
     }
 
-    public final Message makeMessage(Player player, String text) {
-        Message message = new Message();
-        message.channel = getKey();
-        if (player != null) {
-            message.sender = player.getUniqueId();
-            message.senderName = player.getName();
-            message.location = player.getLocation();
-        }
-        message.senderServer = ChatPlugin.getInstance().getServerName();
-        message.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
-        message.message = text;
-        fillMessage(message);
-        return message;
+    protected final Component makeChannelTag(TextColor channelColor, TextColor bracketColor, BracketType bracketType) {
+        Component tooltip = TextComponent
+            .ofChildren(Component.text(getTitle()),
+                        Component.text("\n" + getDescription(), NamedTextColor.DARK_PURPLE, TextDecoration.ITALIC));
+        return Component.text()
+            .append(Component.text(bracketType.opening, bracketColor))
+            .append(Component.text(getTag(), channelColor))
+            .append(Component.text(bracketType.closing, bracketColor))
+            .hoverEvent(HoverEvent.showText(tooltip))
+            .clickEvent(ClickEvent.suggestCommand("/" + getAlias()))
+            .build();
     }
 
-    final Object channelTag(ChatColor channelColor, ChatColor bracketColor,
-                            BracketType bracketType) {
-        String text = bracketColor + bracketType.opening
-            + channelColor + getTag()
-            + bracketColor + bracketType.closing;
-        String tooltip = getTitle() + "\n&5&o" + getDescription();
-        String cmd = "/" + getAlias() + " ";
-        return Msg.button(channelColor, text, tooltip, cmd);
-    }
-
-    final Object serverTag(Message message, ChatColor serverColor,
-                           ChatColor bracketColor, BracketType bracketType) {
+    protected final Component makeServerTag(Message message, TextColor serverColor, TextColor bracketColor, BracketType bracketType) {
         String name;
-        if (message.senderServerDisplayName != null) {
-            name = message.senderServerDisplayName;
-        } else if (message.senderServer != null) {
-            name = message.senderServer;
+        if (message.getSenderServerDisplayName() != null) {
+            name = message.getSenderServerDisplayName();
+        } else if (message.getSenderServer() != null) {
+            name = message.getSenderServer();
         } else {
-            return "";
+            return Component.empty();
         }
-        String text = bracketColor + bracketType.opening
-            + serverColor + name
-            + bracketColor + bracketType.closing;
-        return Msg.button(serverColor, text, null, null);
+        return Component.text()
+            .append(Component.text(bracketType.opening, bracketColor))
+            .append(Component.text(name, serverColor))
+            .append(Component.text(bracketType.closing, bracketColor))
+            .hoverEvent(HoverEvent.showText(Component.text(name, serverColor)))
+            .clickEvent(ClickEvent.suggestCommand("/" + message.getSenderServer()))
+            .build();
     }
 
-    final Object senderTitleTag(Message message, ChatColor bracketColor, BracketType bracketType) {
-         if (message.senderTitleJson != null) {
-            List<Object> list = (List<Object>) Msg.GSON.fromJson(message.senderTitleJson, List.class);
-            if (list == null) return "";
-            List<Object> extra = new ArrayList<>();
-            extra.add(Msg.button(bracketColor, bracketType.opening, null, null));
-            extra.addAll(list);
-            extra.add(Msg.button(bracketColor, bracketType.closing, null, null));
-            List<Object> tooltip = new ArrayList<>();
-            tooltip.add(Msg.extra(list));
-            if (message.senderTitleDescription != null) {
-                Map<String, Object> tooltip2 = new HashMap<>();
-                tooltip2.put("text", "\n" + Msg.format(message.senderTitleDescription));
-                tooltip.add(tooltip2);
+    protected final Component makeTitleTag(Message message, TextColor bracketColor, BracketType bracketType) {
+        Title theTitle = message.getTitle();
+        if (theTitle == null || theTitle.isEmptyTitle()) return Component.empty();
+        return Component.text()
+            .append(Component.text(bracketType.opening, bracketColor))
+            .append(theTitle.getTitleComponent())
+            .append(Component.text(bracketType.closing, bracketColor))
+            .hoverEvent(HoverEvent.showText(theTitle.getTooltip()))
+            .clickEvent(ClickEvent.suggestCommand("/title " + theTitle.getName()))
+            .build();
+    }
+
+    protected final Component makeSenderTag(Message message, TextColor senderColor, TextColor bracketColor, BracketType bracketType, boolean useBrackets) {
+        final Component senderName;
+        Component senderDisplayName = message.getSenderDisplayName();
+        if (senderDisplayName != null) {
+            senderName = senderDisplayName;
+        } else if (message.getSenderName() != null) {
+            senderName = Component.text(message.getSenderName(), senderColor);
+        } else {
+            return Component.empty();
+        }
+        final String serverName;
+        if (message.getSenderServerDisplayName() != null) {
+            serverName = message.getSenderServerDisplayName();
+        } else if (message.getSenderServer() != null) {
+            serverName = message.getSenderServer();
+        } else {
+            serverName = "";
+        }
+        TextColor kcolor = TextColor.color(0xA0A0A0);
+        TextColor vcolor = TextColor.color(0xFFFFFF);
+        Component tooltip = Component.text()
+            .append(senderName)
+            .append(Component.text("\nServer ", kcolor)).append(Component.text(serverName, vcolor))
+            .append(Component.text("\nChannel ", kcolor)).append(Component.text(getTitle(), vcolor))
+            .append(Component.text("\nTime ", kcolor)).append(Component.text(timeFormat.format(new Date(message.getTime())), vcolor))
+            .decoration(TextDecoration.ITALIC, false)
+            .build();
+        TextComponent.Builder cb = Component.text();
+        if (useBrackets) {
+            cb = cb.append(Component.text(bracketType.opening, bracketColor));
+        }
+        cb.append(senderName);
+        if (useBrackets) {
+            cb = cb.append(Component.text(bracketType.closing, bracketColor));
+        }
+        cb = cb.hoverEvent(HoverEvent.showText(tooltip));
+        if (message.getSenderName() != null) {
+            cb = cb.clickEvent(ClickEvent.suggestCommand("/msg " + message.getSenderName()));
+        }
+        return cb.build();
+    }
+
+    protected final Component makeMessageComponent(Message message, Player target, TextColor textColor, boolean languageFilter) {
+        Component messageComponent = message.getMessageComponent();
+        if (messageComponent != null) {
+            return messageComponent;
+        }
+        String raw = message.getMessage();
+        if (raw == null) return Component.empty();
+        Component component = Component.text(raw, textColor);
+        Component itemComponent = message.getItemComponent();
+        if (itemComponent != null) {
+            component = component.replaceFirstText("[item]", itemComponent);
+        }
+        List<String> urls = message.getUrls();
+        if (urls != null) {
+            for (String url : urls) {
+                TextColor linkColor = TextColor.color(0x4040EE);
+                Component urlComponent = Component.text()
+                    .content(url).color(TextColor.color(0xC0C0FF))
+                    .hoverEvent(HoverEvent.showText(Component.text(url, linkColor, TextDecoration.UNDERLINED)))
+                    .clickEvent(ClickEvent.openUrl(url))
+                    .build();
+                component = component.replaceFirstText(url, urlComponent);
             }
-            Map<String, Object> hoverEvent = new HashMap<>();
-            hoverEvent.put("action", "show_text");
-            hoverEvent.put("value", tooltip);
-            Map<String, Object> result = new HashMap<>();
-            result.put("text", "");
-            result.put("extra", extra);
-            result.put("hoverEvent", hoverEvent);
-            return result;
-         } else if (message.senderTitle != null) {
-            String text = bracketColor + bracketType.opening
-                + Msg.format(message.senderTitle)
-                + bracketColor + bracketType.closing;
-            String tooltip = Msg.format(message.senderTitle)
-                + (message.senderTitleDescription != null
-                   ? "\n&f" + message.senderTitleDescription
-                   : "");
-            return Msg.button(bracketColor, text, tooltip, null);
-        } else {
-            return "";
         }
-    }
-
-    final Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor,
-                           BracketType bracketType, boolean useBrackets) {
-        if (message.senderName == null) return "";
-        String text = useBrackets
-            ? (bracketColor + bracketType.opening
-               + senderColor + message.senderName
-               + bracketColor + bracketType.closing)
-            : message.senderName;
-        if (message.sender == null) {
-            return Msg.button(senderColor, text, null, null);
-        }
-        String titleLine = message.senderTitle != null
-            ? "\n&5&oTitle&r " + Msg.format(message.senderTitle)
-            : "";
-        String serverLine = message.senderServerDisplayName != null
-            ? "\n&5&oServer&r "
-            + message.senderServerDisplayName : "";
-        String tooltip = message.senderName
-            + titleLine
-            + serverLine
-            + "\n&5&oChannel&r " + getTitle()
-            + "\n&5&oTime&r " + timeFormat.format(new Date());
-        String cmd = "/msg " + message.senderName + " ";
-        return Msg.button(senderColor, text, message.senderName, tooltip, cmd);
-    }
-
-    final void appendMessage(List<Object> json, Message message, ChatColor textColor,
-                             boolean languageFilter) {
-        List<Object> sourceList = languageFilter ? message.languageFilterJson : message.json;
-        Map<String, Object> map = new HashMap<>();
-        List<Object> extra = new ArrayList<>(sourceList);
-        map.put("text", "");
-        map.put("color", textColor.getName().toLowerCase());
-        map.put("extra", extra);
-        map.put("insertion", languageFilter ? message.languageFilterMessage : message.message);
-        json.add(map);
+        component = component.replaceText("May", Component.text("June"));
+        component = component.replaceText("Dune", Component.text("Arachnid"));
+        component = component.insertion(Msg.plain(component));
+        return component;
     }
 
     static boolean shouldIgnore(UUID player, Message message) {
-        if (message.sender != null && SQLIgnore.doesIgnore(player, message.sender)) return true;
+        if (message.getSender() != null && SQLIgnore.doesIgnore(player, message.getSender())) return true;
         return false;
     }
-
 
     public final List<Chatter> getOnlineMembers() {
         List<Chatter> result = new ArrayList<>();

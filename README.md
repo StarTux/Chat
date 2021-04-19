@@ -32,7 +32,6 @@ Each channel has a permission which determins whether a player can see and join 
 - `chat.pm` - Send private messages.
 - `chat.url` - Send clickable URLs in messages.
 - `chat.color` - Use color codes in messages.
-- `chat.staff` - Be identified as Staff in chat.
 - `chat.channel.CHANNEL` - Allows access to a specific channel. Replace `CHANNEL` with the actual channel name.
 - `chat.channel.*` - Allows access to any channel.
 

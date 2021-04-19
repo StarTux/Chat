@@ -4,6 +4,7 @@ import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
 import java.util.List;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 public interface Channel extends CommandResponder {
@@ -22,9 +23,10 @@ public interface Channel extends CommandResponder {
     void handleMessage(Message message);
     List<Option> getOptions();
     void playerDidUseChat(PlayerCommandContext context);
-    void announce(Object msg);
-    void announceLocal(Object msg);
+    void announce(Component msg);
+    void announceLocal(Component msg);
     List<Chatter> getOnlineMembers();
     List<Player> getLocalMembers();
-    void exampleOutput(Player player);
+    Component makeOutput(Message message, Player player);
+    Component makeExampleOutput(Player player);
 }

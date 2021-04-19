@@ -6,13 +6,8 @@ import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
-import com.winthier.chat.util.Msg;
-import java.util.Arrays;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -104,12 +99,7 @@ public final class ChatListener implements Listener {
         Channel localChannel = plugin.findChannel("local");
         if (localChannel != null && localChannel instanceof AbstractChannel) {
             AbstractChannel channel = (AbstractChannel) localChannel;
-            Message message = channel.makeMessage(player, PlainComponentSerializer.plain().serialize(deathMessage));
-            String string = GsonComponentSerializer.gson().serialize(deathMessage);
-            Object obj = Msg.GSON.fromJson(string, Object.class);
-            List<Object> json = obj instanceof List ? (List<Object>) obj : Arrays.asList(obj);
-            message.setJson(json);
-            message.setLanguageFilterJson(json);
+            Message message = new Message().init(localChannel).player(player, deathMessage);
             message.setHideSenderTags(true);
             message.setLocal(true);
             message.setLocation(player.getLocation());

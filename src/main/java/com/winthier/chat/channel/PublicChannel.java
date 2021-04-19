@@ -5,12 +5,15 @@ import com.winthier.chat.Message;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public final class PublicChannel extends AbstractChannel {
@@ -31,66 +34,49 @@ public final class PublicChannel extends AbstractChannel {
     }
 
     @Override
-    public void playerDidUseCommand(PlayerCommandContext c) {
+    public void playerDidUseCommand(PlayerCommandContext context) {
+        Player player = context.getPlayer();
+        String msg = context.getMessage();
         if (SQLSetting.getBoolean(null, getKey(), "MutePlayers", false)) return;
-        if (!isJoined(c.player.getUniqueId())) {
-            joinChannel(c.player.getUniqueId());
+        if (!isJoined(player.getUniqueId())) {
+            joinChannel(player.getUniqueId());
         }
-        if (c.message == null || c.message.isEmpty()) {
-            setFocusChannel(c.player.getUniqueId());
-            Msg.info(c.player, "Now focusing %s&r.", getTitle());
+        if (msg == null || msg.isEmpty()) {
+            setFocusChannel(player.getUniqueId());
+            Msg.info(player, Component.text("Now focusing " + getTitle(), NamedTextColor.WHITE));
             return;
         }
-        SQLLog.store(c.player, this, null, c.message);
-        String cMessage = c.message;
-        if (cMessage.length() > 3 && !c.player.hasPermission("chat.caps")) {
-            boolean allCaps = true;
-            for (int i = 0; i < cMessage.length(); i += 1) {
-                if (Character.isLowerCase(cMessage.charAt(i))) {
-                    allCaps = false;
-                    break;
-                }
-            }
-            if (allCaps) {
-                cMessage = cMessage.toLowerCase();
-            }
-        }
-        Message message = makeMessage(c.player, cMessage);
-        if (message.shouldCancel) return;
+        SQLLog.store(player, this, null, msg);
+        Message message = new Message().init(this).player(player, msg);
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
 
     @Override
     public void consoleDidUseCommand(String msg) {
-        Message message = makeMessage(null, msg);
-        message.senderName = "Console";
+        Message message = new Message().init(this).console(msg);
         SQLLog.store("Console", this, null, msg);
         ChatPlugin.getInstance().didCreateMessage(this, message);
         handleMessage(message);
     }
 
+    @Override
     public void handleMessage(Message message) {
-        fillMessage(message);
-        if (message.shouldCancel && message.sender != null) return;
-        String log = "[" + getTag() + "]"
-            + "[" + message.senderServer + "]"
-            + (message.senderName != null
-               ? message.senderName + ": "
-               : "")
-            + message.message;
+        String log = String.format("[%s][%s]%s: %s", getTag(), message.getSenderServer(),
+                                   message.getSenderName(), message.getMessage());
         ChatPlugin.getInstance().getLogger().info(log);
-        final boolean ranged = range > 0 && message.location != null;
+        Location location = message.getLocation();
+        final boolean ranged = range > 0 && location != null;
         long maxDistance = ranged ? (long) range * range : 0L;
-        Player sender = message.sender != null ? Bukkit.getPlayer(message.sender) : null;
+        Player sender = message.getSender() != null ? Bukkit.getPlayer(message.getSender()) : null;
         int seenCount = 0;
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!canJoin(player.getUniqueId())) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;
             if (ranged) {
-                if (!message.location.getWorld().equals(player.getWorld())) continue;
-                double dist = message.location.distanceSquared(player.getLocation());
+                if (!location.getWorld().equals(player.getWorld())) continue;
+                double dist = location.distanceSquared(player.getLocation());
                 if ((long) dist > maxDistance) continue;
             }
             send(message, player);
@@ -104,65 +90,57 @@ public final class PublicChannel extends AbstractChannel {
             }
         }
         if (!message.isPassive() && ranged && sender != null && seenCount == 0) {
-            sender.sendMessage(ChatColor.WHITE + "[Chat] " + ChatColor.YELLOW + "Nobody is in range to hear you");
+            sender.sendMessage(TextComponent.ofChildren(Component.text("[Chat] ", NamedTextColor.WHITE),
+                                                        Component.text("Nobody is in range to hear you", NamedTextColor.YELLOW)));
         }
     }
 
     @Override
-    public void exampleOutput(Player player) {
-        Message message = makeMessage(player, "Hello World");
-        message.prefix = (Msg.format(" &7&oPreview&r "));
-        send(message, player);
+    public Component makeExampleOutput(Player player) {
+        Message message = new Message().init(this).player(player, "Hello World");
+        return makeOutput(message, player);
     }
 
-    void send(Message message, Player player) {
+    @Override
+    public Component makeOutput(Message message, Player player) {
         UUID uuid = player.getUniqueId();
         String key = getKey();
-        List<Object> json = new ArrayList<>();
-        final ChatColor white = ChatColor.WHITE;
-        ChatColor channelColor = SQLSetting.getChatColor(uuid, key, "ChannelColor", white);
-        ChatColor textColor = SQLSetting.getChatColor(uuid, key, "TextColor", white);
-        ChatColor senderColor = SQLSetting.getChatColor(uuid, key, "SenderColor", white);
-        ChatColor bracketColor = SQLSetting.getChatColor(uuid, key, "BracketColor", white);
+        final TextColor white = NamedTextColor.WHITE;
+        TextColor channelColor = SQLSetting.getTextColor(uuid, key, "ChannelColor", white);
+        TextColor textColor = SQLSetting.getTextColor(uuid, key, "TextColor", white);
+        TextColor senderColor = SQLSetting.getTextColor(uuid, key, "SenderColor", white);
+        TextColor bracketColor = SQLSetting.getTextColor(uuid, key, "BracketColor", white);
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
+        boolean languageFilter = SQLSetting.getBoolean(uuid, null, "LanguageFilter", true);
+        boolean showServer = SQLSetting.getBoolean(uuid, key, "ShowServer", false);
+        boolean showPlayerTitle = SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", false);
+        boolean showChannelTag = SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false);
         String tmp = SQLSetting.getString(uuid, key, "BracketType", null);
-        BracketType bracketType = tmp != null
-            ? BracketType.of(tmp)
-            : BracketType.ANGLE;
-        json.add("");
-        if (message.prefix != null) json.add(message.prefix);
-        // Channel Tag
-        boolean tagsShown = false;
-        if (SQLSetting.getBoolean(uuid, key, "ShowChannelTag", false)) {
-            json.add(channelTag(channelColor, bracketColor, bracketType));
-            tagsShown = true;
+        BracketType bracketType = tmp != null ? BracketType.of(tmp) : BracketType.ANGLE;
+        TextComponent.Builder cb = Component.text();
+        if (showChannelTag) {
+            cb.append(makeChannelTag(channelColor, bracketColor, bracketType));
         }
         if (!message.isHideSenderTags()) {
             // Server Tag
-            if (message.senderServer != null && SQLSetting.getBoolean(uuid, key, "ShowServer", false)) {
-                json.add(serverTag(message, channelColor, bracketColor, bracketType));
-            tagsShown = true;
+            if (showServer) {
+                cb = cb.append(makeServerTag(message, channelColor, bracketColor, bracketType));
             }
             // Player Title
-            if (SQLSetting.getBoolean(uuid, key, "ShowPlayerTitle", true)) {
-                json.add(senderTitleTag(message, bracketColor, bracketType));
-            tagsShown = true;
+            if (showPlayerTitle) {
+                cb = cb.append(makeTitleTag(message, bracketColor, bracketType));
             }
             // Player Name
-            json.add(senderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
-            if (!tagPlayerName && message.senderName != null) {
-                json.add(Msg.button(bracketColor, ":", null, null));
-            tagsShown = true;
+            Component senderTag = makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName);
+            if (!Objects.equals(senderTag, Component.empty())) {
+                cb = cb.append(senderTag);
+                if (!tagPlayerName) {
+                    cb = cb.append(Component.text(":", bracketColor));
+                }
             }
         }
-        if (tagsShown) {
-            json.add(" ");
-        }
-        // Message
-        boolean languageFilter = SQLSetting.getBoolean(uuid, key, "LanguageFilter", true);
-        appendMessage(json, message, textColor, languageFilter);
-        Msg.raw(player, json);
-        // Sound Cue
-        if (!message.isPassive()) playSoundCue(player);
+        cb.append(Component.text(" "));
+        cb = cb.append(makeMessageComponent(message, player, textColor, languageFilter));
+        return cb.build();
     }
 }
