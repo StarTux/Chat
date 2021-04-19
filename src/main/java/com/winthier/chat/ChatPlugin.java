@@ -29,7 +29,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -370,7 +370,7 @@ public final class ChatPlugin extends JavaPlugin {
         Channel channel = findChannel("info");
         if (channel == null) return;
         Message message = new Message().init(channel)
-            .message(Component.text(name + " joined", TextColor.color(0x00FF00), TextDecoration.ITALIC));
+            .message(Component.text(name + " joined", NamedTextColor.GREEN, TextDecoration.ITALIC));
         message.setSender(uuid);
         message.setSenderName(name);
         message.setLocal(true);
@@ -384,7 +384,7 @@ public final class ChatPlugin extends JavaPlugin {
         Channel channel = findChannel("info");
         if (channel == null) return;
         Message message = new Message().init(channel)
-            .message(Component.text(name + " disconnected", TextColor.color(0xFF0000), TextDecoration.ITALIC));
+            .message(Component.text(name + " disconnected", NamedTextColor.AQUA, TextDecoration.ITALIC));
         message.setSender(uuid);
         message.setSenderName(name);
         message.setLocal(true);
