@@ -10,12 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.Value;
 
 @Table(name = "ignores",
        uniqueConstraints = @UniqueConstraint(columnNames = {"player", "ignoree"}))
-@Data @NoArgsConstructor
+@Data
 public final class SQLIgnore {
     // Cache
     @Value
@@ -28,6 +27,8 @@ public final class SQLIgnore {
     @Id private Integer id;
     @Column(nullable = false) private UUID player;
     @Column(nullable = false) private UUID ignoree;
+
+    public SQLIgnore() { }
 
     private SQLIgnore(final UUID player, final UUID ignoree) {
         setPlayer(player);

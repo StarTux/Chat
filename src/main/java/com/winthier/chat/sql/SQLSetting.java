@@ -10,7 +10,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Value;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -18,7 +17,7 @@ import org.bukkit.ChatColor;
 
 @Table(name = "settings",
        uniqueConstraints = @UniqueConstraint(columnNames = {"uuid", "channel", "setting_key"}))
-@Data @NoArgsConstructor
+@Data
 public final class SQLSetting {
     @Value
     private static final class Key {
@@ -42,6 +41,8 @@ public final class SQLSetting {
     @Column(nullable = true, length = 16) private String channel;
     @Column(nullable = false, length = 32) private String settingKey;
     @Column(nullable = true, length = 64) private String settingValue;
+
+    public SQLSetting() { }
 
     public SQLSetting(final UUID uuid, final String channel, final String key, final Object value) {
         setUuid(uuid);
