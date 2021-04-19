@@ -156,7 +156,7 @@ public final class PartyChannel extends AbstractChannel {
             if (!Objects.equals(senderTag, Component.empty())) {
                 cb = cb.append(senderTag);
                 if (!tagPlayerName) {
-                    cb = cb.append(Component.text(": ", bracketColor));
+                    cb = cb.append(Component.text(":", bracketColor));
                 }
             }
         }
