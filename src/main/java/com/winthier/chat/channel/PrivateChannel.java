@@ -44,12 +44,14 @@ public final class PrivateChannel extends AbstractChannel {
             if (!hasPermission(player)) return;
             if (!isJoined(player.getUniqueId())) return;
         }
+        Component component = makeOutput(message, player);
         if (special != null || !shouldIgnore(player.getUniqueId(), message)) {
-            send(message, player);
+            player.sendMessage(component);
         }
         if (special == null) {
-            sendAck(message, player);
             SQLSetting.set(player.getUniqueId(), getKey(), "ReplyName", message.getSenderName());
+            sendAck(message, player, component);
+            playSoundCue(player);
         }
     }
 
@@ -130,8 +132,8 @@ public final class PrivateChannel extends AbstractChannel {
         return cb.build();
     }
 
-    void sendAck(Message old, Player player) {
-        Message message = new Message().init(this).player(player);
+    void sendAck(Message old, Player player, Component component) {
+        Message message = new Message().init(this).player(player).message(component);
         message.setSpecial("Ack");
         message.setTarget(old.getSender());
         message.setTargetName(old.getSenderName());

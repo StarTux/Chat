@@ -253,8 +253,6 @@ public abstract class AbstractChannel implements Channel {
                 component = component.replaceFirstText(url, urlComponent);
             }
         }
-        component = component.replaceText("May", Component.text("June"));
-        component = component.replaceText("Dune", Component.text("Arachnid"));
         component = component.insertion(Msg.plain(component));
         return component;
     }
