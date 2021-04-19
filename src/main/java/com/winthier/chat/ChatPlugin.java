@@ -28,6 +28,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -53,6 +54,7 @@ public final class ChatPlugin extends JavaPlugin {
     private ChatCommand chatCommand = new ChatCommand(this);
     @Setter private boolean debugMode = false;
     private SQLDatabase db;
+    private final List<TextReplacementConfig> badWords = new ArrayList<>();
 
     @Override
     public void onEnable() {

@@ -5,6 +5,7 @@ import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
+import com.winthier.chat.util.Filter;
 import com.winthier.chat.util.Msg;
 import com.winthier.title.Title;
 import java.text.SimpleDateFormat;
@@ -193,7 +194,7 @@ public abstract class AbstractChannel implements Channel {
         if (senderDisplayName != null) {
             senderName = senderDisplayName;
         } else if (message.getSenderName() != null) {
-            senderName = Component.text(message.getSenderName(), senderColor);
+            senderName = Component.text(message.getSenderName());
         } else {
             return Component.empty();
         }
@@ -232,6 +233,9 @@ public abstract class AbstractChannel implements Channel {
     protected final Component makeMessageComponent(Message message, Player target, TextColor textColor, boolean languageFilter) {
         Component messageComponent = message.getMessageComponent();
         if (messageComponent != null) {
+            if (languageFilter) {
+                messageComponent = Filter.filterBadWords(messageComponent);
+            }
             return messageComponent;
         }
         String raw = message.getMessage();
@@ -252,6 +256,9 @@ public abstract class AbstractChannel implements Channel {
                     .build();
                 component = component.replaceFirstText(url, urlComponent);
             }
+        }
+        if (languageFilter) {
+            component = Filter.filterBadWords(component);
         }
         component = component.insertion(Msg.plain(component));
         return component;

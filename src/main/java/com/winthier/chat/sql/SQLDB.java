@@ -18,7 +18,8 @@ public final class SQLDB {
             SQLSetting.class,
             SQLIgnore.class,
             SQLLog.class,
-            SQLChannel.class
+            SQLChannel.class,
+            SQLBadWord.class
             );
     }
 
@@ -47,5 +48,6 @@ public final class SQLDB {
 
     public static void load() {
         SQLSetting.loadDefaultSettingsAsync();
+        SQLBadWord.loadAllAsync();
     }
 }

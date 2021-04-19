@@ -1,7 +1,10 @@
 package com.winthier.chat.util;
 
+import com.winthier.chat.ChatPlugin;
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 import org.bukkit.ChatColor;
 
 public final class Filter {
@@ -62,6 +65,13 @@ public final class Filter {
             i += 1;
         }
         return sb != null ? sb.toString() : msg;
+    }
+
+    public static Component filterBadWords(Component in) {
+        for (TextReplacementConfig config : ChatPlugin.getInstance().getBadWords()) {
+            in = in.replaceText(config);
+        }
+        return in;
     }
 
     public static String findUrl(String text) {
