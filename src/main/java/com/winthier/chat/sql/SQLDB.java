@@ -24,8 +24,8 @@ public final class SQLDB {
     }
 
     public static void reload() {
-        SQLSetting.clearCache();
-        SQLIgnore.clearCache();
+        clear();
+        load();
     }
 
     public static void clear(UUID uuid) {
