@@ -215,17 +215,18 @@ public abstract class AbstractChannel implements Channel {
             .append(Component.text("\nTime ", kcolor)).append(Component.text(timeFormat.format(new Date(message.getTime())), vcolor))
             .decoration(TextDecoration.ITALIC, false)
             .build();
-        TextComponent.Builder cb = Component.text().color(senderColor);
+        TextComponent.Builder cb = Component.text().color(senderColor)
+            .insertion(message.getSenderName());
         if (useBrackets) {
-            cb = cb.append(Component.text(bracketType.opening, bracketColor));
+            cb.append(Component.text(bracketType.opening, bracketColor));
         }
         cb.append(senderName);
         if (useBrackets) {
-            cb = cb.append(Component.text(bracketType.closing, bracketColor));
+            cb.append(Component.text(bracketType.closing, bracketColor));
         }
         cb = cb.hoverEvent(HoverEvent.showText(tooltip));
         if (message.getSenderName() != null) {
-            cb = cb.clickEvent(ClickEvent.suggestCommand("/msg " + message.getSenderName()));
+            cb.clickEvent(ClickEvent.suggestCommand("/msg " + message.getSenderName()));
         }
         return cb.build();
     }
