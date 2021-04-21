@@ -296,6 +296,7 @@ public abstract class AbstractChannel implements Channel {
         return result;
     }
 
+    @Override
     public final boolean playSoundCue(Player player) {
         String tmp = SQLSetting.getString(player.getUniqueId(), getKey(), "SoundCueChat", "off");
         SoundCue soundCue = tmp != null

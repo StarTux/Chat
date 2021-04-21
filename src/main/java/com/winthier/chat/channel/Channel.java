@@ -29,4 +29,5 @@ public interface Channel extends CommandResponder {
     List<Player> getLocalMembers();
     Component makeOutput(Message message, Player player);
     Component makeExampleOutput(Player player);
+    boolean playSoundCue(Player player);
 }

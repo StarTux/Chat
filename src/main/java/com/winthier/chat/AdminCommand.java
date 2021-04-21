@@ -1,19 +1,23 @@
 package com.winthier.chat;
 
 import com.cavetale.core.command.CommandNode;
+import com.cavetale.core.command.CommandWarn;
 import com.winthier.chat.channel.Channel;
+import com.winthier.chat.channel.Option;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 @RequiredArgsConstructor
 public final class AdminCommand extends AbstractChatCommand {
@@ -40,6 +44,9 @@ public final class AdminCommand extends AbstractChatCommand {
         rootNode.addChild("initdb").denyTabCompletion()
             .description("Initialize the database")
             .senderCaller(this::initDb);
+        rootNode.addChild("setdefaults").arguments("<channel>")
+            .description("Set all channel defaults")
+            .playerCaller(this::setDefaults);
         plugin.getCommand("chatadmin").setExecutor(this);
         return this;
     }
@@ -105,6 +112,25 @@ public final class AdminCommand extends AbstractChatCommand {
         }
         SQLSetting.set(null, channel.getKey(), key, value);
         Msg.info(sender, Component.text("Did set " + channel.getKey() + "." + key + " = " + value, NamedTextColor.YELLOW));
+        return true;
+    }
+
+    boolean setDefaults(Player player, String[] args) {
+        if (args.length != 1) return false;
+        Channel channel = plugin.findChannel(args[0]);
+        if (channel == null) throw new CommandWarn("Channel not found: " + args[0]);
+        UUID uuid = player.getUniqueId();
+        for (Option option : channel.getOptions()) {
+            SQLSetting s = SQLSetting.find(uuid, channel.getKey(), option.getKey());
+            if (s == null || s.getSettingValue() == null) {
+                s = SQLSetting.find(null, channel.getKey(), option.getKey());
+            }
+            String value = s != null && s.getSettingValue() != null
+                ? s.getSettingValue()
+                : option.getDefaultValue();
+            SQLSetting.set(null, channel.getKey(), option.getKey(), value);
+        }
+        Msg.info(player, Component.text("Channel defaults updated: " + channel.getTitle(), NamedTextColor.GREEN));
         return true;
     }
 
