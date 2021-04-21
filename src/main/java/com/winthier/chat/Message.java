@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Data;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -93,12 +92,7 @@ public final class Message {
                 } else {
                     itemName = Component.text(itemStack.getI18NDisplayName());
                 }
-                Component itemComponent = Component.text()
-                    .append(Component.text("[", NamedTextColor.WHITE))
-                    .append(itemName)
-                    .append(Component.text("]", NamedTextColor.WHITE))
-                    .hoverEvent(itemStack.asHoverEvent())
-                    .build();
+                Component itemComponent = itemName.hoverEvent(itemStack.asHoverEvent());
                 itemJson = Msg.toJson(itemComponent);
             }
         }

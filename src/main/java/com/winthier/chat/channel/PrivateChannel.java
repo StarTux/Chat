@@ -126,7 +126,7 @@ public final class PrivateChannel extends AbstractChannel {
             cb.append(Component.text(":", bracketColor));
         }
         cb.append(Component.text(" "));
-        Component messageComponent = makeMessageComponent(message, target, textColor, languageFilter);
+        Component messageComponent = makeMessageComponent(message, target, textColor, bracketType, bracketColor, languageFilter);
         cb.append(messageComponent);
         message.message(messageComponent);
         return cb.build();

@@ -231,7 +231,8 @@ public abstract class AbstractChannel implements Channel {
         return cb.build();
     }
 
-    protected final Component makeMessageComponent(Message message, Player target, TextColor textColor, boolean languageFilter) {
+    protected final Component makeMessageComponent(Message message, Player target, TextColor textColor,
+                                                   BracketType brackets, TextColor bracketColor, boolean languageFilter) {
         Component messageComponent = message.getMessageComponent();
         if (messageComponent != null) {
             if (languageFilter) {
@@ -244,7 +245,12 @@ public abstract class AbstractChannel implements Channel {
         Component component = Component.text(raw, textColor);
         Component itemComponent = message.getItemComponent();
         if (itemComponent != null) {
-            component = component.replaceFirstText("[item]", itemComponent);
+            Component itemTag = Component.text().color(textColor)
+                .append(Component.text(brackets.opening, bracketColor))
+                .append(itemComponent)
+                .append(Component.text(brackets.closing, bracketColor))
+                .build();
+            component = component.replaceFirstText("[item]", itemTag);
         }
         List<String> urls = message.getUrls();
         if (urls != null) {

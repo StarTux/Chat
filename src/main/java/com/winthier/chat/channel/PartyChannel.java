@@ -139,29 +139,29 @@ public final class PartyChannel extends AbstractChannel {
         BracketType bracketType = tmp != null ? BracketType.of(tmp) : BracketType.ANGLE;
         TextComponent.Builder cb = Component.text();
         if (showChannelTag) {
-            cb = cb.append(makeChannelTag(channelColor, bracketColor, bracketType));
+            cb.append(makeChannelTag(channelColor, bracketColor, bracketType));
         }
-        cb = cb.append(makePartyTag(partyName, bracketType, bracketColor, channelColor));
+        cb.append(makePartyTag(partyName, bracketType, bracketColor, channelColor));
         if (!message.isHideSenderTags()) {
             // Server Tag
             if (showServer) {
-                cb = cb.append(makeServerTag(message, channelColor, bracketColor, bracketType));
+                cb.append(makeServerTag(message, channelColor, bracketColor, bracketType));
             }
             // Player Title
             if (showPlayerTitle) {
-                cb = cb.append(makeTitleTag(message, bracketColor, bracketType));
+                cb.append(makeTitleTag(message, bracketColor, bracketType));
             }
             // Player Name
             Component senderTag = makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName);
             if (!Objects.equals(senderTag, Component.empty())) {
-                cb = cb.append(senderTag);
+                cb.append(senderTag);
                 if (!tagPlayerName) {
-                    cb = cb.append(Component.text(":", bracketColor));
+                    cb.append(Component.text(":", bracketColor));
                 }
             }
         }
         cb.append(Component.text(" "));
-        cb = cb.append(makeMessageComponent(message, player, textColor, languageFilter));
+        cb.append(makeMessageComponent(message, player, textColor, bracketType, bracketColor, languageFilter));
         return cb.build();
     }
 
@@ -232,8 +232,8 @@ public final class PartyChannel extends AbstractChannel {
             }
         }
         TextComponent.Builder cb = Component.text();
-        cb = cb.append(Component.text("Party " + partyName + "(" + chatters.size() + "): ", channelColor));
-        cb = cb.append(Component.join(Component.text(", ", NamedTextColor.DARK_GRAY), chatters));
+        cb.append(Component.text("Party " + partyName + "(" + chatters.size() + "): ", channelColor));
+        cb.append(Component.join(Component.text(", ", NamedTextColor.DARK_GRAY), chatters));
         player.sendMessage(cb.build());
     }
 }
