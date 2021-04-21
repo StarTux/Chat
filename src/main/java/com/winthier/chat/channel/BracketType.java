@@ -4,7 +4,10 @@ public enum BracketType {
     PAREN("(", ")"),
     BRACKETS("[", "]"),
     CURLY("{", "}"),
-    ANGLE("<", ">");
+    ANGLE("<", ">"),
+    HEAVY_ANGLE("\u2770", "\u2771"),
+    GUILLEMET("\u2039", "\u203A"),
+    SINGLE_GUILLEMET("\u00AB", "\u00BB");
 
     public final String opening;
     public final String closing;
