@@ -14,10 +14,12 @@ public final class DynmapHandler implements Listener {
     }
 
     public void postPlayerMessage(Message message) {
+        DynmapAPI api = getDynmap();
+        if (api == null) return;
         String msg = message.getMessage();
         if (msg == null) return;
         String sender = message.getSenderName();
         if (sender == null) sender = "Announcement";
-        getDynmap().postPlayerMessageToWeb(sender, sender, msg);
+        api.postPlayerMessageToWeb(sender, sender, msg);
     }
 }
