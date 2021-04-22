@@ -5,6 +5,8 @@ import com.winthier.sql.SQLDatabase;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 public final class SQLDB {
     private SQLDB() { }
@@ -49,5 +51,8 @@ public final class SQLDB {
     public static void load() {
         SQLSetting.loadDefaultSettingsAsync();
         SQLBadWord.loadAllAsync();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            load(player.getUniqueId());
+        }
     }
 }
