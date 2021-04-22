@@ -178,7 +178,7 @@ public abstract class AbstractChannel implements Channel {
 
     protected final Component makeTitleTag(Message message, TextColor bracketColor, BracketType bracketType) {
         Title theTitle = message.getTitle();
-        if (theTitle == null || theTitle.isEmptyTitle()) return Component.empty();
+        if (theTitle == null || theTitle.isPrefix() || theTitle.isEmptyTitle()) return Component.empty();
         return Component.text()
             .append(Component.text(bracketType.opening, bracketColor))
             .append(theTitle.getTitleComponent())
