@@ -26,16 +26,16 @@ public final class SQLBadWord {
         SQLDB.get().find(SQLBadWord.class).findListAsync(rows -> {
                 List<String> words = new ArrayList<>(rows.size());
                 for (SQLBadWord row : rows) {
-                    String word = row.getWord();
+                    String word = row.getWord()
+                        .replace("i", "[i1]")
+                        .replace("o", "[o0]");
                     words.add(word);
-                    if (word.contains("i")) words.add(word.replace("i", "1"));
-                    if (word.contains("o")) words.add(word.replace("o", "0"));
                 }
                 List<TextReplacementConfig> configs = new ArrayList<>(words.size());
                 for (String word : words) {
                     Pattern pattern;
                     try {
-                        pattern = Pattern.compile(word, Pattern.CASE_INSENSITIVE | Pattern.LITERAL);
+                        pattern = Pattern.compile(word, Pattern.CASE_INSENSITIVE);
                     } catch (PatternSyntaxException pse) {
                         pse.printStackTrace();
                         continue;
