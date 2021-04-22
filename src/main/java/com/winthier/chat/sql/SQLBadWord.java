@@ -28,7 +28,7 @@ public final class SQLBadWord {
 
     protected static ComponentLike replace(MatchResult matchResult, TextComponent.Builder builder) {
         final String stars = "********";
-        final String result = stars.substring(Math.min(stars.length(), matchResult.end() - matchResult.start()));
+        final String result = stars.substring(0, Math.min(stars.length(), matchResult.end() - matchResult.start()));
         return Component.text(result);
     }
 
