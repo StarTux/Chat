@@ -83,15 +83,18 @@ public final class SQLIgnore {
 
     public static void loadIgnoresAsync(UUID uuid) {
         SQLDB.get().find(SQLIgnore.class).where().eq("player", uuid).findListAsync(list -> {
-                Ignores old = CACHE.get(uuid);
                 Ignores ignores = new Ignores();
                 for (SQLIgnore ignore : list) {
                     ignores.map.put(ignore.getIgnoree(), ignore);
                 }
                 CACHE.put(uuid, ignores);
-                if (old != null) {
-                    ignores.map.putAll(old.map);
-                }
             });
+    }
+
+    public static void loadIgnores() {
+        for (SQLIgnore row : SQLDB.get().find(SQLIgnore.class).findList()) {
+            CACHE.computeIfAbsent(row.getPlayer(), u -> new Ignores())
+                .map.put(row.getIgnoree(), row);
+        }
     }
 }

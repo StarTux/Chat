@@ -6,6 +6,7 @@ import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.Option;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.channel.PrivateChannel;
+import com.winthier.chat.connect.ConnectListener;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
@@ -467,9 +468,11 @@ public final class ChatCommand extends AbstractChatCommand {
         if (SQLIgnore.doesIgnore(player.getUniqueId(), ignoree.getUuid())) {
             SQLIgnore.ignore(player.getUniqueId(), ignoree.getUuid(), false);
             Msg.info(player, Component.text("No longer ignoring " + ignoree.getName(), NamedTextColor.WHITE));
+            plugin.getConnectListener().broadcastMeta(ConnectListener.META_IGNORE, player.getUniqueId());
         } else {
             SQLIgnore.ignore(player.getUniqueId(), ignoree.getUuid(), true);
             Msg.info(player, Component.text("Ignoring " + ignoree.getName(), NamedTextColor.YELLOW));
+            plugin.getConnectListener().broadcastMeta(ConnectListener.META_IGNORE, player.getUniqueId());
         }
     }
 }
