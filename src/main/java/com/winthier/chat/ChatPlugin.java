@@ -299,7 +299,7 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public Chatter getOnlinePlayer(String name) {
-        Player player = getServer().getPlayer(name);
+        Player player = Bukkit.getPlayerExact(name);
         if (player != null) {
             return new Chatter(player.getUniqueId(), player.getName());
         }
