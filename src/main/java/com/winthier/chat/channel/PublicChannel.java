@@ -6,7 +6,9 @@ import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -46,17 +48,32 @@ public final class PublicChannel extends AbstractChannel {
         String log = String.format("[%s][%s]%s: %s",
                                    getTag(), message.senderServer, message.senderName + ChatColor.RESET, message.message);
         ChatPlugin.getInstance().getLogger().info(log);
+        Set<UUID> delivered = new HashSet<>();
+        int range = getRange();
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (ChatPlugin.getInstance().isChatPaused(player)) continue;
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;
-            int range = getRange();
             if (range != 0 && message.location != null) {
                 if (!message.location.getWorld().equals(player.getWorld())) continue;
                 if (message.location.distanceSquared(player.getLocation()) > range * range) continue;
             }
             send(message, player);
+            delivered.add(player.getUniqueId());
+        }
+        // Chat Spy
+        if (range != 0 && message.location != null) {
+            for (UUID uuid : ChatPlugin.getInstance().getChatSpies()) {
+                if (delivered.contains(uuid)) continue;
+                final Player spy = Bukkit.getPlayer(uuid);
+                if (spy == null) continue;
+                if (!spy.hasPermission("chat.admin")) continue;
+                spy.sendMessage(ChatColor.YELLOW
+                                + "[Spy] "
+                                + message.senderName
+                                + ": " + message.message);
+            }
         }
     }
 
