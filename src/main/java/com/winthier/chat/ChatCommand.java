@@ -1,6 +1,7 @@
 package com.winthier.chat;
 
 import com.cavetale.core.command.CommandNode;
+import com.cavetale.core.command.CommandWarn;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.Option;
@@ -47,7 +48,7 @@ public final class ChatCommand extends AbstractChatCommand {
             .playerCaller(this::set);
         rootNode.addChild("list").denyTabCompletion()
             .description("List channels")
-            .playerCaller(this::list);
+            .senderCaller(this::list);
         rootNode.addChild("join").denyTabCompletion()
             .arguments("<channel>")
             .description("Join a channel")
@@ -63,11 +64,11 @@ public final class ChatCommand extends AbstractChatCommand {
         rootNode.addChild("who").denyTabCompletion()
             .arguments("<channel>")
             .description("List channel players")
-            .playerCaller(this::who);
+            .senderCaller(this::who);
         rootNode.addChild("say").denyTabCompletion()
             .arguments("<channel> <message...>")
             .description("Speak in chat")
-            .playerCaller(this::say);
+            .senderCaller(this::say);
         return this;
     }
 
@@ -109,9 +110,9 @@ public final class ChatCommand extends AbstractChatCommand {
         return true;
     }
 
-    boolean list(Player player, String[] args) {
+    boolean list(CommandSender sender, String[] args) {
         if (args.length != 0) return false;
-        listChannels(player);
+        listChannels(sender);
         return true;
     }
 
@@ -151,13 +152,21 @@ public final class ChatCommand extends AbstractChatCommand {
         if (args.length == 0) {
             if (player == null) return false;
             channel = plugin.getFocusChannel(player.getUniqueId());
+            if (channel == null) {
+                throw new CommandWarn("Join a channel first!");
+            }
         } else if (args.length == 1) {
-            channel = plugin.findChannel(args[0]);
+            String channelName = args[0];
+            channel = plugin.findChannel(channelName);
+            if (channel == null) {
+                throw new CommandWarn("Channel not found: " + channelName);
+            }
         } else {
             return false;
         }
-        if (channel == null) return true;
-        if (player != null && !channel.canJoin(player.getUniqueId())) return true;
+        if (player != null && !channel.canJoin(player.getUniqueId())) {
+            throw new CommandWarn("Channel not found!");
+        }
         StringBuilder sb = new StringBuilder();
         List<Component> chatters = new ArrayList<>();
         for (Chatter chatter: channel.getOnlineMembers()) {
@@ -171,16 +180,20 @@ public final class ChatCommand extends AbstractChatCommand {
         return true;
     }
 
-    boolean say(Player player, String[] args) {
+    boolean say(CommandSender sender, String[] args) {
         if (args.length < 2) return false;
+        Player player = sender instanceof Player ? (Player) sender : null;
         CommandResponder cmd = plugin.findCommand(args[0]);
         if (cmd == null) return false;
         if (player != null && !cmd.hasPermission(player)) return false;
         StringBuilder sb = new StringBuilder(args[1]);
-        for (int i = 1; i < args.length; i += 1) sb.append(" ").append(args[i]);
-        String msg = sb.toString();
+        String msg = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         if (player != null && !ChatPlayerTalkEvent.call(player, cmd.getChannel(), msg)) return false;
-        cmd.playerDidUseCommand(new PlayerCommandContext(player, args[0], msg));
+        if (player != null) {
+            cmd.playerDidUseCommand(new PlayerCommandContext(player, args[0], msg));
+        } else {
+            cmd.consoleDidUseCommand(msg);
+        }
         return true;
     }
 
@@ -400,15 +413,15 @@ public final class ChatCommand extends AbstractChatCommand {
         player.sendMessage(Component.join(Component.newline(), lines));
     }
 
-    void listChannels(Player player) {
-        if (player == null) return;
-        Msg.info(player, Component.text("Channel List", NamedTextColor.WHITE));
+    void listChannels(CommandSender sender) {
+        Player player = sender instanceof Player ? (Player) sender : null;
+        Msg.info(sender, Component.text("Channel List", NamedTextColor.WHITE));
         List<Component> lines = new ArrayList<>();
         for (Channel channel: plugin.getChannels()) {
             List<Object> json = new ArrayList<>();
-            if (!channel.canJoin(player.getUniqueId())) continue;
+            if (player != null && !channel.canJoin(player.getUniqueId())) continue;
             TextComponent.Builder cb = Component.text().content(" ");
-            if (channel.isJoined(player.getUniqueId())) {
+            if (player == null || channel.isJoined(player.getUniqueId())) {
                 cb.append(Component.text().content("\u2612").color(NamedTextColor.GREEN)
                           .hoverEvent(HoverEvent.showText(Component.text("Leave " + channel.getTitle(), NamedTextColor.GREEN)))
                           .clickEvent(ClickEvent.runCommand("/ch leave " + channel.getAlias()))
@@ -420,14 +433,16 @@ public final class ChatCommand extends AbstractChatCommand {
                           .build());
             }
             cb.append(Component.space());
-            TextColor channelColor = SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
+            TextColor channelColor = player != null
+                ? SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", NamedTextColor.WHITE)
+                : SQLSetting.getTextColor(null, channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
             Component tooltip = TextComponent.ofChildren(Component.text("/" + channel.getTag().toLowerCase() + " [message]", channelColor),
                                                          Component.text("\nFocus " + channel.getTitle(), NamedTextColor.GRAY));
             cb.append(Component.text().content(channel.getTitle()).color(channelColor)
                       .hoverEvent(HoverEvent.showText(tooltip))
                       .clickEvent(ClickEvent.runCommand("/" + channel.getTag().toLowerCase()))
                       .build());
-            if (channel.equals(plugin.getFocusChannel(player.getUniqueId()))) {
+            if (player != null && channel.equals(plugin.getFocusChannel(player.getUniqueId()))) {
                 cb.append(Component.text().content("*").color(channelColor)
                           .hoverEvent(HoverEvent.showText(Component.text("You are focusing " + channel.getTitle(), channelColor)))
                           .build());
@@ -436,7 +451,7 @@ public final class ChatCommand extends AbstractChatCommand {
             cb.append(Component.text(channel.getDescription(), NamedTextColor.GRAY));
             lines.add(cb.build());
         }
-        player.sendMessage(Component.join(Component.newline(), lines));
+        sender.sendMessage(Component.join(Component.newline(), lines));
     }
 
     void listIgnores(Player player) {
