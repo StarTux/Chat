@@ -106,6 +106,22 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Mytems -->
+    <dependency>
+      <groupId>com.cavetale.mytems</groupId>
+      <artifactId>mytems</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- CavetaleResourcePack -->
+    <dependency>
+      <groupId>com.cavetale.cavetaleresourcepack</groupId>
+      <artifactId>cavetaleresourcepack</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
   <build>
     <finalName>${project.name}</finalName>
@@ -125,6 +141,39 @@
             <arg>-Xlint:unchecked</arg>
           </compilerArgs>
         </configuration>
+      </plugin>
+
+      <!-- Shade -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <includes>
+                  <include>com.cavetale.cavetaleresourcepack:cavetaleresourcepack</include>
+                </includes>
+              </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>com.cavetale.cavetaleresourcepack:cavetaleresourcepack</artifact>
+                  <includes>
+                    <include>com/cavetale/cavetaleresourcepack/PackPath.class</include>
+                    <include>com/cavetale/cavetaleresourcepack/DefaultFont.class</include>
+                    <include>com/cavetale/cavetaleresourcepack/DefaultFont$Policy.class</include>
+                    <include>com/cavetale/cavetaleresourcepack/FontProviderJson.class</include>
+                  </includes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
     </plugins>

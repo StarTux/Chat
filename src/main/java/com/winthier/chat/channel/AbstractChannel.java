@@ -243,6 +243,9 @@ public abstract class AbstractChannel implements Channel {
         String raw = message.getMessage();
         if (raw == null) return Component.empty();
         Component component = Component.text(raw, textColor);
+        if (message.isEmoji()) {
+            component = component.replaceText(ChatPlugin.getInstance().getEmojiReplacer());
+        }
         Component itemComponent = message.getItemComponent();
         if (itemComponent != null) {
             Component itemTag = Component.text().color(textColor)

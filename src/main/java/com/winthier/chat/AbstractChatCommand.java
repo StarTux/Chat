@@ -16,6 +16,6 @@ public abstract class AbstractChatCommand implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 0) return null;
         String arg = args[args.length - 1];
-        return ChatPlugin.getInstance().completePlayerName(arg);
+        return ChatPlugin.getInstance().completeChatArg(sender, arg);
     }
 }

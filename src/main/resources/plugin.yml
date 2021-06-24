@@ -6,7 +6,7 @@ api-version: 1.13
 website: https://cavetale.com
 main: com.winthier.chat.ChatPlugin
 depend: [SQL, GenericEvents, Core, Title]
-softdepend: [Connect, PlayerCache, dynmap]
+softdepend: [Connect, PlayerCache, dynmap, Mytems]
 commands:
 
   chat:
@@ -95,6 +95,9 @@ permissions:
     default: op
   chat.caps:
     description: Override the all-caps check
+    default: op
+  chat.emoji:
+    description: Use emoji
     default: op
 
   chat.channel.*:

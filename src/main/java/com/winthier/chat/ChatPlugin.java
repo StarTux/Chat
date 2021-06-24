@@ -1,5 +1,6 @@
 package com.winthier.chat;
 
+import com.cavetale.cavetaleresourcepack.DefaultFont;
 import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
@@ -22,12 +23,18 @@ import com.winthier.generic_events.GenericEvents;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.MatchResult;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -55,6 +62,8 @@ public final class ChatPlugin extends JavaPlugin {
     @Setter private boolean debugMode = false;
     private SQLDatabase db;
     private final List<TextReplacementConfig> badWords = new ArrayList<>();
+    private final Map<String, Component> emoji = new HashMap<>();
+    private TextReplacementConfig emojiReplacer;
 
     @Override
     public void onEnable() {
@@ -95,6 +104,11 @@ public final class ChatPlugin extends JavaPlugin {
         for (Player player : Bukkit.getOnlinePlayers()) {
             SQLDB.load(player.getUniqueId());
         }
+        emojiReplacer = TextReplacementConfig.builder()
+            .match("\\B:[0-9a-z_]+:\\B")
+            .replacement(this::replaceEmoji)
+            .build();
+        loadEmoji();
     }
 
     @Override
@@ -127,11 +141,10 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command,
-                                      String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 0) return null;
         String arg = args[args.length - 1];
-        return completePlayerName(arg);
+        return completeChatArg(sender, arg);
     }
 
     public List<String> completePlayerName(String name) {
@@ -148,6 +161,25 @@ public final class ChatPlugin extends JavaPlugin {
             }
         }
         return result;
+    }
+
+    public List<String> completeChatArg(CommandSender sender, String arg) {
+        if (arg.isEmpty()) {
+            return null;
+        } else if (arg.startsWith(":") && sender.hasPermission("chat.emoji")) {
+            String keyArg = arg.substring(1);
+            List<String> result = new ArrayList<>(emoji.size());
+            for (String key : emoji.keySet()) {
+                if (key.contains(keyArg)) result.add(":" + key + ":");
+            }
+            return result;
+        } else if (arg.startsWith("[") && sender.hasPermission("chat.item")) {
+            return "item]".contains(arg.substring(1))
+                ? Arrays.asList("[item]")
+                : null;
+        } else {
+            return completePlayerName(arg);
+        }
     }
 
     void loadChannels() {
@@ -391,5 +423,31 @@ public final class ChatPlugin extends JavaPlugin {
         message.setPassive(true);
         message.setHideSenderTags(true);
         channel.handleMessage(message);
+    }
+
+    public void loadEmoji() {
+        emoji.clear();
+        for (DefaultFont defaultFont : DefaultFont.values()) {
+            if (defaultFont.policy != DefaultFont.Policy.PUBLIC) continue;
+            emoji.put(defaultFont.name().toLowerCase(), Component.text()
+                      .content(defaultFont.character + "")
+                      .color(NamedTextColor.WHITE)
+                      .font(Key.key("cavetale:default"))
+                      .build());
+        }
+        if (getServer().getPluginManager().isPluginEnabled("Mytems")) {
+            new MytemsModule(this).enable();
+            getLogger().info("Mytems plugin found!");
+        } else {
+            getLogger().warning("Mytems plugin NOT found!");
+        }
+        getLogger().info(emoji.size() + " emoji loaded");
+    }
+
+    public ComponentLike replaceEmoji(MatchResult matchResult, TextComponent.Builder builder) {
+        String group = matchResult.group();
+        String key = group.substring(1, group.length() - 1);
+        Component component = emoji.get(key);
+        return component != null ? component : Component.text(group);
     }
 }

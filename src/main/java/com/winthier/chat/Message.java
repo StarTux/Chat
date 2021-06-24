@@ -34,6 +34,7 @@ public final class Message {
 
     private boolean hideSenderTags;
     private boolean passive;
+    private boolean emoji;
 
     private String itemJson;
 
@@ -63,6 +64,7 @@ public final class Message {
         if (displayName != null) this.senderDisplayNameJson = Msg.toJson(displayName);
         this.location = player.getLocation();
         this.title = TitlePlugin.getInstance().getPlayerTitle(player);
+        this.emoji = player.hasPermission("chat.emoji");
         return this;
     }
 
@@ -115,6 +117,7 @@ public final class Message {
         this.senderName = "Console";
         this.message = msg;
         this.urls = Filter.findUrls(msg);
+        this.emoji = true;
         return this;
     }
 
