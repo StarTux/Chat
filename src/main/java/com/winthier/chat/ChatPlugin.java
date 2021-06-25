@@ -1,6 +1,8 @@
 package com.winthier.chat;
 
-import com.cavetale.cavetaleresourcepack.DefaultFont;
+import com.cavetale.core.font.DefaultFont;
+import com.cavetale.core.font.GlyphPolicy;
+import com.cavetale.core.font.VanillaItems;
 import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
@@ -19,6 +21,7 @@ import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
+import com.winthier.chat.util.Msg;
 import com.winthier.generic_events.GenericEvents;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
@@ -36,6 +39,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -45,6 +49,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
@@ -428,11 +433,24 @@ public final class ChatPlugin extends JavaPlugin {
     public void loadEmoji() {
         emoji.clear();
         for (DefaultFont defaultFont : DefaultFont.values()) {
-            if (defaultFont.policy != DefaultFont.Policy.PUBLIC) continue;
+            if (defaultFont.policy != GlyphPolicy.PUBLIC) continue;
             emoji.put(defaultFont.name().toLowerCase(), Component.text()
                       .content(defaultFont.character + "")
                       .color(NamedTextColor.WHITE)
                       .font(Key.key("cavetale:default"))
+                      .hoverEvent(HoverEvent.showText(Component.text(Msg.camelCase(defaultFont.name()), NamedTextColor.WHITE)))
+                      .build());
+        }
+        for (VanillaItems vanillaItems : VanillaItems.values()) {
+            if (vanillaItems.getPolicy() != GlyphPolicy.PUBLIC) continue;
+            String itemName = vanillaItems.material.isItem()
+                ? new ItemStack(vanillaItems.material).getI18NDisplayName()
+                : Msg.camelCase(vanillaItems.name());
+            emoji.put(vanillaItems.name().toLowerCase(), Component.text()
+                      .content(vanillaItems.character + "")
+                      .color(NamedTextColor.WHITE)
+                      .font(Key.key("cavetale:default"))
+                      .hoverEvent(HoverEvent.showText(Component.text(itemName, NamedTextColor.WHITE)))
                       .build());
         }
         if (getServer().getPluginManager().isPluginEnabled("Mytems")) {
