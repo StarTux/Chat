@@ -45,6 +45,7 @@ public final class SQLDB {
      */
     public static void load(UUID uuid) {
         SQLSetting.loadSettingsAsync(uuid);
+        SQLIgnore.loadIgnoresAsync(uuid);
     }
 
     public static void load() {
