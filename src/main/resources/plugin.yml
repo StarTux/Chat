@@ -5,8 +5,8 @@ version: 0.1
 api-version: 1.13
 website: https://cavetale.com
 main: com.winthier.chat.ChatPlugin
-depend: [SQL, GenericEvents, Core, Title]
-softdepend: [Connect, PlayerCache, dynmap, Mytems]
+depend: [Core, SQL, GenericEvents, Title]
+softdepend: [Connect, PlayerCache, dynmap]
 commands:
 
   chat:

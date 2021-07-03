@@ -1,8 +1,6 @@
 package com.winthier.chat;
 
-import com.cavetale.core.font.DefaultFont;
-import com.cavetale.core.font.GlyphPolicy;
-import com.cavetale.core.font.VanillaItems;
+import com.cavetale.core.font.Emoji;
 import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
@@ -21,25 +19,18 @@ import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
-import com.winthier.chat.util.Msg;
 import com.winthier.generic_events.GenericEvents;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.MatchResult;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -49,7 +40,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
@@ -67,8 +57,6 @@ public final class ChatPlugin extends JavaPlugin {
     @Setter private boolean debugMode = false;
     private SQLDatabase db;
     private final List<TextReplacementConfig> badWords = new ArrayList<>();
-    private final Map<String, Component> emoji = new HashMap<>();
-    private TextReplacementConfig emojiReplacer;
 
     @Override
     public void onEnable() {
@@ -109,11 +97,6 @@ public final class ChatPlugin extends JavaPlugin {
         for (Player player : Bukkit.getOnlinePlayers()) {
             SQLDB.load(player.getUniqueId());
         }
-        emojiReplacer = TextReplacementConfig.builder()
-            .match("\\B:[0-9a-z_]+:\\B")
-            .replacement(this::replaceEmoji)
-            .build();
-        loadEmoji();
     }
 
     @Override
@@ -172,12 +155,7 @@ public final class ChatPlugin extends JavaPlugin {
         if (arg.isEmpty()) {
             return null;
         } else if (arg.startsWith(":") && sender.hasPermission("chat.emoji")) {
-            String keyArg = arg.substring(1);
-            List<String> result = new ArrayList<>(emoji.size());
-            for (String key : emoji.keySet()) {
-                if (key.contains(keyArg)) result.add(":" + key + ":");
-            }
-            return result;
+            return Emoji.tabComplete(arg);
         } else if (arg.startsWith("[") && sender.hasPermission("chat.item")) {
             return "item]".contains(arg.substring(1))
                 ? Arrays.asList("[item]")
@@ -428,44 +406,5 @@ public final class ChatPlugin extends JavaPlugin {
         message.setPassive(true);
         message.setHideSenderTags(true);
         channel.handleMessage(message);
-    }
-
-    public void loadEmoji() {
-        emoji.clear();
-        for (DefaultFont defaultFont : DefaultFont.values()) {
-            if (defaultFont.policy != GlyphPolicy.PUBLIC) continue;
-            emoji.put(defaultFont.name().toLowerCase(), Component.text()
-                      .content(defaultFont.character + "")
-                      .color(NamedTextColor.WHITE)
-                      .font(Key.key("cavetale:default"))
-                      .hoverEvent(HoverEvent.showText(Component.text(Msg.camelCase(defaultFont.name()), NamedTextColor.WHITE)))
-                      .build());
-        }
-        for (VanillaItems vanillaItems : VanillaItems.values()) {
-            if (vanillaItems.getPolicy() != GlyphPolicy.PUBLIC) continue;
-            String itemName = vanillaItems.material.isItem()
-                ? new ItemStack(vanillaItems.material).getI18NDisplayName()
-                : Msg.camelCase(vanillaItems.name());
-            emoji.put(vanillaItems.name().toLowerCase(), Component.text()
-                      .content(vanillaItems.character + "")
-                      .color(NamedTextColor.WHITE)
-                      .font(Key.key("cavetale:default"))
-                      .hoverEvent(HoverEvent.showText(Component.text(itemName, NamedTextColor.WHITE)))
-                      .build());
-        }
-        if (getServer().getPluginManager().isPluginEnabled("Mytems")) {
-            new MytemsModule(this).enable();
-            getLogger().info("Mytems plugin found!");
-        } else {
-            getLogger().warning("Mytems plugin NOT found!");
-        }
-        getLogger().info(emoji.size() + " emoji loaded");
-    }
-
-    public ComponentLike replaceEmoji(MatchResult matchResult, TextComponent.Builder builder) {
-        String group = matchResult.group();
-        String key = group.substring(1, group.length() - 1);
-        Component component = emoji.get(key);
-        return component != null ? component : Component.text(group);
     }
 }
