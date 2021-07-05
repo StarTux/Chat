@@ -1,6 +1,7 @@
 package com.winthier.chat.channel;
 
 import com.cavetale.core.font.Emoji;
+import com.cavetale.core.font.GlyphPolicy;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
@@ -245,7 +246,7 @@ public abstract class AbstractChannel implements Channel {
         if (raw == null) return Component.empty();
         Component component = Component.text(raw, textColor);
         if (message.isEmoji()) {
-            component = Emoji.replaceText(component);
+            component = Emoji.replaceText(component, GlyphPolicy.PUBLIC, true);
         }
         Component itemComponent = message.getItemComponent();
         if (itemComponent != null) {
