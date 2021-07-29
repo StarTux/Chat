@@ -19,7 +19,7 @@ import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
-import com.winthier.generic_events.GenericEvents;
+import com.winthier.perm.Perm;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -263,7 +263,7 @@ public final class ChatPlugin extends JavaPlugin {
         if (uuid == null) return true;
         Player player = getServer().getPlayer(uuid);
         if (player != null) return player.hasPermission(permission);
-        return GenericEvents.playerHasPermission(uuid, permission);
+        return Perm.has(uuid, permission);
     }
 
     public Channel getFocusChannel(UUID uuid) {

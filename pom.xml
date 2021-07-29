@@ -75,14 +75,6 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- GenericEvents -->
-    <dependency>
-      <groupId>com.winthier.generic_events</groupId>
-      <artifactId>generic_events</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- Dynmap API -->
     <dependency>
       <groupId>us.dynmap</groupId>
@@ -103,6 +95,14 @@
     <dependency>
       <groupId>com.cavetale.core</groupId>
       <artifactId>core</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Perm -->
+    <dependency>
+      <groupId>com.winthier.perm</groupId>
+      <artifactId>perm</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
