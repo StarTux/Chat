@@ -1,5 +1,6 @@
 package com.winthier.chat.channel;
 
+import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.cavetale.core.font.Emoji;
 import com.cavetale.core.font.GlyphPolicy;
 import com.winthier.chat.ChatPlugin;
@@ -85,6 +86,12 @@ public abstract class AbstractChannel implements Channel {
     @Override
     public final boolean hasPermission(Player player) {
         return canTalk(player.getUniqueId());
+    }
+
+    @Override
+    public final void setFocusChannel(Player player) {
+        setFocusChannel(player.getUniqueId());
+        PluginPlayerEvent.Name.FOCUS_CHAT_CHANNEL.call(ChatPlugin.getInstance(), player);
     }
 
     @Override

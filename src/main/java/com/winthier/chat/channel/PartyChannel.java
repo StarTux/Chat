@@ -73,7 +73,7 @@ public final class PartyChannel extends AbstractChannel {
             return;
         }
         if (msg == null || msg.isEmpty()) {
-            setFocusChannel(player.getUniqueId());
+            setFocusChannel(player);
             Msg.info(player, Component.text("Now focusing party " + partyName, NamedTextColor.WHITE));
             return;
         }

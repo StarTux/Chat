@@ -42,7 +42,7 @@ public final class PublicChannel extends AbstractChannel {
             joinChannel(player.getUniqueId());
         }
         if (msg == null || msg.isEmpty()) {
-            setFocusChannel(player.getUniqueId());
+            setFocusChannel(player);
             Msg.info(player, Component.text("Now focusing " + getTitle(), NamedTextColor.WHITE));
             return;
         }

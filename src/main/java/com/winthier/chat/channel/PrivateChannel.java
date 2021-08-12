@@ -163,7 +163,7 @@ public final class PrivateChannel extends AbstractChannel {
             return;
         }
         if (arr.length == 1) {
-            setFocusChannel(uuid);
+            setFocusChannel(player);
             SQLSetting.set(uuid, getKey(), "FocusName", target.getName());
             Msg.info(player, Component.text("Now focusing " + target.getName(), NamedTextColor.WHITE));
         } else if (arr.length == 2) {
@@ -197,7 +197,7 @@ public final class PrivateChannel extends AbstractChannel {
         }
         if (msg == null || msg.isEmpty()) {
             UUID uuid = player.getUniqueId();
-            setFocusChannel(uuid);
+            setFocusChannel(player);
             SQLSetting.set(uuid, getKey(), "FocusName", target.getName());
             Msg.info(player, Component.text("Now focusing " + target.getName(), NamedTextColor.WHITE));
         } else {
