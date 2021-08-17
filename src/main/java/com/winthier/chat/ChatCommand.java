@@ -2,6 +2,7 @@ package com.winthier.chat;
 
 import com.cavetale.core.command.CommandNode;
 import com.cavetale.core.command.CommandWarn;
+import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
@@ -247,8 +248,7 @@ public final class ChatCommand extends AbstractChatCommand {
         } else {
             showSettingsMenu(player, channel);
             PluginPlayerEvent.Name.OPEN_CHAT_SETTINGS.ultimate(plugin, player)
-                .detail("channel_key", channel.getKey())
-                .detail("channel_tag", channel.getTag())
+                .detail(Detail.NAME, channel.getKey())
                 .call();
         }
     }

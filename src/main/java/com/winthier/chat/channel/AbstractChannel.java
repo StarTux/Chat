@@ -1,5 +1,6 @@
 package com.winthier.chat.channel;
 
+import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.cavetale.core.font.Emoji;
 import com.cavetale.core.font.GlyphPolicy;
@@ -33,6 +34,7 @@ import org.bukkit.entity.Player;
  */
 @Getter @Setter
 public abstract class AbstractChannel implements Channel {
+    protected final ChatPlugin plugin;
     protected String title;
     protected String key;
     protected String tag;
@@ -42,7 +44,8 @@ public abstract class AbstractChannel implements Channel {
     protected final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     protected final List<Option> options = new ArrayList<>();
 
-    AbstractChannel() {
+    AbstractChannel(final ChatPlugin plugin) {
+        this.plugin = plugin;
         Option[] opts = {
             Option.booleanOption("ShowChannelTag", "Show Channel Tag",
                                  "Show the channel tag at the beginning of every message",
@@ -91,7 +94,9 @@ public abstract class AbstractChannel implements Channel {
     @Override
     public final void setFocusChannel(Player player) {
         setFocusChannel(player.getUniqueId());
-        PluginPlayerEvent.Name.FOCUS_CHAT_CHANNEL.call(ChatPlugin.getInstance(), player);
+        PluginPlayerEvent.Name.FOCUS_CHAT_CHANNEL.ultimate(plugin, player)
+            .detail(Detail.NAME, getKey())
+            .call();
     }
 
     @Override
@@ -140,7 +145,7 @@ public abstract class AbstractChannel implements Channel {
     private void announce(Component msg, boolean local) {
         Message message = new Message().init(this).message(msg);
         message.setLocal(local);
-        ChatPlugin.getInstance().didCreateMessage(this, message);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -292,7 +297,7 @@ public abstract class AbstractChannel implements Channel {
 
     public final List<Chatter> getOnlineMembers() {
         List<Chatter> result = new ArrayList<>();
-        for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
+        for (Chatter chatter : plugin.getOnlinePlayers()) {
             if (!canJoin(chatter.getUuid())) continue;
             if (!isJoined(chatter.getUuid())) continue;
             result.add(chatter);

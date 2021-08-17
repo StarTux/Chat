@@ -4,15 +4,17 @@ import com.winthier.chat.ChatPlugin;
 import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 
-@Getter
+@Getter @RequiredArgsConstructor
 public final class PartyCommand implements CommandResponder {
+    private final ChatPlugin plugin;
     private final List<String> aliases = Arrays.<String>asList("party");
 
     @Override
     public void playerDidUseCommand(PlayerCommandContext context) {
-        ChatPlugin.getInstance().getPartyChannel().partyCommand(context);
+        plugin.getPartyChannel().partyCommand(context);
     }
 
     @Override
@@ -21,11 +23,11 @@ public final class PartyCommand implements CommandResponder {
 
     @Override
     public boolean hasPermission(Player player) {
-        return ChatPlugin.getInstance().getPartyChannel().hasPermission(player);
+        return plugin.getPartyChannel().hasPermission(player);
     }
 
     @Override
     public Channel getChannel() {
-        return ChatPlugin.getInstance().getPartyChannel();
+        return plugin.getPartyChannel();
     }
 }

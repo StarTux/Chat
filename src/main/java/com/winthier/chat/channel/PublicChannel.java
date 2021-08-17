@@ -1,5 +1,7 @@
 package com.winthier.chat.channel;
 
+import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
+import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Message;
 import com.winthier.chat.sql.SQLLog;
@@ -17,20 +19,24 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public final class PublicChannel extends AbstractChannel {
+    public PublicChannel(final ChatPlugin plugin) {
+        super(plugin);
+    }
+
     @Override
     public boolean canJoin(UUID player) {
         String perm = "chat.channel." + key;
-        return ChatPlugin.getInstance().hasPermission(player, perm)
-            || ChatPlugin.getInstance().hasPermission(player, perm + ".join")
-            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+        return plugin.hasPermission(player, perm)
+            || plugin.hasPermission(player, perm + ".join")
+            || plugin.hasPermission(player, "chat.channel.*");
     }
 
     @Override
     public boolean canTalk(UUID player) {
         String perm = "chat.channel." + key;
-        return ChatPlugin.getInstance().hasPermission(player, perm)
-            || ChatPlugin.getInstance().hasPermission(player, perm + ".talk")
-            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+        return plugin.hasPermission(player, perm)
+            || plugin.hasPermission(player, perm + ".talk")
+            || plugin.hasPermission(player, "chat.channel.*");
     }
 
     @Override
@@ -48,15 +54,18 @@ public final class PublicChannel extends AbstractChannel {
         }
         SQLLog.store(player, this, null, msg);
         Message message = new Message().init(this).player(player, msg);
-        ChatPlugin.getInstance().didCreateMessage(this, message);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
+        PluginPlayerEvent.Name.USE_CHAT_CHANNEL.ultimate(plugin, player)
+            .detail(Detail.NAME, key)
+            .call();
     }
 
     @Override
     public void consoleDidUseCommand(String msg) {
         Message message = new Message().init(this).console(msg);
         SQLLog.store("Console", this, null, msg);
-        ChatPlugin.getInstance().didCreateMessage(this, message);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -64,7 +73,7 @@ public final class PublicChannel extends AbstractChannel {
     public void handleMessage(Message message) {
         String log = String.format("[%s][%s]%s: %s", getTag(), message.getSenderServer(),
                                    message.getSenderName(), message.getMessage());
-        ChatPlugin.getInstance().getLogger().info(log);
+        plugin.getLogger().info(log);
         Location location = message.getLocation();
         final boolean ranged = range > 0 && location != null;
         long maxDistance = ranged ? (long) range * range : 0L;

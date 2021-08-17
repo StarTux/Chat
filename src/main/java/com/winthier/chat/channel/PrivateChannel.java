@@ -19,14 +19,18 @@ import org.bukkit.entity.Player;
 
 @Getter
 public final class PrivateChannel extends AbstractChannel {
+    public PrivateChannel(final ChatPlugin plugin) {
+        super(plugin);
+    }
+
     @Override
     public boolean canJoin(UUID player) {
-        return ChatPlugin.getInstance().hasPermission(player, "chat.pm");
+        return plugin.hasPermission(player, "chat.pm");
     }
 
     @Override
     public boolean canTalk(UUID player) {
-        return ChatPlugin.getInstance().hasPermission(player, "chat.pm");
+        return plugin.hasPermission(player, "chat.pm");
     }
 
     public void handleMessage(Message message) {
@@ -36,7 +40,7 @@ public final class PrivateChannel extends AbstractChannel {
                                        getTag(), message.getSenderServer(),
                                        message.getSenderName(), message.getTargetName(),
                                        message.getMessage());
-            ChatPlugin.getInstance().getLogger().info(log);
+            plugin.getLogger().info(log);
         }
         Player player = Bukkit.getServer().getPlayer(message.getTarget());
         if (player == null) return;
@@ -60,9 +64,9 @@ public final class PrivateChannel extends AbstractChannel {
             return;
         }
         String targetName = arr[0];
-        Chatter target = ChatPlugin.getInstance().getOnlinePlayer(targetName);
+        Chatter target = plugin.getOnlinePlayer(targetName);
         if (target == null) {
-            ChatPlugin.getInstance().getLogger().warning("Player not found: " + targetName + ".");
+            plugin.getLogger().warning("Player not found: " + targetName + ".");
             return;
         }
         msg = arr[1];
@@ -70,7 +74,7 @@ public final class PrivateChannel extends AbstractChannel {
         message.setTarget(target.getUuid());
         message.setTargetName(target.getName());
         SQLLog.store("Console", this, target.getName(), msg);
-        ChatPlugin.getInstance().didCreateMessage(this, message);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -138,7 +142,7 @@ public final class PrivateChannel extends AbstractChannel {
         message.setTarget(old.getSender());
         message.setTargetName(old.getSenderName());
         message.setMessageJson(old.getMessageJson());
-        ChatPlugin.getInstance().didCreateMessage(this, message);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -153,7 +157,7 @@ public final class PrivateChannel extends AbstractChannel {
             return;
         }
         String targetName = arr[0];
-        Chatter target = ChatPlugin.getInstance().getOnlinePlayer(targetName);
+        Chatter target = plugin.getOnlinePlayer(targetName);
         if (target == null) {
             Msg.warn(player, Component.text("Player not found: " + targetName, NamedTextColor.RED));
             return;
@@ -177,7 +181,7 @@ public final class PrivateChannel extends AbstractChannel {
         String msg = context.getMessage();
         String focusName = SQLSetting.getString(player.getUniqueId(), getKey(), "FocusName", null);
         if (focusName == null) return;
-        Chatter target = ChatPlugin.getInstance().getOnlinePlayer(focusName);
+        Chatter target = plugin.getOnlinePlayer(focusName);
         if (target == null) {
             Msg.warn(player, Component.text("Player not found: " + focusName, NamedTextColor.RED));
             return;
@@ -190,7 +194,7 @@ public final class PrivateChannel extends AbstractChannel {
         String msg = context.getMessage();
         String replyName = SQLSetting.getString(player.getUniqueId(), getKey(), "ReplyName", null);
         if (replyName == null) return;
-        Chatter target = ChatPlugin.getInstance().getOnlinePlayer(replyName);
+        Chatter target = plugin.getOnlinePlayer(replyName);
         if (target == null) {
             Msg.warn(player, Component.text("Player not found: " + replyName, NamedTextColor.RED));
             return;
@@ -210,7 +214,7 @@ public final class PrivateChannel extends AbstractChannel {
         Message message = new Message().init(this).player(player, msg);
         message.setTarget(target.getUuid());
         message.setTargetName(target.getName());
-        ChatPlugin.getInstance().didCreateMessage(this, message);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
 }

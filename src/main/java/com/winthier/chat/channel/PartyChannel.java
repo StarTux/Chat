@@ -21,6 +21,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public final class PartyChannel extends AbstractChannel {
+    public PartyChannel(final ChatPlugin plugin) {
+        super(plugin);
+    }
+
     private final Component usage = TextComponent
         .ofChildren(Component.text("Usage", NamedTextColor.GRAY, TextDecoration.ITALIC),
                     Component.text("\n"),
@@ -46,17 +50,17 @@ public final class PartyChannel extends AbstractChannel {
     @Override
     public boolean canJoin(UUID player) {
         String perm = "chat.channel." + key;
-        return ChatPlugin.getInstance().hasPermission(player, perm)
-            || ChatPlugin.getInstance().hasPermission(player, perm + ".join")
-            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+        return plugin.hasPermission(player, perm)
+            || plugin.hasPermission(player, perm + ".join")
+            || plugin.hasPermission(player, "chat.channel.*");
     }
 
     @Override
     public boolean canTalk(UUID player) {
         String perm = "chat.channel." + key;
-        return ChatPlugin.getInstance().hasPermission(player, perm)
-            || ChatPlugin.getInstance().hasPermission(player, perm + ".talk")
-            || ChatPlugin.getInstance().hasPermission(player, "chat.channel.*");
+        return plugin.hasPermission(player, perm)
+            || plugin.hasPermission(player, perm + ".talk")
+            || plugin.hasPermission(player, "chat.channel.*");
     }
 
     @Override
@@ -80,7 +84,7 @@ public final class PartyChannel extends AbstractChannel {
         SQLLog.store(player, this, partyName, msg);
         Message message = new Message().init(this).player(player, msg);
         message.setTargetName(partyName);
-        ChatPlugin.getInstance().didCreateMessage(this, message);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -92,7 +96,7 @@ public final class PartyChannel extends AbstractChannel {
         msg = arr[1];
         Message message = new Message().init(this).console(msg);
         SQLLog.store("Console", this, target, msg);
-        ChatPlugin.getInstance().didCreateMessage(this, message);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -102,7 +106,7 @@ public final class PartyChannel extends AbstractChannel {
                                    getTag(), message.getTargetName(),
                                    message.getSenderServer(), message.getSenderName(),
                                    message.getMessage());
-        ChatPlugin.getInstance().getLogger().info(log);
+        plugin.getLogger().info(log);
         for (Player player: Bukkit.getServer().getOnlinePlayers()) {
             if (!hasPermission(player)) continue;
             if (!isJoined(player.getUniqueId())) continue;
@@ -225,7 +229,7 @@ public final class PartyChannel extends AbstractChannel {
         TextColor senderColor = SQLSetting.getTextColor(player.getUniqueId(), getKey(), "SenderColor", NamedTextColor.WHITE);
         TextColor channelColor = SQLSetting.getTextColor(player.getUniqueId(), getKey(), "ChannelColor", NamedTextColor.WHITE);
         List<Component> chatters = new ArrayList<>();
-        for (Chatter chatter: ChatPlugin.getInstance().getOnlinePlayers()) {
+        for (Chatter chatter : plugin.getOnlinePlayers()) {
             String otherPartyName = getPartyName(chatter.getUuid());
             if (Objects.equals(partyName, otherPartyName)) {
                 chatters.add(Component.text(chatter.getName(), senderColor));

@@ -171,17 +171,17 @@ public final class ChatPlugin extends JavaPlugin {
         for (SQLChannel chan : SQLChannel.fetch()) {
             CommandResponder cmd;
             if ("pm".equals(chan.getChannelKey())) {
-                commandResponders.add(new ReplyCommand());
-                privateChannel = new PrivateChannel();
+                commandResponders.add(new ReplyCommand(this));
+                privateChannel = new PrivateChannel(this);
                 cmd = privateChannel;
             } else if ("party".equals(chan.getChannelKey())) {
-                commandResponders.add(new PartyCommand());
-                partyChannel = new PartyChannel();
+                commandResponders.add(new PartyCommand(this));
+                partyChannel = new PartyChannel(this);
                 cmd = partyChannel;
             } else if ("reply".equals(chan.getChannelKey())) {
-                cmd = new ReplyCommand();
+                cmd = new ReplyCommand(this);
             } else {
-                cmd = new PublicChannel();
+                cmd = new PublicChannel(this);
             }
             for (String ali: chan.getAliases().split(",")) {
                 cmd.getAliases().add(ali.toLowerCase());
