@@ -456,6 +456,9 @@ public final class ChatCommand extends AbstractChatCommand {
             lines.add(cb.build());
         }
         sender.sendMessage(Component.join(Component.newline(), lines));
+        if (sender instanceof Player) {
+            PluginPlayerEvent.Name.LIST_CHAT_CHANNELS.call(plugin, player);
+        }
     }
 
     void listIgnores(Player player) {
