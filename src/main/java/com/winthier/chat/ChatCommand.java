@@ -258,7 +258,7 @@ public final class ChatCommand extends AbstractChatCommand {
         Msg.info(player, Component.text("Menu", NamedTextColor.GRAY));
         TextComponent.Builder cb = Component.text();
         cb.append(Component.text("Channels", NamedTextColor.WHITE, TextDecoration.ITALIC));
-        for (Channel channel: plugin.getChannels()) {
+        for (Channel channel : plugin.getChannels()) {
             if (!channel.canJoin(player.getUniqueId())) continue;
             if (SQLSetting.getBoolean(null, channel.getKey(), "MutePlayers", false)) continue;
             cb.append(Component.space());
@@ -268,7 +268,7 @@ public final class ChatCommand extends AbstractChatCommand {
                 tooltip = TextComponent.ofChildren(Component.text("/msg [user] [message]", channelColor),
                                                    Component.text("\nWhisper someone", NamedTextColor.GRAY));
             } else {
-                tooltip = TextComponent.ofChildren(Component.text("/msg [user] [message]", channelColor),
+                tooltip = TextComponent.ofChildren(Component.text("/" + channel.getAlias() + " [message]", channelColor),
                                                    Component.text("\nTalk in " + channel.getTitle(), NamedTextColor.GRAY));
             }
             cb.append(Component.text()
@@ -436,6 +436,13 @@ public final class ChatCommand extends AbstractChatCommand {
                           .clickEvent(ClickEvent.runCommand("/ch join " + channel.getAlias()))
                           .build());
             }
+            cb.append(Component.space());
+            cb.append(Component.text().content("\u2699").color(NamedTextColor.YELLOW)
+                      .hoverEvent(HoverEvent.showText(Component.join(Component.newline(),
+                                                                     Component.text("/ch set " + channel.getAlias(), NamedTextColor.YELLOW),
+                                                                     Component.text("Open channel settings", NamedTextColor.GRAY))))
+                      .clickEvent(ClickEvent.runCommand("/ch set " + channel.getAlias()))
+                      .build());
             cb.append(Component.space());
             TextColor channelColor = player != null
                 ? SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", NamedTextColor.WHITE)
