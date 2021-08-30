@@ -403,9 +403,9 @@ public final class ChatCommand extends AbstractChatCommand {
                        .clickEvent(ClickEvent.runCommand("/ch set " + channel.getAlias() + " reset"))
                        .build());
         if (player.hasPermission("chat.admin")) {
-            TextColor color = TextColor.color(0xFFFF00);
+            TextColor color = TextColor.color(0xFF0000);
             components.add(Component.text().content("[Defaults]").color(color)
-                           .hoverEvent(HoverEvent.showText(Component.text("Set channel defaults", color)))
+                           .hoverEvent(HoverEvent.showText(Component.text("Overwrite all public channel\ndefaultswith your settings", color)))
                            .clickEvent(ClickEvent.runCommand("/chadm setdefaults " + channel.getAlias()))
                            .build());
         }
