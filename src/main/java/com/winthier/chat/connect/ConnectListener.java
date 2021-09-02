@@ -7,11 +7,11 @@ import com.winthier.chat.MetaMessage;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.util.Msg;
 import com.winthier.connect.Connect;
-import com.winthier.connect.OnlinePlayer;
 import com.winthier.connect.event.ConnectMessageEvent;
+import com.winthier.connect.payload.OnlinePlayer;
+import com.winthier.connect.payload.PlayerServerPayload;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.event.EventHandler;
@@ -26,19 +26,17 @@ public final class ConnectListener implements Listener {
     public void onConnectMessage(ConnectMessageEvent event) {
         switch (event.getMessage().getChannel()) {
         case CHANNEL: {
-            Object o = event.getMessage().getPayload();
-            if (!(o instanceof String)) return;
-            Message message = Message.deserialize((String) o);
+            String payload = event.getMessage().getPayload();
+            Message message = Message.deserialize(event.getMessage().getPayload());
             if (message == null) {
-                ChatPlugin.getInstance().getLogger().warning("Failed to deserialize message: " + o);
+                ChatPlugin.getInstance().getLogger().warning("Failed to deserialize message: " + payload);
             } else {
                 ChatPlugin.getInstance().didReceiveMessage(message);
             }
             return;
         }
         case META_CHANNEL: {
-            String payload = Objects.requireNonNull(event.getMessage().getPayload()).toString();
-            MetaMessage metaMessage = Msg.GSON.fromJson(payload, MetaMessage.class);
+            MetaMessage metaMessage = Msg.GSON.fromJson(event.getMessage().getPayload(), MetaMessage.class);
             String meta = Objects.requireNonNull(metaMessage.getMeta());
             switch (meta) {
             case META_IGNORE:
@@ -51,21 +49,19 @@ public final class ConnectListener implements Listener {
             return;
         }
         case "BUNGEE_PLAYER_JOIN": {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>) event.getMessage().getPayload();
-            UUID uuid = UUID.fromString((String) map.get("uuid"));
-            String name = (String) map.get("name");
-            String server = (String) map.get("server");
-            ChatPlugin.getInstance().onBungeeJoin(uuid, name, server);
+            PlayerServerPayload payload = PlayerServerPayload.deserialize(event.getMessage().getPayload());
+            ChatPlugin.getInstance().onBungeeJoin(payload.getPlayer().getUuid(),
+                                                  payload.getPlayer().getName(),
+                                                  payload.getServer(),
+                                                  event.getMessage().getCreated());
             return;
         }
         case "BUNGEE_PLAYER_QUIT": {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>) event.getMessage().getPayload();
-            UUID uuid = UUID.fromString((String) map.get("uuid"));
-            String name = (String) map.get("name");
-            String server = (String) map.get("server");
-            ChatPlugin.getInstance().onBungeeQuit(uuid, name, server);
+            PlayerServerPayload payload = PlayerServerPayload.deserialize(event.getMessage().getPayload());
+            ChatPlugin.getInstance().onBungeeQuit(payload.getPlayer().getUuid(),
+                                                  payload.getPlayer().getName(),
+                                                  payload.getServer(),
+                                                  event.getMessage().getCreated());
             return;
         }
         default: return;
@@ -97,7 +93,7 @@ public final class ConnectListener implements Listener {
 
     public List<Chatter> getOnlinePlayers() {
         List<Chatter> result = new ArrayList<>();
-        for (OnlinePlayer op: Connect.getInstance().getOnlinePlayers()) {
+        for (OnlinePlayer op : Connect.getInstance().getOnlinePlayers()) {
             result.add(new Chatter(op.getUuid(), op.getName()));
         }
         return result;

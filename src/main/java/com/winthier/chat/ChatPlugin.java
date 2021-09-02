@@ -380,7 +380,7 @@ public final class ChatPlugin extends JavaPlugin {
         return SQLIgnore.doesIgnore(player, ignoree);
     }
 
-    public void onBungeeJoin(UUID uuid, String name, String server) {
+    public void onBungeeJoin(UUID uuid, String name, String server, long timestamp) {
         if (!hasPermission(uuid, "chat.joinmessage")) return;
         Channel channel = findChannel("info");
         if (channel == null) return;
@@ -394,7 +394,7 @@ public final class ChatPlugin extends JavaPlugin {
         channel.handleMessage(message);
     }
 
-    public void onBungeeQuit(UUID uuid, String name, String server) {
+    public void onBungeeQuit(UUID uuid, String name, String server, long timestamp) {
         if (!hasPermission(uuid, "chat.joinmessage")) return;
         Channel channel = findChannel("info");
         if (channel == null) return;
