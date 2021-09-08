@@ -5,31 +5,34 @@ import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 @RequiredArgsConstructor
 public final class ChatListener implements Listener {
     private final ChatPlugin plugin;
 
     @EventHandler
-    public void onAsyncPlayerChat(final AsyncPlayerChatEvent event) {
+    public void onAsyncChat(final AsyncChatEvent event) {
         event.setCancelled(true);
-        new BukkitRunnable() {
-            @Override public void run() {
-                onPlayerChat(event.getPlayer(), event.getMessage());
-            }
-        }.runTask(plugin);
+        final Player player = event.getPlayer();
+        if (event.originalMessage() instanceof TextComponent) {
+            TextComponent textComponent = (TextComponent) event.originalMessage();
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                    onPlayerChat(player, textComponent.content());
+                });
+        }
     }
 
     void onPlayerChat(Player player, String message) {
@@ -44,13 +47,13 @@ public final class ChatListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         SQLDB.load(event.getPlayer().getUniqueId());
-        event.setJoinMessage(null);
+        event.joinMessage(null);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         SQLDB.clear(event.getPlayer().getUniqueId());
-        event.setQuitMessage(null);
+        event.quitMessage(null);
     }
 
     @EventHandler

@@ -8,7 +8,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.command.CommandSender;
 
 public final class Msg {
@@ -45,7 +45,7 @@ public final class Msg {
     }
 
     public static String plain(Component component) {
-        return PlainComponentSerializer.plain().serialize(component);
+        return PlainTextComponentSerializer.plainText().serialize(component);
     }
 
     public static String toJson(Component component) {

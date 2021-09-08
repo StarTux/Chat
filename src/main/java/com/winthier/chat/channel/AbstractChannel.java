@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -276,7 +277,12 @@ public abstract class AbstractChannel implements Channel {
                 .append(itemComponent)
                 .append(Component.text(brackets.closing, bracketColor))
                 .build();
-            component = component.replaceFirstText("[item]", itemTag);
+            TextReplacementConfig textReplacementConfig = TextReplacementConfig.builder()
+                .once()
+                .matchLiteral("[item]")
+                .replacement(itemTag)
+                .build();
+            component = component.replaceText(textReplacementConfig);
         }
         List<String> urls = message.getUrls();
         if (urls != null) {
@@ -287,7 +293,12 @@ public abstract class AbstractChannel implements Channel {
                     .hoverEvent(HoverEvent.showText(Component.text(url, linkColor, TextDecoration.UNDERLINED)))
                     .clickEvent(ClickEvent.openUrl(url))
                     .build();
-                component = component.replaceFirstText(url, urlComponent);
+                TextReplacementConfig textReplacementConfig = TextReplacementConfig.builder()
+                    .once()
+                    .matchLiteral(url)
+                    .replacement(urlComponent)
+                    .build();
+                component = component.replaceText(textReplacementConfig);
             }
         }
         if (languageFilter) {

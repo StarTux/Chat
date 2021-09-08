@@ -23,6 +23,7 @@ import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -62,8 +63,6 @@ public final class ChatPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        saveDefaultConfig();
-        reloadConfig();
         db = new SQLDatabase(this);
         for (Class<?> clazz: SQLDB.getDatabaseClasses()) db.registerTable(clazz);
         db.createAllTables();
@@ -170,7 +169,9 @@ public final class ChatPlugin extends JavaPlugin {
     void loadChannels() {
         commandResponders.clear();
         channels.clear();
-        for (SQLChannel row : SQLChannel.fetch()) {
+        List<SQLChannel> rows = SQLChannel.fetch();
+        Collections.sort(rows, (a, b) -> Integer.compare(a.getId(), b.getId()));
+        for (SQLChannel row : rows) {
             Channel cmd;
             if ("pm".equals(row.getChannelKey())) {
                 commandResponders.add(new ReplyCommand(this));
@@ -248,23 +249,28 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public Channel getFocusChannel(UUID uuid) {
-        String forcedFocusChannelName = getConfig().getString("ForcedFocusChannel", null);
-        if (forcedFocusChannelName != null && !forcedFocusChannelName.isEmpty()) {
-            Channel channel = findChannel(forcedFocusChannelName);
-            if (channel != null) return channel;
+        String focusChannelName = SQLSetting.getString(uuid, null, "FocusChannel", "g");
+        Channel focusChannel = findChannel(focusChannelName);
+        if (focusChannel != null && focusChannel.canTalk(uuid)) {
+            return focusChannel;
         }
-        String channelName = SQLSetting.getString(uuid, null, "FocusChannel", "g");
-        return findChannel(channelName);
+        for (Channel channel : channels) {
+            if (channel instanceof PublicChannel && channel.canTalk(uuid)) {
+                channel.setFocusChannel(uuid);
+                return channel;
+            }
+        }
+        return null;
     }
 
     public String getServerName() {
         if (connectListener != null) return connectListener.getServerName();
-        return getConfig().getString("ServerName", "N/A");
+        return "minecraft";
     }
 
     public String getServerDisplayName() {
         if (connectListener != null) return connectListener.getServerDisplayName();
-        return getConfig().getString("ServerDisplayName", "N/A");
+        return "Minecraft";
     }
 
     public void didCreateMessage(Channel channel, Message message) {
