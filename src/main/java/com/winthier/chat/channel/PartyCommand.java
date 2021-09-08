@@ -30,4 +30,10 @@ public final class PartyCommand implements CommandResponder {
     public Channel getChannel() {
         return plugin.getPartyChannel();
     }
+
+    @Override
+    public void registerCommand() { }
+
+    @Override
+    public void unregisterCommand() { }
 }

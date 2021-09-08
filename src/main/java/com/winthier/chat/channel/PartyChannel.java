@@ -3,9 +3,11 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
+import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
+import com.winthier.perm.Perm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,8 +23,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public final class PartyChannel extends AbstractChannel {
-    public PartyChannel(final ChatPlugin plugin) {
-        super(plugin);
+    private final String permission;
+
+    public PartyChannel(final ChatPlugin plugin, final SQLChannel row) {
+        super(plugin, row);
+        this.permission = "chat.channel." + key;
     }
 
     private final Component usage = TextComponent
@@ -49,18 +54,16 @@ public final class PartyChannel extends AbstractChannel {
 
     @Override
     public boolean canJoin(UUID player) {
-        String perm = "chat.channel." + key;
-        return plugin.hasPermission(player, perm)
-            || plugin.hasPermission(player, perm + ".join")
-            || plugin.hasPermission(player, "chat.channel.*");
+        return Perm.has(player, permission)
+            || Perm.has(player, permission + ".join")
+            || Perm.has(player, "chat.channel.*");
     }
 
     @Override
     public boolean canTalk(UUID player) {
-        String perm = "chat.channel." + key;
-        return plugin.hasPermission(player, perm)
-            || plugin.hasPermission(player, perm + ".talk")
-            || plugin.hasPermission(player, "chat.channel.*");
+        return Perm.has(player, permission)
+            || Perm.has(player, permission + ".talk")
+            || Perm.has(player, "chat.channel.*");
     }
 
     @Override

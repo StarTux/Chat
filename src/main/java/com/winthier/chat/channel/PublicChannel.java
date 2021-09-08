@@ -4,9 +4,11 @@ import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Message;
+import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
+import com.winthier.perm.Perm;
 import java.util.Objects;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
@@ -17,26 +19,30 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 
 public final class PublicChannel extends AbstractChannel {
-    public PublicChannel(final ChatPlugin plugin) {
-        super(plugin);
+    protected final String permission;
+    protected PublicChannelCommand command;
+
+    public PublicChannel(final ChatPlugin plugin, final SQLChannel row) {
+        super(plugin, row);
+        this.permission = "chat.channel." + key;
     }
 
     @Override
     public boolean canJoin(UUID player) {
-        String perm = "chat.channel." + key;
-        return plugin.hasPermission(player, perm)
-            || plugin.hasPermission(player, perm + ".join")
-            || plugin.hasPermission(player, "chat.channel.*");
+        return Perm.has(player, permission)
+            || Perm.has(player, permission + ".join")
+            || Perm.has(player, "chat.channel.*");
     }
 
     @Override
     public boolean canTalk(UUID player) {
-        String perm = "chat.channel." + key;
-        return plugin.hasPermission(player, perm)
-            || plugin.hasPermission(player, perm + ".talk")
-            || plugin.hasPermission(player, "chat.channel.*");
+        return Perm.has(player, permission)
+            || Perm.has(player, permission + ".talk")
+            || Perm.has(player, "chat.channel.*");
     }
 
     @Override
@@ -151,5 +157,41 @@ public final class PublicChannel extends AbstractChannel {
         cb.append(Component.text(" "));
         cb.append(makeMessageComponent(message, player, textColor, bracketType, bracketColor, languageFilter));
         return cb.build();
+    }
+
+    /**
+     * Public channels are created dynamically, so we have to modify
+     * the command map.
+     */
+    @Override
+    public void registerCommand() {
+        Permission usePermission = new Permission(permission, "Use the " + title + " channel", PermissionDefault.FALSE);
+        Permission talkPermission = new Permission(permission + ".talk", "Talk in the " + title + " channel", PermissionDefault.FALSE);
+        Permission joinPermission = new Permission(permission + ".join", "JOin the " + title + " channel", PermissionDefault.FALSE);
+        Bukkit.getPluginManager().removePermission(usePermission.getName());
+        Bukkit.getPluginManager().removePermission(talkPermission.getName());
+        Bukkit.getPluginManager().removePermission(joinPermission.getName());
+        Bukkit.getPluginManager().addPermission(usePermission);
+        Bukkit.getPluginManager().addPermission(talkPermission);
+        Bukkit.getPluginManager().addPermission(joinPermission);
+        command = new PublicChannelCommand(this);
+        if (!Bukkit.getCommandMap().register("chat", command)) {
+            plugin.getLogger().warning("/" + getAlias() + ": Command registration failed. Using fallback");
+        }
+    }
+
+    @Override
+    public void unregisterCommand() {
+        if (command == null) return;
+        for (String alias : getAliases()) {
+            removeCommand(alias);
+        }
+        command = null;
+    }
+
+    private void removeCommand(String label) {
+        if (Bukkit.getCommandMap().getKnownCommands().get(label) == command) {
+            Bukkit.getCommandMap().getKnownCommands().remove(label);
+        }
     }
 }

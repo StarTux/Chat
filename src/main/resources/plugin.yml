@@ -17,44 +17,30 @@ commands:
     aliases: [ ch ]
     description: Command interface
     permission: chat.chat
+
   join:
     description: Join a channel
     permission: chat.chat
   leave:
     description: Leave a channel
     permission: chat.chat
+
   ignore:
     description: Ignore someone
     permission: chat.chat
+
   chatadmin:
     aliases: [ chadmin, chadm ]
     description: Admin interface
     permission: chat.admin
-  global:
-    aliases: [ g ]
-    permission: chat.channel.global
-  local:
-    aliases: [ l ]
-    permission: chat.channel.local
-  trusted:
-    aliases: [ tr ]
-    permission: chat.channel.trusted
-  moderator:
-    aliases: [ mc ]
-    permission: chat.channel.moderator
-  admin:
-    aliases: [ a ]
-    permission: chat.channel.admin
-  information:
-    permission: chat.channel.information
-  mini:
-    permission: chat.channel.mini
+
   tell:
-    aliases: [ msg, pm, w, tell, msg ]
+    aliases: [msg, pm, whisper, w]
     permission: chat.pm
   reply:
     aliases: [ r, reply ]
     permission: chat.pm
+
   party:
     permission: chat.channel.party
   p:
@@ -69,9 +55,6 @@ permissions:
     description: Use /chatadmin
     default: op
 
-  chat.pm:
-    description: Send and receive private messages
-    default: false
   chat.joinmessage:
     description: Display join and leave messages
     default: false
@@ -82,63 +65,43 @@ permissions:
   chat.url:
     description: Pose clickable links in chat
     default: op
+
   chat.color:
     description: Use legacy color codes
     default: op
+
   chat.format:
     description: Use legacy formatting codes
     default: op
+
   chat.unicode:
     description: Use any unicode character
     default: op
+
   chat.obfuscate:
     description: Use legacy magic code
     default: op
+
   chat.item:
     description: Paste items in chat
     default: op
+
   chat.caps:
     description: Override the all-caps check
     default: op
+
   chat.emoji:
     description: Use emoji
     default: op
 
   chat.channel.*:
     default: false
-    children:
-      chat.channel.global: true
-      chat.channel.local: true
-      chat.channel.trusted: true
-      chat.channel.moderator: true
-      chat.channel.admin: true
-      chat.channel.information: true
-      chat.channel.mini: true
-  chat.channel.global:
-    default: false
-  chat.channel.local:
-    default: false
-  chat.channel.trusted:
-    description: Trusted channel
-    default: false
-  chat.channel.trusted.join:
-    description: Join the Trusted channel
-    default: false
-  chat.channel.moderator:
-    description: Moderator channel
-    default: false
-  chat.channel.moderator.join:
-    description: Join the Moderator channel
-    default: false
-  chat.channel.admin:
-    description: Admin channel
-    default: false
-  chat.channel.admin.join:
-    description: Join the Admin channel
-    default: false
-  chat.channel.information:
-    default: false
-  chat.channel.mini:
-    default: false
+    description: Access any channel
+
   chat.channel.party:
+    default: false
+    description: Use the party channel
+
+  chat.pm:
+    description: Send and receive private messages
     default: false

@@ -170,14 +170,13 @@ public final class ChatCommand extends AbstractChatCommand {
         }
         StringBuilder sb = new StringBuilder();
         List<Component> chatters = new ArrayList<>();
-        for (Chatter chatter: channel.getOnlineMembers()) {
+        for (Chatter chatter : channel.getOnlineMembers()) {
             chatters.add(Component.text(chatter.getName(), NamedTextColor.WHITE));
         }
-        Component c = TextComponent
-            .ofChildren(Component.text("Channel " + channel.getTitle() + " (" + chatters.size() + "): ", NamedTextColor.YELLOW),
-                        Component.join(Component.text(", ", NamedTextColor.DARK_GRAY),
-                                       chatters));
-        Msg.info(sender, c);
+        Msg.info(sender, TextComponent.ofChildren(new Component[] {
+                    Component.text("Channel " + channel.getTitle() + " (" + chatters.size() + "): ", NamedTextColor.YELLOW),
+                    Component.join(Component.text(", ", NamedTextColor.DARK_GRAY), chatters),
+                }));
         return true;
     }
 

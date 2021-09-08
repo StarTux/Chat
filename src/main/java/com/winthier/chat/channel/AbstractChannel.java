@@ -7,6 +7,7 @@ import com.cavetale.core.font.GlyphPolicy;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
+import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Filter;
@@ -35,17 +36,23 @@ import org.bukkit.entity.Player;
 @Getter @Setter
 public abstract class AbstractChannel implements Channel {
     protected final ChatPlugin plugin;
-    protected String title;
-    protected String key;
-    protected String tag;
-    protected String description;
-    protected int range = 0;
-    protected final List<String> aliases = new ArrayList<>();
+    protected final String title;
+    protected final String key;
+    protected final String tag;
+    protected final String description;
+    protected final int range;
+    protected final List<String> aliases;
     protected final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     protected final List<Option> options = new ArrayList<>();
 
-    AbstractChannel(final ChatPlugin plugin) {
+    AbstractChannel(final ChatPlugin plugin, final SQLChannel row) {
         this.plugin = plugin;
+        this.tag = row.getTag();
+        this.key = row.getChannelKey();
+        this.title = row.getTitle();
+        this.description = row.getDescription();
+        this.range = row.getLocalRange();
+        this.aliases = List.of(row.getAliases().split(","));
         Option[] opts = {
             Option.booleanOption("ShowChannelTag", "Show Channel Tag",
                                  "Show the channel tag at the beginning of every message",
@@ -327,4 +334,14 @@ public abstract class AbstractChannel implements Channel {
         player.playSound(player.getLocation(), soundCue.sound, vol, 1.0f);
         return true;
     }
+
+    /**
+     * Most commands are handled by the plugin. The plugin's onCommand
+     * will find the channel in question.
+     */
+    @Override
+    public void registerCommand() { }
+
+    @Override
+    public void unregisterCommand() { }
 }

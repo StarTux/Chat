@@ -11,4 +11,6 @@ public interface CommandResponder {
     void consoleDidUseCommand(String msg);
     boolean hasPermission(Player player);
     Channel getChannel();
+    void registerCommand();
+    void unregisterCommand();
 }

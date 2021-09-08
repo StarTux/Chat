@@ -1,7 +1,6 @@
 package com.winthier.chat;
 
 import com.cavetale.core.font.Emoji;
-import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.PartyChannel;
@@ -40,6 +39,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
@@ -97,10 +98,18 @@ public final class ChatPlugin extends JavaPlugin {
         for (Player player : Bukkit.getOnlinePlayers()) {
             SQLDB.load(player.getUniqueId());
         }
+        // Register the wildcard permission, just in case
+        if (Bukkit.getPluginManager().getPermission("chat.channel.*") == null) {
+            Permission perm = new Permission("chat.channel.*", "Access any channel", PermissionDefault.FALSE);
+            Bukkit.getPluginManager().addPermission(perm);
+        }
     }
 
     @Override
     public void onDisable() {
+        for (CommandResponder commandResponder : commandResponders) {
+            commandResponder.unregisterCommand();
+        }
         SQLDB.clear();
         instance = null;
     }
@@ -111,14 +120,7 @@ public final class ChatPlugin extends JavaPlugin {
         if (cmd == null) return false;
         Player player = sender instanceof Player ? (Player) sender : null;
         if (player != null && !cmd.hasPermission(player)) return true;
-        String msg;
-        if (args.length == 0) {
-            msg = null;
-        } else {
-            StringBuilder sb = new StringBuilder(args[0]);
-            for (int i = 1; i < args.length; i += 1) sb.append(" ").append(args[i]);
-            msg = sb.toString();
-        }
+        String msg = args.length != 0 ? String.join(" ", args) : null;
         if (player == null) {
             cmd.consoleDidUseCommand(msg);
         } else {
@@ -168,36 +170,22 @@ public final class ChatPlugin extends JavaPlugin {
     void loadChannels() {
         commandResponders.clear();
         channels.clear();
-        for (SQLChannel chan : SQLChannel.fetch()) {
-            CommandResponder cmd;
-            if ("pm".equals(chan.getChannelKey())) {
+        for (SQLChannel row : SQLChannel.fetch()) {
+            Channel cmd;
+            if ("pm".equals(row.getChannelKey())) {
                 commandResponders.add(new ReplyCommand(this));
-                privateChannel = new PrivateChannel(this);
+                privateChannel = new PrivateChannel(this, row);
                 cmd = privateChannel;
-            } else if ("party".equals(chan.getChannelKey())) {
+            } else if ("party".equals(row.getChannelKey())) {
                 commandResponders.add(new PartyCommand(this));
-                partyChannel = new PartyChannel(this);
+                partyChannel = new PartyChannel(this, row);
                 cmd = partyChannel;
-            } else if ("reply".equals(chan.getChannelKey())) {
-                cmd = new ReplyCommand(this);
             } else {
-                cmd = new PublicChannel(this);
-            }
-            for (String ali: chan.getAliases().split(",")) {
-                cmd.getAliases().add(ali.toLowerCase());
-            }
-            if (cmd instanceof AbstractChannel) {
-                AbstractChannel channel = (AbstractChannel) cmd;
-                channel.setTag(chan.getTag());
-                channel.setKey(chan.getChannelKey());
-                channel.setTitle(chan.getTitle());
-                channel.setDescription(chan.getDescription());
-                channel.setRange(chan.getLocalRange());
+                cmd = new PublicChannel(this, row);
             }
             commandResponders.add(cmd);
-            if (cmd instanceof Channel) {
-                channels.add((Channel) cmd);
-            }
+            channels.add(cmd);
+            cmd.registerCommand();
         }
     }
 
@@ -257,13 +245,6 @@ public final class ChatPlugin extends JavaPlugin {
             }
         }
         return null;
-    }
-
-    public boolean hasPermission(UUID uuid, String permission) {
-        if (uuid == null) return true;
-        Player player = getServer().getPlayer(uuid);
-        if (player != null) return player.hasPermission(permission);
-        return Perm.has(uuid, permission);
     }
 
     public Channel getFocusChannel(UUID uuid) {
@@ -381,7 +362,7 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public void onBungeeJoin(UUID uuid, String name, String server, long timestamp) {
-        if (!hasPermission(uuid, "chat.joinmessage")) return;
+        if (!Perm.has(uuid, "chat.joinmessage")) return;
         Channel channel = findChannel("info");
         if (channel == null) return;
         Message message = new Message().init(channel)
@@ -395,7 +376,7 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     public void onBungeeQuit(UUID uuid, String name, String server, long timestamp) {
-        if (!hasPermission(uuid, "chat.joinmessage")) return;
+        if (!Perm.has(uuid, "chat.joinmessage")) return;
         Channel channel = findChannel("info");
         if (channel == null) return;
         Message message = new Message().init(channel)

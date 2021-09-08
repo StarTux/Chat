@@ -30,4 +30,10 @@ public final class ReplyCommand implements CommandResponder {
     public Channel getChannel() {
         return plugin.getPrivateChannel();
     }
+
+    @Override
+    public void registerCommand() { }
+
+    @Override
+    public void unregisterCommand() { }
 }

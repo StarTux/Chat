@@ -3,9 +3,11 @@ package com.winthier.chat.channel;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
+import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
+import com.winthier.perm.Perm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -19,18 +21,18 @@ import org.bukkit.entity.Player;
 
 @Getter
 public final class PrivateChannel extends AbstractChannel {
-    public PrivateChannel(final ChatPlugin plugin) {
-        super(plugin);
+    public PrivateChannel(final ChatPlugin plugin, final SQLChannel row) {
+        super(plugin, row);
     }
 
     @Override
     public boolean canJoin(UUID player) {
-        return plugin.hasPermission(player, "chat.pm");
+        return Perm.has(player, "chat.pm");
     }
 
     @Override
     public boolean canTalk(UUID player) {
-        return plugin.hasPermission(player, "chat.pm");
+        return Perm.has(player, "chat.pm");
     }
 
     public void handleMessage(Message message) {
