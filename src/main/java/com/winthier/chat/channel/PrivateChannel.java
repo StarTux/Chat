@@ -19,20 +19,21 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-@Getter
 public final class PrivateChannel extends AbstractChannel {
+    @Getter private final String permission = "chat.pm";
+
     public PrivateChannel(final ChatPlugin plugin, final SQLChannel row) {
         super(plugin, row);
     }
 
     @Override
     public boolean canJoin(UUID player) {
-        return Perm.has(player, "chat.pm");
+        return Perm.has(player, permission);
     }
 
     @Override
     public boolean canTalk(UUID player) {
-        return Perm.has(player, "chat.pm");
+        return Perm.has(player, permission);
     }
 
     public void handleMessage(Message message) {

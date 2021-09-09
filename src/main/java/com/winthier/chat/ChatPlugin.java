@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -96,11 +97,6 @@ public final class ChatPlugin extends JavaPlugin {
         SQLDB.load();
         for (Player player : Bukkit.getOnlinePlayers()) {
             SQLDB.load(player.getUniqueId());
-        }
-        // Register the wildcard permission, just in case
-        if (Bukkit.getPluginManager().getPermission("chat.channel.*") == null) {
-            Permission perm = new Permission("chat.channel.*", "Access any channel", PermissionDefault.FALSE);
-            Bukkit.getPluginManager().addPermission(perm);
         }
     }
 
@@ -188,6 +184,14 @@ public final class ChatPlugin extends JavaPlugin {
             channels.add(cmd);
             cmd.registerCommand();
         }
+        // Register the wildcard permission
+        Map<String, Boolean> children = new LinkedHashMap<>();
+        for (Channel channel : channels) {
+            children.put(channel.getPermission(), true);
+        }
+        Permission perm = new Permission("chat.channel.*", "Access any channel", PermissionDefault.FALSE, children);
+        Bukkit.getPluginManager().removePermission(perm.getName());
+        Bukkit.getPluginManager().addPermission(perm);
     }
 
     @SuppressWarnings("unchecked")

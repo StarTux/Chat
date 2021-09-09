@@ -11,6 +11,7 @@ import com.winthier.chat.util.Msg;
 import com.winthier.perm.Perm;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -23,7 +24,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
 public final class PublicChannel extends AbstractChannel {
-    protected final String permission;
+    @Getter protected final String permission;
     protected PublicChannelCommand command;
 
     public PublicChannel(final ChatPlugin plugin, final SQLChannel row) {

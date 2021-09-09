@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -23,11 +24,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public final class PartyChannel extends AbstractChannel {
-    private final String permission;
+    @Getter private final String permission = "chat.channel.party";
 
     public PartyChannel(final ChatPlugin plugin, final SQLChannel row) {
         super(plugin, row);
-        this.permission = "chat.channel." + key;
     }
 
     private final Component usage = TextComponent
@@ -54,16 +54,12 @@ public final class PartyChannel extends AbstractChannel {
 
     @Override
     public boolean canJoin(UUID player) {
-        return Perm.has(player, permission)
-            || Perm.has(player, permission + ".join")
-            || Perm.has(player, "chat.channel.*");
+        return Perm.has(player, permission) || Perm.has(player, "chat.channel.*");
     }
 
     @Override
     public boolean canTalk(UUID player) {
-        return Perm.has(player, permission)
-            || Perm.has(player, permission + ".talk")
-            || Perm.has(player, "chat.channel.*");
+        return Perm.has(player, permission) || Perm.has(player, "chat.channel.*");
     }
 
     @Override

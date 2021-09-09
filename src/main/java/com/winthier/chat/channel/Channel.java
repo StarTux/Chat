@@ -31,4 +31,5 @@ public interface Channel extends CommandResponder {
     Component makeOutput(Message message, Player player);
     Component makeExampleOutput(Player player);
     boolean playSoundCue(Player player);
+    String getPermission();
 }
