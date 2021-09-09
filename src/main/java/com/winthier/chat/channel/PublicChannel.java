@@ -191,6 +191,9 @@ public final class PublicChannel extends AbstractChannel {
     }
 
     private void removeCommand(String label) {
+        Bukkit.getPluginManager().removePermission(permission);
+        Bukkit.getPluginManager().removePermission(permission + ".talk");
+        Bukkit.getPluginManager().removePermission(permission + ".join");
         if (Bukkit.getCommandMap().getKnownCommands().get(label) == command) {
             Bukkit.getCommandMap().getKnownCommands().remove(label);
         }

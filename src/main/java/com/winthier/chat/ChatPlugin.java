@@ -102,9 +102,7 @@ public final class ChatPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        for (CommandResponder commandResponder : commandResponders) {
-            commandResponder.unregisterCommand();
-        }
+        unloadChannels();
         SQLDB.clear();
         instance = null;
     }
@@ -162,7 +160,7 @@ public final class ChatPlugin extends JavaPlugin {
         }
     }
 
-    void loadChannels() {
+    protected void loadChannels() {
         commandResponders.clear();
         channels.clear();
         List<SQLChannel> rows = SQLChannel.fetch();
@@ -194,8 +192,15 @@ public final class ChatPlugin extends JavaPlugin {
         Bukkit.getPluginManager().addPermission(perm);
     }
 
+    protected void unloadChannels() {
+        for (CommandResponder commandResponder : commandResponders) {
+            commandResponder.unregisterCommand();
+        }
+        Bukkit.getPluginManager().removePermission("chat.channel.*");
+    }
+
     @SuppressWarnings("unchecked")
-    void initializeDatabase() {
+    protected void initializeDatabase() {
         YamlConfiguration config;
         InputStreamReader isr = new InputStreamReader(getResource("database.yml"));
         config = YamlConfiguration.loadConfiguration(isr);

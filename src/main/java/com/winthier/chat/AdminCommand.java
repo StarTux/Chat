@@ -66,6 +66,7 @@ public final class AdminCommand extends AbstractChatCommand {
         if (args.length != 0) return false;
         SQLDB.reload();
         plugin.reloadConfig();
+        plugin.unloadChannels();
         plugin.loadChannels();
         Msg.info(sender, Component.text("Configs reloaded", NamedTextColor.YELLOW));
         return true;
