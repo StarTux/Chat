@@ -161,8 +161,6 @@ public final class ChatPlugin extends JavaPlugin {
     }
 
     protected void loadChannels() {
-        commandResponders.clear();
-        channels.clear();
         List<SQLChannel> rows = SQLChannel.fetch();
         Collections.sort(rows, (a, b) -> Integer.compare(a.getId(), b.getId()));
         for (SQLChannel row : rows) {
@@ -197,6 +195,8 @@ public final class ChatPlugin extends JavaPlugin {
             commandResponder.unregisterCommand();
         }
         Bukkit.getPluginManager().removePermission("chat.channel.*");
+        commandResponders.clear();
+        channels.clear();
     }
 
     @SuppressWarnings("unchecked")
