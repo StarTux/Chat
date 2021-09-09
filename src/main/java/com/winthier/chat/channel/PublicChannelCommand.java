@@ -20,7 +20,7 @@ public final class PublicChannelCommand extends Command implements PluginIdentif
               channel.getAliases()); // aliases
         this.channel = channel;
         this.plugin = channel.getPlugin();
-        setPermission(channel.permission + ";chat.channel.*");
+        setPermission(channel.permission);
     }
 
     @Override
