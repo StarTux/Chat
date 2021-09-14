@@ -96,9 +96,9 @@ public final class ChatCommand extends AbstractChatCommand {
         return list != null ? list : super.onTabComplete(sender, command, label, args);
     }
 
-    boolean chat(Player player, String[] args) {
+    boolean chat(CommandSender sender, String[] args) {
         if (args.length != 0) return false;
-        showMenu(player);
+        showMenu(sender);
         return true;
     }
 
@@ -252,16 +252,17 @@ public final class ChatCommand extends AbstractChatCommand {
         }
     }
 
-    void showMenu(Player player) {
-        if (player == null) return;
-        Msg.info(player, Component.text("Menu", NamedTextColor.GRAY));
+    void showMenu(CommandSender sender) {
+        Msg.info(sender, Component.text("Menu", NamedTextColor.GRAY));
+        Player human = sender instanceof Player ? (Player) sender : null;
         TextComponent.Builder cb = Component.text();
         cb.append(Component.text("Channels", NamedTextColor.WHITE, TextDecoration.ITALIC));
         for (Channel channel : plugin.getChannels()) {
-            if (!channel.canJoin(player.getUniqueId())) continue;
+            if (human != null && !channel.canJoin(human.getUniqueId())) continue;
             if (SQLSetting.getBoolean(null, channel.getKey(), "MutePlayers", false)) continue;
             cb.append(Component.space());
-            TextColor channelColor = SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
+            TextColor channelColor = SQLSetting.getTextColor(human != null ? human.getUniqueId() : null,
+                                                             channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
             Component tooltip;
             if (channel instanceof PrivateChannel) {
                 tooltip = TextComponent.ofChildren(Component.text("/msg [user] [message]", channelColor),
@@ -325,7 +326,7 @@ public final class ChatCommand extends AbstractChatCommand {
                                                             Component.text("or list ignored players", descColor))
                                              .asHoverEvent())
                                  .clickEvent(ClickEvent.suggestCommand("/ignore ")).build()));
-        player.sendMessage(cb.build());
+        sender.sendMessage(cb.build());
     }
 
     /**

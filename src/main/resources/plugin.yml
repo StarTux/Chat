@@ -104,4 +104,4 @@ permissions:
 
   chat.pm:
     description: Send and receive private messages
-    default: false
+    default: op
