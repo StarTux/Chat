@@ -133,15 +133,18 @@ public final class ChatPlugin extends JavaPlugin {
     public List<String> completePlayerName(String name) {
         List<String> result = new ArrayList<>();
         name = name.toLowerCase();
-        for (Chatter chatter: getOnlinePlayers()) {
+        for (Chatter chatter : getOnlinePlayers()) {
             if (name.isEmpty()) {
                 result.add(chatter.getName());
             } else {
                 String name2 = chatter.getName().toLowerCase();
-                if (name2.startsWith(name)) {
+                if (name2.contains(name)) {
                     result.add(chatter.getName());
                 }
             }
+        }
+        if (Chatter.CONSOLE.name.contains(name)) {
+            result.add(Chatter.CONSOLE.name);
         }
         return result;
     }

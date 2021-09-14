@@ -1,5 +1,6 @@
 package com.winthier.chat.channel;
 
+import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
@@ -76,7 +77,7 @@ public final class PrivateChannel extends AbstractChannel {
         Message message = new Message().init(this).console(msg);
         message.setTarget(target.getUuid());
         message.setTargetName(target.getName());
-        SQLLog.store("Console", this, target.getName(), msg);
+        SQLLog.store(Chatter.CONSOLE.name, this, target.getName(), msg);
         plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
@@ -139,14 +140,10 @@ public final class PrivateChannel extends AbstractChannel {
         return cb.build();
     }
 
-    void sendAck(Message old, Player player) {
-        Message message = new Message().init(this).player(player);
-        message.setSpecial("Ack");
-        message.setTarget(old.getSender());
-        message.setTargetName(old.getSenderName());
-        message.setMessageJson(old.getMessageJson());
-        plugin.didCreateMessage(this, message);
-        handleMessage(message);
+    private void sendAck(Message old, Player player) {
+        Message ack = new Message().init(this).player(player).ack(old);
+        plugin.didCreateMessage(this, ack);
+        handleMessage(ack);
     }
 
     @Override
@@ -160,7 +157,9 @@ public final class PrivateChannel extends AbstractChannel {
             return;
         }
         String targetName = arr[0];
-        Chatter target = plugin.getOnlinePlayer(targetName);
+        Chatter target = targetName.equalsIgnoreCase(Chatter.CONSOLE.name)
+            ? Chatter.CONSOLE
+            : plugin.getOnlinePlayer(targetName);
         if (target == null) {
             Msg.warn(player, Component.text("Player not found: " + targetName, NamedTextColor.RED));
             return;
@@ -192,12 +191,14 @@ public final class PrivateChannel extends AbstractChannel {
         talk(player, target, msg);
     }
 
-    void reply(PlayerCommandContext context) {
+    protected void reply(PlayerCommandContext context) {
         Player player = context.getPlayer();
         String msg = context.getMessage();
         String replyName = SQLSetting.getString(player.getUniqueId(), getKey(), "ReplyName", null);
         if (replyName == null) return;
-        Chatter target = plugin.getOnlinePlayer(replyName);
+        Chatter target = replyName.equalsIgnoreCase(Chatter.CONSOLE.name)
+            ? Chatter.CONSOLE
+            : plugin.getOnlinePlayer(replyName);
         if (target == null) {
             Msg.warn(player, Component.text("Player not found: " + replyName, NamedTextColor.RED));
             return;
@@ -207,17 +208,23 @@ public final class PrivateChannel extends AbstractChannel {
             setFocusChannel(player);
             SQLSetting.set(uuid, getKey(), "FocusName", target.getName());
             Msg.info(player, Component.text("Now focusing " + target.getName(), NamedTextColor.WHITE));
+            PluginPlayerEvent.Name.FOCUS_PRIVATE_CHAT.call(plugin, player);
         } else {
             talk(player, target, msg);
+            PluginPlayerEvent.Name.USE_PRIVATE_CHAT_REPLY.call(plugin, player);
         }
     }
 
-    void talk(Player player, Chatter target, String msg) {
+    private void talk(Player player, Chatter target, String msg) {
         SQLLog.store(player, this, target.getUuid().toString(), msg);
         Message message = new Message().init(this).player(player, msg);
         message.setTarget(target.getUuid());
         message.setTargetName(target.getName());
         plugin.didCreateMessage(this, message);
         handleMessage(message);
+        if (target.isConsole()) {
+            send(new Message().init(this).console().ack(message), player);
+        }
+        PluginPlayerEvent.Name.USE_PRIVATE_CHAT.call(plugin, player);
     }
 }

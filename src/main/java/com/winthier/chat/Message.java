@@ -112,9 +112,14 @@ public final class Message {
         return this;
     }
 
-    public Message console(final String msg) {
+    public Message console() {
         this.sender = null;
-        this.senderName = "Console";
+        this.senderName = Chatter.CONSOLE.name;
+        return this;
+    }
+
+    public Message console(final String msg) {
+        console();
         this.message = msg;
         this.urls = Filter.findUrls(msg);
         this.emoji = true;
@@ -140,5 +145,23 @@ public final class Message {
     public Component getItemComponent() {
         if (itemJson == null) return null;
         return Msg.parseComponent(itemJson);
+    }
+
+    /**
+     * Copy the essential message content so it can be send back as an
+     * ACK to the sender. This is called after initialization with a
+     * player or console.
+     */
+    public Message ack(Message old) {
+        special = "ACK";
+        target = old.sender;
+        targetName = old.senderName;
+        message = old.message;
+        urls = old.urls;
+        hideSenderTags = old.hideSenderTags;
+        passive = true;
+        emoji = old.emoji;
+        itemJson = old.itemJson;
+        return this;
     }
 }

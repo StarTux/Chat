@@ -43,7 +43,7 @@ public final class ChatCommand extends AbstractChatCommand {
     public ChatCommand enable() {
         plugin.getCommand("chat").setExecutor(this);
         rootNode = new CommandNode("chat").description("Chat menu")
-            .playerCaller(this::chat);
+            .senderCaller(this::chat);
         rootNode.addChild("set").denyTabCompletion()
             .arguments("[channel]")
             .description("Chat settings")
