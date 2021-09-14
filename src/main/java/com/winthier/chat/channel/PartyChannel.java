@@ -1,5 +1,7 @@
 package com.winthier.chat.channel;
 
+import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
+import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
@@ -214,6 +216,8 @@ public final class PartyChannel extends AbstractChannel {
             } else {
                 setPartyName(uuid, arg);
                 Msg.info(player, Component.text("You joined party " + arg, NamedTextColor.WHITE));
+                PluginPlayerEvent.Name.JOIN_CHAT_PARTY.ultimate(plugin, player)
+                    .detail(Detail.NAME, arg).call();
             }
         } else {
             usage(player);
