@@ -87,6 +87,9 @@ public final class PartyChannel extends AbstractChannel {
         message.setTargetName(partyName);
         plugin.didCreateMessage(this, message);
         handleMessage(message);
+        PluginPlayerEvent.Name.USE_CHAT_PARTY.ultimate(plugin, player)
+            .detail(Detail.NAME, partyName)
+            .call();
     }
 
     @Override
