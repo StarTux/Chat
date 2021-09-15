@@ -173,6 +173,10 @@ public final class PrivateChannel extends AbstractChannel {
             setFocusChannel(player);
             SQLSetting.set(uuid, getKey(), "FocusName", target.name);
             Msg.info(player, Component.text("Now focusing " + target.name, NamedTextColor.WHITE));
+            PluginPlayerEvent.Name.FOCUS_PRIVATE_CHAT.ultimate(plugin, player)
+                .detail(Detail.TARGET, target.uuid)
+                .detail(Detail.NAME, target.name)
+                .call();
         } else if (arr.length == 2) {
             talk(player, target, arr[1]);
         }
