@@ -1,5 +1,6 @@
 package com.winthier.chat.channel;
 
+import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
@@ -75,9 +76,9 @@ public final class PrivateChannel extends AbstractChannel {
         }
         msg = arr[1];
         Message message = new Message().init(this).console(msg);
-        message.setTarget(target.getUuid());
-        message.setTargetName(target.getName());
-        SQLLog.store(Chatter.CONSOLE.name, this, target.getName(), msg);
+        message.setTarget(target.uuid);
+        message.setTargetName(target.name);
+        SQLLog.store(Chatter.CONSOLE.name, this, target.name, msg);
         plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
@@ -164,14 +165,14 @@ public final class PrivateChannel extends AbstractChannel {
             Msg.warn(player, Component.text("Player not found: " + targetName, NamedTextColor.RED));
             return;
         }
-        if (target.getUuid().equals(uuid)) {
+        if (target.uuid.equals(uuid)) {
             Msg.warn(player, Component.text("You cannot message yourself", NamedTextColor.RED));
             return;
         }
         if (arr.length == 1) {
             setFocusChannel(player);
-            SQLSetting.set(uuid, getKey(), "FocusName", target.getName());
-            Msg.info(player, Component.text("Now focusing " + target.getName(), NamedTextColor.WHITE));
+            SQLSetting.set(uuid, getKey(), "FocusName", target.name);
+            Msg.info(player, Component.text("Now focusing " + target.name, NamedTextColor.WHITE));
         } else if (arr.length == 2) {
             talk(player, target, arr[1]);
         }
@@ -206,25 +207,34 @@ public final class PrivateChannel extends AbstractChannel {
         if (msg == null || msg.isEmpty()) {
             UUID uuid = player.getUniqueId();
             setFocusChannel(player);
-            SQLSetting.set(uuid, getKey(), "FocusName", target.getName());
-            Msg.info(player, Component.text("Now focusing " + target.getName(), NamedTextColor.WHITE));
-            PluginPlayerEvent.Name.FOCUS_PRIVATE_CHAT.call(plugin, player);
+            SQLSetting.set(uuid, getKey(), "FocusName", target.name);
+            Msg.info(player, Component.text("Now focusing " + target.name, NamedTextColor.WHITE));
+            PluginPlayerEvent.Name.FOCUS_PRIVATE_CHAT.ultimate(plugin, player)
+                .detail(Detail.TARGET, target.uuid)
+                .detail(Detail.NAME, target.name)
+                .call();
         } else {
             talk(player, target, msg);
-            PluginPlayerEvent.Name.USE_PRIVATE_CHAT_REPLY.call(plugin, player);
+            PluginPlayerEvent.Name.USE_PRIVATE_CHAT_REPLY.ultimate(plugin, player)
+                .detail(Detail.TARGET, target.uuid)
+                .detail(Detail.NAME, target.name)
+                .call();
         }
     }
 
     private void talk(Player player, Chatter target, String msg) {
-        SQLLog.store(player, this, target.getUuid().toString(), msg);
+        SQLLog.store(player, this, target.uuid.toString(), msg);
         Message message = new Message().init(this).player(player, msg);
-        message.setTarget(target.getUuid());
-        message.setTargetName(target.getName());
+        message.setTarget(target.uuid);
+        message.setTargetName(target.name);
         plugin.didCreateMessage(this, message);
         handleMessage(message);
         if (target.isConsole()) {
             send(new Message().init(this).console().ack(message), player);
         }
-        PluginPlayerEvent.Name.USE_PRIVATE_CHAT.call(plugin, player);
+        PluginPlayerEvent.Name.USE_PRIVATE_CHAT.ultimate(plugin, player)
+            .detail(Detail.TARGET, target.uuid)
+            .detail(Detail.NAME, target.name)
+            .call();
     }
 }
