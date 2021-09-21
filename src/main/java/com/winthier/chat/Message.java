@@ -128,7 +128,7 @@ public final class Message {
 
     public Message message(Component component) {
         this.messageJson = Msg.toJson(component);
-        this.message = Msg.plain(component);
+        if (message == null) this.message = Msg.plain(component);
         return this;
     }
 
@@ -153,15 +153,15 @@ public final class Message {
      * player or console.
      */
     public Message ack(Message old) {
-        special = "ACK";
-        target = old.sender;
-        targetName = old.senderName;
-        message = old.message;
-        urls = old.urls;
-        hideSenderTags = old.hideSenderTags;
-        passive = true;
-        emoji = old.emoji;
-        itemJson = old.itemJson;
+        this.special = "ACK";
+        this.target = old.sender;
+        this.targetName = old.senderName;
+        this.message = old.message;
+        this.urls = old.urls;
+        this.hideSenderTags = old.hideSenderTags;
+        this.passive = true;
+        this.emoji = old.emoji;
+        this.itemJson = old.itemJson;
         return this;
     }
 }

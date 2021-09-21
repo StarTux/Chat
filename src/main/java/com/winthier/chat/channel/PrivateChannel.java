@@ -47,17 +47,18 @@ public final class PrivateChannel extends AbstractChannel {
                                        message.getMessage());
             plugin.getLogger().info(log);
         }
-        Player player = Bukkit.getServer().getPlayer(message.getTarget());
+        Player player = Bukkit.getPlayer(message.getTarget());
         if (player == null) return;
         if (special == null) {
             if (!hasPermission(player)) return;
             if (!isJoined(player.getUniqueId())) return;
         }
-        if (special != null || !shouldIgnore(player.getUniqueId(), message)) {
+        if (special != null) {
             send(message, player);
         }
-        if (special == null) {
+        if (special == null && !shouldIgnore(player.getUniqueId(), message)) {
             SQLSetting.set(player.getUniqueId(), getKey(), "ReplyName", message.getSenderName());
+            send(message, player);
             sendAck(message, player);
         }
     }
@@ -137,12 +138,11 @@ public final class PrivateChannel extends AbstractChannel {
         cb.append(Component.text(" "));
         Component messageComponent = makeMessageComponent(message, target, textColor, bracketType, bracketColor, languageFilter);
         cb.append(messageComponent);
-        message.message(messageComponent);
         return cb.build();
     }
 
     private void sendAck(Message old, Player player) {
-        Message ack = new Message().init(this).player(player).ack(old);
+        Message ack = new Message().player(player).init(this).ack(old);
         plugin.didCreateMessage(this, ack);
         handleMessage(ack);
     }
