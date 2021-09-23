@@ -158,9 +158,7 @@ public final class PrivateChannel extends AbstractChannel {
             return;
         }
         String targetName = arr[0];
-        Chatter target = targetName.equalsIgnoreCase(Chatter.CONSOLE.name)
-            ? Chatter.CONSOLE
-            : plugin.getOnlinePlayer(targetName);
+        Chatter target = plugin.getOnlinePlayer(targetName);
         if (target == null) {
             Msg.warn(player, Component.text("Player not found: " + targetName, NamedTextColor.RED));
             return;
@@ -201,9 +199,7 @@ public final class PrivateChannel extends AbstractChannel {
         String msg = context.getMessage();
         String replyName = SQLSetting.getString(player.getUniqueId(), getKey(), "ReplyName", null);
         if (replyName == null) return;
-        Chatter target = replyName.equalsIgnoreCase(Chatter.CONSOLE.name)
-            ? Chatter.CONSOLE
-            : plugin.getOnlinePlayer(replyName);
+        Chatter target = plugin.getOnlinePlayer(replyName);
         if (target == null) {
             Msg.warn(player, Component.text("Player not found: " + replyName, NamedTextColor.RED));
             return;

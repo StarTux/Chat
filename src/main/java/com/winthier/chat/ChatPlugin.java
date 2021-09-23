@@ -312,7 +312,15 @@ public final class ChatPlugin extends JavaPlugin {
         }
     }
 
+    /**
+     * Find a Chatter by name. It is possible that the Console chatter
+     * is returned.
+     * This is only used by PrivateCommand.
+     */
     public Chatter getOnlinePlayer(String name) {
+        if (name.equalsIgnoreCase(Chatter.CONSOLE.name)) {
+            return Chatter.CONSOLE;
+        }
         Player player = Bukkit.getPlayerExact(name);
         if (player != null) {
             return new Chatter(player.getUniqueId(), player.getName());
