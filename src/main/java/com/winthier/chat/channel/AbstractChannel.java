@@ -12,15 +12,21 @@ import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Filter;
 import com.winthier.chat.util.Msg;
+import com.winthier.perm.rank.ExtraRank;
+import com.winthier.perm.rank.PlayerRank;
+import com.winthier.perm.rank.StaffRank;
 import com.winthier.title.Title;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -230,13 +236,28 @@ public abstract class AbstractChannel implements Channel {
         }
         TextColor kcolor = TextColor.color(0xA0A0A0);
         TextColor vcolor = TextColor.color(0xFFFFFF);
-        Component tooltip = Component.text()
-            .append(senderName)
-            .append(Component.text("\nServer ", kcolor)).append(Component.text(serverName, vcolor))
-            .append(Component.text("\nChannel ", kcolor)).append(Component.text(getTitle(), vcolor))
-            .append(Component.text("\nTime ", kcolor)).append(Component.text(timeFormat.format(new Date(message.getTime())), vcolor))
-            .decoration(TextDecoration.ITALIC, false)
-            .build();
+        List<Component> tooltip = new ArrayList<>();
+        tooltip.add(senderName);
+        if (message.getSender() != null) {
+            StaffRank staffRank = StaffRank.ofPlayer(message.getSender());
+            if (staffRank != null) {
+                tooltip.add(Component.text("Staff ", kcolor).append(Component.text(staffRank.getDisplayName(), vcolor)));
+            }
+            PlayerRank playerRank = PlayerRank.ofPlayer(message.getSender());
+            if (playerRank != null) {
+                tooltip.add(Component.text("Rank ", kcolor).append(Component.text(playerRank.getDisplayName(), vcolor)));
+            }
+            Set<ExtraRank> extraRanks = ExtraRank.ofPlayer(message.getSender());
+            if (!extraRanks.isEmpty()) {
+                String extraString = extraRanks.stream()
+                    .map(ExtraRank::getDisplayName)
+                    .collect(Collectors.joining(" "));
+                tooltip.add(Component.text("Extra ", kcolor).append(Component.text(extraString, vcolor)));
+            }
+        }
+        tooltip.add(Component.text("Server ", kcolor).append(Component.text(serverName, vcolor)));
+        tooltip.add(Component.text("Channel ", kcolor).append(Component.text(getTitle(), vcolor)));
+        tooltip.add(Component.text("Time ", kcolor).append(Component.text(timeFormat.format(new Date(message.getTime())), vcolor)));
         TextComponent.Builder cb = Component.text().color(senderColor)
             .insertion(message.getSenderName());
         if (useBrackets) {
@@ -246,7 +267,8 @@ public abstract class AbstractChannel implements Channel {
         if (useBrackets) {
             cb.append(Component.text(bracketType.closing, bracketColor));
         }
-        cb = cb.hoverEvent(HoverEvent.showText(tooltip));
+        cb = cb.hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.separator(Component.newline()),
+                                                              tooltip)));
         if (message.getSenderName() != null) {
             cb.clickEvent(ClickEvent.suggestCommand("/msg " + message.getSenderName()));
         }
