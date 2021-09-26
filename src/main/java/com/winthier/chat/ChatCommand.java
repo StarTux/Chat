@@ -418,7 +418,11 @@ public final class ChatCommand extends AbstractChatCommand {
         if (player.hasPermission("chat.admin")) {
             TextColor color = TextColor.color(0xFF0000);
             components.add(Component.text().content("[Defaults]").color(color)
-                           .hoverEvent(HoverEvent.showText(Component.text("Overwrite all public channel\ndefaultswith your settings", color)))
+                           .hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+                                           Component.text("Overwrite all public"),
+                                           Component.text("channel defaults with"),
+                                           Component.text("your settings"),
+                                       }).color(color)))
                            .clickEvent(ClickEvent.runCommand("/chadm setdefaults " + channel.getAlias()))
                            .build());
         }
