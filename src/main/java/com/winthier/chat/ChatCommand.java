@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -173,9 +174,9 @@ public final class ChatCommand extends AbstractChatCommand {
         for (Chatter chatter : channel.getOnlineMembers()) {
             chatters.add(Component.text(chatter.getName(), NamedTextColor.WHITE));
         }
-        Msg.info(sender, TextComponent.ofChildren(new Component[] {
+        Msg.info(sender, Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
                     Component.text("Channel " + channel.getTitle() + " (" + chatters.size() + "): ", NamedTextColor.YELLOW),
-                    Component.join(Component.text(", ", NamedTextColor.DARK_GRAY), chatters),
+                    Component.join(JoinConfiguration.separator(Component.text(", ", NamedTextColor.DARK_GRAY)), chatters),
                 }));
         return true;
     }
@@ -265,11 +266,15 @@ public final class ChatCommand extends AbstractChatCommand {
                                                              channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
             Component tooltip;
             if (channel instanceof PrivateChannel) {
-                tooltip = TextComponent.ofChildren(Component.text("/msg [user] [message]", channelColor),
-                                                   Component.text("\nWhisper someone", NamedTextColor.GRAY));
+                tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+                        Component.text("/msg [user] [message]", channelColor),
+                        Component.text("\nWhisper someone", NamedTextColor.GRAY),
+                    });
             } else {
-                tooltip = TextComponent.ofChildren(Component.text("/" + channel.getAlias() + " [message]", channelColor),
-                                                   Component.text("\nTalk in " + channel.getTitle(), NamedTextColor.GRAY));
+                tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+                        Component.text("/" + channel.getAlias() + " [message]", channelColor),
+                        Component.text("\nTalk in " + channel.getTitle(), NamedTextColor.GRAY),
+                    });
             }
             cb.append(Component.text()
                       .content("[" + channel.getTag() + "]").color(channelColor)
@@ -281,51 +286,53 @@ public final class ChatCommand extends AbstractChatCommand {
         TextColor titleColor = NamedTextColor.WHITE;
         TextColor descColor = NamedTextColor.GRAY;
         cb.append(Component.newline());
-        cb.append(Component.join(Component.space(),
-                                 Component.text("Community", NamedTextColor.GRAY, TextDecoration.ITALIC),
-                                 Component.text().content("[List]").color(clickColor)
-                                 .hoverEvent(Component.join(Component.newline(),
-                                                            Component.text("/ch list", titleColor),
-                                                            Component.text("Channel List", descColor))
-                                             .asHoverEvent())
-                                 .clickEvent(ClickEvent.runCommand("/ch list")).build(),
-                                 Component.text().content("[Who]").color(clickColor)
-                                 .hoverEvent(Component.join(Component.newline(),
-                                                            Component.text("/ch who <channel>", titleColor),
-                                                            Component.text("Channel User List", descColor))
-                                             .asHoverEvent())
-                                 .clickEvent(ClickEvent.suggestCommand("/ch who ")).build(),
-                                 Component.text().content("[Reply]").color(clickColor)
-                                 .hoverEvent(Component.join(Component.newline(),
-                                                            Component.text("/r [message]", titleColor),
-                                                            Component.text("Reply to a private message", descColor),
-                                                            Component.text("or focus on reply", descColor))
-                                             .asHoverEvent())
-                                 .clickEvent(ClickEvent.suggestCommand("/r ")).build(),
-                                 Component.text().content("[Party]").color(clickColor)
-                                 .hoverEvent(Component.join(Component.newline(),
-                                                            Component.text("/party [name]", titleColor),
-                                                            Component.text("Select a named party", descColor),
-                                                            Component.text("or show current party", descColor))
-                                             .asHoverEvent())
-                                 .clickEvent(ClickEvent.suggestCommand("/party "))));
+        cb.append(Component.join(JoinConfiguration.separator(Component.space()), new Component[] {
+                    Component.text("Community", NamedTextColor.GRAY, TextDecoration.ITALIC),
+                    Component.text().content("[List]").color(clickColor)
+                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
+                                               Component.text("/ch list", titleColor),
+                                               Component.text("Channel List", descColor))
+                                .asHoverEvent())
+                    .clickEvent(ClickEvent.runCommand("/ch list")).build(),
+                    Component.text().content("[Who]").color(clickColor)
+                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
+                                               Component.text("/ch who <channel>", titleColor),
+                                               Component.text("Channel User List", descColor))
+                                .asHoverEvent())
+                    .clickEvent(ClickEvent.suggestCommand("/ch who ")).build(),
+                    Component.text().content("[Reply]").color(clickColor)
+                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
+                                               Component.text("/r [message]", titleColor),
+                                               Component.text("Reply to a private message", descColor),
+                                               Component.text("or focus on reply", descColor))
+                                .asHoverEvent())
+                    .clickEvent(ClickEvent.suggestCommand("/r ")).build(),
+                    Component.text().content("[Party]").color(clickColor)
+                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
+                                               Component.text("/party [name]", titleColor),
+                                               Component.text("Select a named party", descColor),
+                                               Component.text("or show current party", descColor))
+                                .asHoverEvent())
+                    .clickEvent(ClickEvent.suggestCommand("/party ")).build(),
+                }));
         clickColor = NamedTextColor.YELLOW;
         cb.append(Component.newline());
-        cb.append(Component.join(Component.space(),
-                                 Component.text("Settings", NamedTextColor.GRAY, TextDecoration.ITALIC),
-                                 Component.text().content("[Set]").color(clickColor)
-                                 .hoverEvent(Component.join(Component.newline(),
-                                                            Component.text("/ch set <channel>", titleColor),
-                                                            Component.text("Channel Settings", descColor))
-                                             .asHoverEvent())
-                                 .clickEvent(ClickEvent.runCommand("/ch set")).build(),
-                                 Component.text().content("[Ignore]").color(clickColor)
-                                 .hoverEvent(Component.join(Component.newline(),
-                                                            Component.text("/ignore [player]", titleColor),
-                                                            Component.text("(Un)ignore a player", descColor),
-                                                            Component.text("or list ignored players", descColor))
-                                             .asHoverEvent())
-                                 .clickEvent(ClickEvent.suggestCommand("/ignore ")).build()));
+        cb.append(Component.join(JoinConfiguration.separator(Component.space()), new Component[] {
+                    Component.text("Settings", NamedTextColor.GRAY, TextDecoration.ITALIC),
+                    Component.text().content("[Set]").color(clickColor)
+                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
+                                               Component.text("/ch set <channel>", titleColor),
+                                               Component.text("Channel Settings", descColor))
+                                .asHoverEvent())
+                    .clickEvent(ClickEvent.runCommand("/ch set")).build(),
+                    Component.text().content("[Ignore]").color(clickColor)
+                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
+                                               Component.text("/ignore [player]", titleColor),
+                                               Component.text("(Un)ignore a player", descColor),
+                                               Component.text("or list ignored players", descColor))
+                                .asHoverEvent())
+                    .clickEvent(ClickEvent.suggestCommand("/ignore ")).build(),
+                }));
         sender.sendMessage(cb.build());
     }
 
@@ -338,23 +345,29 @@ public final class ChatCommand extends AbstractChatCommand {
         String chkey = channel != null ? channel.getKey() : null;
         TextComponent.Builder cb = Component.text();
         cb.append(Component.text().content(option.getDisplayName()).color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC)
-                  .hoverEvent(TextComponent.ofChildren(Component.text(option.getDisplayName(), NamedTextColor.WHITE),
-                                                       Component.text("\n" + option.getDescription(), NamedTextColor.GRAY))));
+                  .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+                              Component.text(option.getDisplayName(), NamedTextColor.WHITE),
+                              Component.text("\n" + option.getDescription(), NamedTextColor.GRAY),
+                          })));
         String current = SQLSetting.getString(uuid, chkey, option.getKey(), option.getDefaultValue());
         for (Option.State state: option.getStates()) {
             cb.append(Component.space());
             boolean active = Objects.equals(current, state.getValue());
             Component c;
             if (active) {
-                Component tooltip = TextComponent.ofChildren(Component.text(state.getDisplayName(), state.getActiveColor()),
-                                                             Component.text("\n" + state.getDescription(), NamedTextColor.WHITE));
+                Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+                        Component.text(state.getDisplayName(), state.getActiveColor()),
+                        Component.text("\n" + state.getDescription(), NamedTextColor.WHITE),
+                    });
                 c = Component.text().content("[" + state.getDisplayName() + "]").color(state.getActiveColor())
                     .hoverEvent(HoverEvent.showText(tooltip))
                     .clickEvent(ClickEvent.runCommand("/ch set " + alias + " " + option.getKey() + " " + state.getValue()))
                     .build();
             } else {
-                Component tooltip = TextComponent.ofChildren(Component.text(state.getDisplayName(), state.getColor()),
-                                                             Component.text("\n" + state.getDescription(), NamedTextColor.WHITE));
+                Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+                        Component.text(state.getDisplayName(), state.getColor()),
+                        Component.text("\n" + state.getDescription(), NamedTextColor.WHITE),
+                    });
                 c = Component.text().content(state.getDisplayName()).color(state.getColor())
                     .hoverEvent(HoverEvent.showText(tooltip))
                     .clickEvent(ClickEvent.runCommand("/ch set " + alias + " " + option.getKey() + " " + state.getValue()))
@@ -384,7 +397,7 @@ public final class ChatCommand extends AbstractChatCommand {
                       .build());
         }
         lines.add(cb.build());
-        player.sendMessage(Component.join(Component.newline(), lines));
+        player.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), lines));
     }
 
     void showSettingsMenu(Player player, Channel channel) {
@@ -409,12 +422,12 @@ public final class ChatCommand extends AbstractChatCommand {
                            .clickEvent(ClickEvent.runCommand("/chadm setdefaults " + channel.getAlias()))
                            .build());
         }
-        lines.add(Component.join(Component.space(), components));
-        lines.add(Component.join(Component.space(),
+        lines.add(Component.join(JoinConfiguration.separator(Component.space()), components));
+        lines.add(Component.join(JoinConfiguration.separator(Component.space()),
                                  Component.text("Example", kcolor, TextDecoration.ITALIC),
                                  channel.makeExampleOutput(player)));
         channel.playSoundCue(player);
-        player.sendMessage(Component.join(Component.newline(), lines));
+        player.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), lines));
     }
 
     void listChannels(CommandSender sender) {
@@ -438,7 +451,7 @@ public final class ChatCommand extends AbstractChatCommand {
             }
             cb.append(Component.space());
             cb.append(Component.text().content("\u2699").color(NamedTextColor.YELLOW)
-                      .hoverEvent(HoverEvent.showText(Component.join(Component.newline(),
+                      .hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.separator(Component.newline()),
                                                                      Component.text("/ch set " + channel.getAlias(), NamedTextColor.YELLOW),
                                                                      Component.text("Open channel settings", NamedTextColor.GRAY))))
                       .clickEvent(ClickEvent.runCommand("/ch set " + channel.getAlias()))
@@ -447,8 +460,10 @@ public final class ChatCommand extends AbstractChatCommand {
             TextColor channelColor = player != null
                 ? SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", NamedTextColor.WHITE)
                 : SQLSetting.getTextColor(null, channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
-            Component tooltip = TextComponent.ofChildren(Component.text("/" + channel.getTag().toLowerCase() + " [message]", channelColor),
-                                                         Component.text("\nFocus " + channel.getTitle(), NamedTextColor.GRAY));
+            Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+                    Component.text("/" + channel.getTag().toLowerCase() + " [message]", channelColor),
+                    Component.text("\nFocus " + channel.getTitle(), NamedTextColor.GRAY),
+                });
             cb.append(Component.text().content(channel.getTitle()).color(channelColor)
                       .hoverEvent(HoverEvent.showText(tooltip))
                       .clickEvent(ClickEvent.runCommand("/" + channel.getTag().toLowerCase()))
@@ -462,7 +477,7 @@ public final class ChatCommand extends AbstractChatCommand {
             cb.append(Component.text(channel.getDescription(), NamedTextColor.GRAY));
             lines.add(cb.build());
         }
-        sender.sendMessage(Component.join(Component.newline(), lines));
+        sender.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), lines));
         if (sender instanceof Player) {
             PluginPlayerEvent.Name.LIST_CHAT_CHANNELS.call(plugin, player);
         }
@@ -484,8 +499,10 @@ public final class ChatCommand extends AbstractChatCommand {
             Msg.warn(player, Component.text("Not ignoring anyone", NamedTextColor.RED));
             return;
         }
-        player.sendMessage(TextComponent.ofChildren(Component.text("Ignoring " + ignores.size() + " players: ", NamedTextColor.WHITE, TextDecoration.ITALIC),
-                                                    Component.join(Component.text(", ", NamedTextColor.DARK_GRAY), ignores)));
+        player.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+                    Component.text("Ignoring " + ignores.size() + " players: ", NamedTextColor.WHITE, TextDecoration.ITALIC),
+                    Component.join(JoinConfiguration.separator(Component.text(", ", NamedTextColor.DARK_GRAY)), ignores),
+                }));
     }
 
     void toggleIgnore(Player player, String name) {

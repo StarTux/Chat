@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -91,13 +91,13 @@ public final class AdminCommand extends AbstractChatCommand {
         List<Component> lines = new ArrayList<>();
         for (SQLSetting sett: SQLSetting.getDefaultSettings().getMap().values()) {
             if (!channel.getKey().equals(sett.getChannel())) continue;
-            lines.add(TextComponent.ofChildren(Component.text(sett.getChannel(), NamedTextColor.GRAY),
+            lines.add(Component.join(JoinConfiguration.separator(Component.newline()), Component.text(sett.getChannel(), NamedTextColor.GRAY),
                                                Component.text(".", NamedTextColor.DARK_GRAY),
                                                Component.text(sett.getSettingKey(), NamedTextColor.GRAY),
                                                Component.text(" = ", NamedTextColor.DARK_GRAY),
                                                Component.text(sett.getSettingValue(), NamedTextColor.YELLOW)));
         }
-        sender.sendMessage(Component.join(Component.text("\n"), lines));
+        sender.sendMessage(Component.join(JoinConfiguration.separator(Component.text("\n")), lines));
         return true;
     }
 

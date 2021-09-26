@@ -174,9 +174,9 @@ public abstract class AbstractChannel implements Channel {
     }
 
     protected final Component makeChannelTag(TextColor channelColor, TextColor bracketColor, BracketType bracketType) {
-        Component tooltip = TextComponent
-            .ofChildren(Component.text(getTitle()),
-                        Component.text("\n" + getDescription(), NamedTextColor.DARK_PURPLE, TextDecoration.ITALIC));
+        Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()),
+                                           Component.text(getTitle()),
+                                           Component.text("\n" + getDescription(), NamedTextColor.DARK_PURPLE, TextDecoration.ITALIC));
         return Component.text()
             .append(Component.text(bracketType.opening, bracketColor))
             .append(Component.text(getTag(), channelColor))

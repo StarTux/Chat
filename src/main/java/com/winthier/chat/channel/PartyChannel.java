@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -32,27 +33,28 @@ public final class PartyChannel extends AbstractChannel {
         super(plugin, row);
     }
 
-    private final Component usage = TextComponent
-        .ofChildren(Component.text("Usage", NamedTextColor.GRAY, TextDecoration.ITALIC),
-                    Component.text("\n"),
-                    Component.text("/party ", NamedTextColor.GREEN),
-                    Component.text("<name>", NamedTextColor.GREEN, TextDecoration.ITALIC),
-                    Component.text(" - ", NamedTextColor.DARK_GRAY),
-                    Component.text("Join a party", NamedTextColor.WHITE),
-                    Component.text("\n"),
-                    Component.text("/party ", NamedTextColor.GREEN),
-                    Component.text("quit", NamedTextColor.GREEN, TextDecoration.ITALIC),
-                    Component.text(" - ", NamedTextColor.DARK_GRAY),
-                    Component.text("Quit any party", NamedTextColor.WHITE),
-                    Component.text("\n"),
-                    Component.text("/p ", NamedTextColor.GREEN),
-                    Component.text("<message>", NamedTextColor.GREEN, TextDecoration.ITALIC),
-                    Component.text(" - ", NamedTextColor.DARK_GRAY),
-                    Component.text("Send a message", NamedTextColor.WHITE),
-                    Component.text("\n"),
-                    Component.text("/p ", NamedTextColor.GREEN),
-                    Component.text(" - ", NamedTextColor.DARK_GRAY),
-                    Component.text("Focus party chat", NamedTextColor.WHITE));
+    private final Component usage = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+            Component.text("Usage", NamedTextColor.GRAY, TextDecoration.ITALIC),
+            Component.text("\n"),
+            Component.text("/party ", NamedTextColor.GREEN),
+            Component.text("<name>", NamedTextColor.GREEN, TextDecoration.ITALIC),
+            Component.text(" - ", NamedTextColor.DARK_GRAY),
+            Component.text("Join a party", NamedTextColor.WHITE),
+            Component.text("\n"),
+            Component.text("/party ", NamedTextColor.GREEN),
+            Component.text("quit", NamedTextColor.GREEN, TextDecoration.ITALIC),
+            Component.text(" - ", NamedTextColor.DARK_GRAY),
+            Component.text("Quit any party", NamedTextColor.WHITE),
+            Component.text("\n"),
+            Component.text("/p ", NamedTextColor.GREEN),
+            Component.text("<message>", NamedTextColor.GREEN, TextDecoration.ITALIC),
+            Component.text(" - ", NamedTextColor.DARK_GRAY),
+            Component.text("Send a message", NamedTextColor.WHITE),
+            Component.text("\n"),
+            Component.text("/p ", NamedTextColor.GREEN),
+            Component.text(" - ", NamedTextColor.DARK_GRAY),
+            Component.text("Focus party chat", NamedTextColor.WHITE),
+        });
 
     @Override
     public boolean canJoin(UUID player) {
@@ -243,7 +245,7 @@ public final class PartyChannel extends AbstractChannel {
         }
         TextComponent.Builder cb = Component.text();
         cb.append(Component.text("Party " + partyName + "(" + chatters.size() + "): ", channelColor));
-        cb.append(Component.join(Component.text(", ", NamedTextColor.DARK_GRAY), chatters));
+        cb.append(Component.join(JoinConfiguration.separator(Component.text(", ", NamedTextColor.DARK_GRAY)), chatters));
         player.sendMessage(cb.build());
     }
 }

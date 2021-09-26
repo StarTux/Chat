@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -106,8 +107,8 @@ public final class PublicChannel extends AbstractChannel {
             }
         }
         if (!message.isPassive() && ranged && sender != null && seenCount == 0) {
-            sender.sendMessage(TextComponent.ofChildren(Component.text("[Chat] ", NamedTextColor.WHITE),
-                                                        Component.text("Nobody is in range to hear you", NamedTextColor.YELLOW)));
+            sender.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), Component.text("[Chat] ", NamedTextColor.WHITE),
+                                              Component.text("Nobody is in range to hear you", NamedTextColor.YELLOW)));
         }
     }
 

@@ -3,7 +3,7 @@ package com.winthier.chat.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -17,21 +17,21 @@ public final class Msg {
     private Msg() { }
 
     public static void info(CommandSender to, Component content) {
-        to.sendMessage(TextComponent.ofChildren(Component.text().content("[Chat]").color(NamedTextColor.DARK_AQUA)
-                                                .clickEvent(ClickEvent.suggestCommand("/ch"))
-                                                .hoverEvent(HoverEvent.showText(Component.text("/ch", NamedTextColor.DARK_AQUA)))
-                                                .build(),
-                                                Component.text(" "),
-                                                content));
+        to.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), Component.text().content("[Chat]").color(NamedTextColor.DARK_AQUA)
+                                      .clickEvent(ClickEvent.suggestCommand("/ch"))
+                                      .hoverEvent(HoverEvent.showText(Component.text("/ch", NamedTextColor.DARK_AQUA)))
+                                      .build(),
+                                      Component.text(" "),
+                                      content));
     }
 
     public static void warn(CommandSender to, Component content) {
-        to.sendMessage(TextComponent.ofChildren(Component.text().content("[Chat]").color(NamedTextColor.DARK_RED)
-                                                .clickEvent(ClickEvent.suggestCommand("/ch"))
-                                                .hoverEvent(HoverEvent.showText(Component.text("/ch", NamedTextColor.DARK_RED)))
-                                                .build(),
-                                                Component.text(" "),
-                                                content));
+        to.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), Component.text().content("[Chat]").color(NamedTextColor.DARK_RED)
+                                      .clickEvent(ClickEvent.suggestCommand("/ch"))
+                                      .hoverEvent(HoverEvent.showText(Component.text("/ch", NamedTextColor.DARK_RED)))
+                                      .build(),
+                                      Component.text(" "),
+                                      content));
     }
 
     public static String camelCase(String msg) {
