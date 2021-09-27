@@ -26,6 +26,11 @@ public final class PrivateChannel extends AbstractChannel {
 
     public PrivateChannel(final ChatPlugin plugin, final SQLChannel row) {
         super(plugin, row);
+        for (String alias : plugin.getCommand("tell").getAliases()) {
+            if (!this.aliases.contains(alias)) {
+                this.aliases.add(alias);
+            }
+        }
     }
 
     @Override
