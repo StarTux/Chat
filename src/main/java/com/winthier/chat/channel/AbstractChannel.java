@@ -59,7 +59,7 @@ public abstract class AbstractChannel implements Channel {
         this.title = row.getTitle();
         this.description = row.getDescription();
         this.range = row.getLocalRange();
-        this.aliases = List.of(row.getAliases().split(","));
+        this.aliases = new ArrayList<>(List.of(row.getAliases().split(",")));
         Option[] opts = {
             Option.booleanOption("ShowChannelTag", "Show Channel Tag",
                                  "Show the channel tag at the beginning of every message",
