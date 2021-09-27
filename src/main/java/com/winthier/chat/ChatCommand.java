@@ -268,12 +268,12 @@ public final class ChatCommand extends AbstractChatCommand {
             if (channel instanceof PrivateChannel) {
                 tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
                         Component.text("/msg [user] [message]", channelColor),
-                        Component.text("\nWhisper someone", NamedTextColor.GRAY),
+                        Component.text("Whisper someone", NamedTextColor.GRAY),
                     });
             } else {
                 tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
                         Component.text("/" + channel.getAlias() + " [message]", channelColor),
-                        Component.text("\nTalk in " + channel.getTitle(), NamedTextColor.GRAY),
+                        Component.text("Talk in " + channel.getTitle(), NamedTextColor.GRAY),
                     });
             }
             cb.append(Component.text()
@@ -347,7 +347,7 @@ public final class ChatCommand extends AbstractChatCommand {
         cb.append(Component.text().content(option.getDisplayName()).color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC)
                   .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
                               Component.text(option.getDisplayName(), NamedTextColor.WHITE),
-                              Component.text("\n" + option.getDescription(), NamedTextColor.GRAY),
+                              Component.text(option.getDescription(), NamedTextColor.GRAY),
                           })));
         String current = SQLSetting.getString(uuid, chkey, option.getKey(), option.getDefaultValue());
         for (Option.State state: option.getStates()) {
@@ -357,7 +357,7 @@ public final class ChatCommand extends AbstractChatCommand {
             if (active) {
                 Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
                         Component.text(state.getDisplayName(), state.getActiveColor()),
-                        Component.text("\n" + state.getDescription(), NamedTextColor.WHITE),
+                        Component.text(state.getDescription(), NamedTextColor.WHITE),
                     });
                 c = Component.text().content("[" + state.getDisplayName() + "]").color(state.getActiveColor())
                     .hoverEvent(HoverEvent.showText(tooltip))
@@ -366,7 +366,7 @@ public final class ChatCommand extends AbstractChatCommand {
             } else {
                 Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
                         Component.text(state.getDisplayName(), state.getColor()),
-                        Component.text("\n" + state.getDescription(), NamedTextColor.WHITE),
+                        Component.text(state.getDescription(), NamedTextColor.WHITE),
                     });
                 c = Component.text().content(state.getDisplayName()).color(state.getColor())
                     .hoverEvent(HoverEvent.showText(tooltip))
@@ -466,7 +466,7 @@ public final class ChatCommand extends AbstractChatCommand {
                 : SQLSetting.getTextColor(null, channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
             Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
                     Component.text("/" + channel.getTag().toLowerCase() + " [message]", channelColor),
-                    Component.text("\nFocus " + channel.getTitle(), NamedTextColor.GRAY),
+                    Component.text("Focus " + channel.getTitle(), NamedTextColor.GRAY),
                 });
             cb.append(Component.text().content(channel.getTitle()).color(channelColor)
                       .hoverEvent(HoverEvent.showText(tooltip))

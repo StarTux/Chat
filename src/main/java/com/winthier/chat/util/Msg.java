@@ -17,7 +17,7 @@ public final class Msg {
     private Msg() { }
 
     public static void info(CommandSender to, Component content) {
-        to.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), Component.text().content("[Chat]").color(NamedTextColor.DARK_AQUA)
+        to.sendMessage(Component.join(JoinConfiguration.noSeparators(), Component.text().content("[Chat]").color(NamedTextColor.DARK_AQUA)
                                       .clickEvent(ClickEvent.suggestCommand("/ch"))
                                       .hoverEvent(HoverEvent.showText(Component.text("/ch", NamedTextColor.DARK_AQUA)))
                                       .build(),
@@ -26,7 +26,7 @@ public final class Msg {
     }
 
     public static void warn(CommandSender to, Component content) {
-        to.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), Component.text().content("[Chat]").color(NamedTextColor.DARK_RED)
+        to.sendMessage(Component.join(JoinConfiguration.noSeparators(), Component.text().content("[Chat]").color(NamedTextColor.DARK_RED)
                                       .clickEvent(ClickEvent.suggestCommand("/ch"))
                                       .hoverEvent(HoverEvent.showText(Component.text("/ch", NamedTextColor.DARK_RED)))
                                       .build(),
