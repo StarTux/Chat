@@ -107,7 +107,7 @@ public final class PublicChannel extends AbstractChannel {
             }
         }
         if (!message.isPassive() && ranged && sender != null && seenCount == 0) {
-            sender.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), Component.text("[Chat] ", NamedTextColor.WHITE),
+            sender.sendMessage(Component.join(JoinConfiguration.noSeparators(), Component.text("[Chat] ", NamedTextColor.WHITE),
                                               Component.text("Nobody is in range to hear you", NamedTextColor.YELLOW)));
         }
     }
