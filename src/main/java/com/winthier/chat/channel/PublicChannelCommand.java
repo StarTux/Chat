@@ -1,6 +1,7 @@
 package com.winthier.chat.channel;
 
 import com.winthier.chat.ChatPlugin;
+import com.winthier.chat.event.ChatPlayerTalkEvent;
 import java.util.List;
 import lombok.Getter;
 import org.bukkit.command.Command;
@@ -31,7 +32,9 @@ public final class PublicChannelCommand extends Command implements PluginIdentif
         String message = String.join(" ", args);
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            channel.playerDidUseCommand(new PlayerCommandContext(player, alias, message));
+            ChatPlayerTalkEvent event = new ChatPlayerTalkEvent(player, channel, message);
+            if (!event.call()) return true;
+            channel.playerDidUseCommand(new PlayerCommandContext(player, alias, event.getMessage()));
             return true;
         } else if (sender instanceof ConsoleCommandSender) {
             channel.consoleDidUseCommand(message);
