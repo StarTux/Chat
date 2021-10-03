@@ -33,9 +33,8 @@ public final class ChatPlayerTalkEvent extends Event implements Cancellable {
         this.message = message;
     }
 
-    public static boolean call(Player thePlayer, Channel theChannel, String theMessage) {
-        ChatPlayerTalkEvent event = new ChatPlayerTalkEvent(thePlayer, theChannel, theMessage);
-        Bukkit.getServer().getPluginManager().callEvent(event);
-        return (!event.isCancelled());
+    public boolean call() {
+        Bukkit.getServer().getPluginManager().callEvent(this);
+        return (!isCancelled());
     }
 }

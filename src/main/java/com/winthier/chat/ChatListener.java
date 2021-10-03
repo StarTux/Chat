@@ -40,8 +40,9 @@ public final class ChatListener implements Listener {
         Channel channel = plugin.getFocusChannel(player.getUniqueId());
         if (channel == null) return;
         if (!channel.canTalk(player.getUniqueId())) return;
-        if (!ChatPlayerTalkEvent.call(player, channel, message)) return;
-        channel.playerDidUseChat(new PlayerCommandContext(player, null, message));
+        ChatPlayerTalkEvent event = new ChatPlayerTalkEvent(player, channel, message);
+        if (!event.call()) return;
+        channel.playerDidUseChat(new PlayerCommandContext(player, null, event.getMessage()));
     }
 
     @EventHandler

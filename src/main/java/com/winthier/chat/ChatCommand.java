@@ -189,9 +189,10 @@ public final class ChatCommand extends AbstractChatCommand {
         if (player != null && !cmd.hasPermission(player)) return false;
         StringBuilder sb = new StringBuilder(args[1]);
         String msg = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-        if (player != null && !ChatPlayerTalkEvent.call(player, cmd.getChannel(), msg)) return false;
         if (player != null) {
-            cmd.playerDidUseCommand(new PlayerCommandContext(player, args[0], msg));
+            ChatPlayerTalkEvent event = new ChatPlayerTalkEvent(player, cmd.getChannel(), msg);
+            if (!event.call()) return false;
+            cmd.playerDidUseCommand(new PlayerCommandContext(player, args[0], event.getMessage()));
         } else {
             cmd.consoleDidUseCommand(msg);
         }

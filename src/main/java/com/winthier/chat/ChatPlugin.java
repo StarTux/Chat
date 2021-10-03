@@ -117,8 +117,9 @@ public final class ChatPlugin extends JavaPlugin {
         if (player == null) {
             cmd.consoleDidUseCommand(msg);
         } else {
-            if (!ChatPlayerTalkEvent.call(player, cmd.getChannel(), msg)) return true;
-            cmd.playerDidUseCommand(new PlayerCommandContext(player, label, msg));
+            ChatPlayerTalkEvent event = new ChatPlayerTalkEvent(player, cmd.getChannel(), msg);
+            if (!event.call()) return true;
+            cmd.playerDidUseCommand(new PlayerCommandContext(player, label, event.getMessage()));
         }
         return true;
     }
