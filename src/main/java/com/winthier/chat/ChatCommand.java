@@ -174,7 +174,7 @@ public final class ChatCommand extends AbstractChatCommand {
         for (Chatter chatter : channel.getOnlineMembers()) {
             chatters.add(Component.text(chatter.getName(), NamedTextColor.WHITE));
         }
-        Msg.info(sender, Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+        Msg.info(sender, Component.join(JoinConfiguration.noSeparators(), new Component[] {
                     Component.text("Channel " + channel.getTitle() + " (" + chatters.size() + "): ", NamedTextColor.YELLOW),
                     Component.join(JoinConfiguration.separator(Component.text(", ", NamedTextColor.DARK_GRAY)), chatters),
                 }));
