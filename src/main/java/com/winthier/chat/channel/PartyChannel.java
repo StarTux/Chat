@@ -33,24 +33,24 @@ public final class PartyChannel extends AbstractChannel {
         super(plugin, row);
     }
 
-    private final Component usage = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+    private final Component usage = Component.join(JoinConfiguration.noSeparators(), new Component[] {
             Component.text("Usage", NamedTextColor.GRAY, TextDecoration.ITALIC),
-            Component.text("\n"),
+            Component.newline(),
             Component.text("/party ", NamedTextColor.GREEN),
             Component.text("<name>", NamedTextColor.GREEN, TextDecoration.ITALIC),
             Component.text(" - ", NamedTextColor.DARK_GRAY),
             Component.text("Join a party", NamedTextColor.WHITE),
-            Component.text("\n"),
+            Component.newline(),
             Component.text("/party ", NamedTextColor.GREEN),
             Component.text("quit", NamedTextColor.GREEN, TextDecoration.ITALIC),
             Component.text(" - ", NamedTextColor.DARK_GRAY),
             Component.text("Quit any party", NamedTextColor.WHITE),
-            Component.text("\n"),
+            Component.newline(),
             Component.text("/p ", NamedTextColor.GREEN),
             Component.text("<message>", NamedTextColor.GREEN, TextDecoration.ITALIC),
             Component.text(" - ", NamedTextColor.DARK_GRAY),
             Component.text("Send a message", NamedTextColor.WHITE),
-            Component.text("\n"),
+            Component.newline(),
             Component.text("/p ", NamedTextColor.GREEN),
             Component.text(" - ", NamedTextColor.DARK_GRAY),
             Component.text("Focus party chat", NamedTextColor.WHITE),
