@@ -97,7 +97,7 @@ public final class AdminCommand extends AbstractChatCommand {
                                                Component.text(" = ", NamedTextColor.DARK_GRAY),
                                                Component.text(sett.getSettingValue(), NamedTextColor.YELLOW)));
         }
-        sender.sendMessage(Component.join(JoinConfiguration.separator(Component.text("\n")), lines));
+        sender.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), lines));
         return true;
     }
 
