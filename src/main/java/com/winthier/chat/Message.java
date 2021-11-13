@@ -23,7 +23,7 @@ public final class Message {
     private String channel;
     private String special;
     private UUID target; // PM
-    private String targetName; // PM, Party
+    private String targetName; // PM, Party, Team
     private String senderServer;
     private String senderServerDisplayName;
     private Title title;

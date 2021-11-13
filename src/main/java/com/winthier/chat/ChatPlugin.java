@@ -9,6 +9,7 @@ import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.channel.PrivateChannel;
 import com.winthier.chat.channel.PublicChannel;
 import com.winthier.chat.channel.ReplyCommand;
+import com.winthier.chat.channel.TeamChannel;
 import com.winthier.chat.connect.ConnectListener;
 import com.winthier.chat.dynmap.DynmapHandler;
 import com.winthier.chat.event.ChatMessageEvent;
@@ -54,6 +55,7 @@ public final class ChatPlugin extends JavaPlugin {
     private ChatListener chatListener = new ChatListener(this);
     private PrivateChannel privateChannel = null;
     private PartyChannel partyChannel = null;
+    private TeamChannel teamChannel = null;
     private PlayerCacheHandler playerCacheHandler = null;
     private DynmapHandler dynmapHandler = null;
     private ChatCommand chatCommand = new ChatCommand(this);
@@ -177,6 +179,9 @@ public final class ChatPlugin extends JavaPlugin {
                 commandResponders.add(new PartyCommand(this));
                 partyChannel = new PartyChannel(this, row);
                 cmd = partyChannel;
+            } else if ("team".equals(row.getChannelKey())) {
+                teamChannel = new TeamChannel(this, row);
+                cmd = teamChannel;
             } else {
                 cmd = new PublicChannel(this, row);
             }

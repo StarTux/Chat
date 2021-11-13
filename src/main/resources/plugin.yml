@@ -46,6 +46,11 @@ commands:
   p:
     permission: chat.channel.party
 
+  team:
+    aliases: [teammsg, t]
+    description: Team channel
+    permission: chat.channel.team
+
 permissions:
 
   chat.chat:
@@ -105,3 +110,7 @@ permissions:
   chat.pm:
     description: Send and receive private messages
     default: op
+
+  chat.channel.team:
+    default: false
+    description: Use team channel
