@@ -409,7 +409,7 @@ public final class ChatPlugin extends JavaPlugin {
     public void onBungeeJoin(UUID uuid, String name, String server, long timestamp) {
         if (!Perm.has(uuid, "chat.joinmessage")) return;
         if (containsBadWord(name)) {
-            getLogger().info("Joining player name contains bad word: " + name);
+            getLogger().warning("Joining player name contains bad word: " + name);
             Bukkit.broadcast(Component.text("[Chat] Joining player name contains bad word: " + name, NamedTextColor.RED),
                              "chat.admin");
             return;
