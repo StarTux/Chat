@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -61,7 +62,8 @@ public final class ChatPlugin extends JavaPlugin {
     private ChatCommand chatCommand = new ChatCommand(this);
     @Setter private boolean debugMode = false;
     private SQLDatabase db;
-    private final List<TextReplacementConfig> badWords = new ArrayList<>();
+    @Setter private List<TextReplacementConfig> badWordConfigList = List.of();
+    @Setter private List<Pattern> badWordList = List.of();
 
     @Override
     public void onEnable() {
@@ -97,9 +99,6 @@ public final class ChatPlugin extends JavaPlugin {
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
         getCommand("ignore").setExecutor(new IgnoreCommand());
         SQLDB.load();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            SQLDB.load(player.getUniqueId());
-        }
     }
 
     @Override
@@ -393,8 +392,28 @@ public final class ChatPlugin extends JavaPlugin {
         return SQLIgnore.doesIgnore(player, ignoree);
     }
 
+    public Component filterBadWords(Component in) {
+        for (TextReplacementConfig config : badWordConfigList) {
+            in = in.replaceText(config);
+        }
+        return in;
+    }
+
+    public boolean containsBadWord(String in) {
+        for (Pattern pattern : badWordList) {
+            if (pattern.matcher(in).find()) return true;
+        }
+        return false;
+    }
+
     public void onBungeeJoin(UUID uuid, String name, String server, long timestamp) {
         if (!Perm.has(uuid, "chat.joinmessage")) return;
+        if (containsBadWord(name)) {
+            getLogger().info("Joining player name contains bad word: " + name);
+            Bukkit.broadcast(Component.text("[Chat] Joining player name contains bad word: " + name, NamedTextColor.RED),
+                             "chat.admin");
+            return;
+        }
         Channel channel = findChannel("info");
         if (channel == null) return;
         Message message = new Message().init(channel)
@@ -409,6 +428,10 @@ public final class ChatPlugin extends JavaPlugin {
 
     public void onBungeeQuit(UUID uuid, String name, String server, long timestamp) {
         if (!Perm.has(uuid, "chat.joinmessage")) return;
+        if (containsBadWord(name)) {
+            getLogger().info("Skipping name containing bad world: " + name);
+            return;
+        }
         Channel channel = findChannel("info");
         if (channel == null) return;
         Message message = new Message().init(channel)

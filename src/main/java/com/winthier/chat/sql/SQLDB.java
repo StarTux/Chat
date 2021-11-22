@@ -50,7 +50,7 @@ public final class SQLDB {
 
     public static void load() {
         SQLSetting.loadDefaultSettingsAsync();
-        SQLBadWord.loadAllAsync();
+        SQLBadWord.loadBadWords();
         SQLIgnore.loadIgnores();
         for (Player player : Bukkit.getOnlinePlayers()) {
             load(player.getUniqueId());

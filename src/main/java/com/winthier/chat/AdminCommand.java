@@ -47,6 +47,9 @@ public final class AdminCommand extends AbstractChatCommand {
         rootNode.addChild("setdefaults").arguments("<channel>")
             .description("Set all channel defaults")
             .playerCaller(this::setDefaults);
+        rootNode.addChild("badword").arguments("<expression>")
+            .description("Check expression against bad word filter")
+            .senderCaller(this::badWord);
         plugin.getCommand("chatadmin").setExecutor(this);
         return this;
     }
@@ -153,6 +156,21 @@ public final class AdminCommand extends AbstractChatCommand {
         if (args.length != 0) return false;
         plugin.initializeDatabase();
         Msg.info(sender, Component.text("Database initialized", NamedTextColor.YELLOW));
+        return true;
+    }
+
+    protected boolean badWord(CommandSender sender, String[] args) {
+        if (args.length == 0) return false;
+        String expression = String.join(" ", args);
+        int count = 0;
+        for (var pattern : plugin.getBadWordList()) {
+            if (pattern.matcher(expression).find()) {
+                sender.sendMessage(Component.text("Match: " + pattern.toString(), NamedTextColor.YELLOW));
+                count += 1;
+            }
+        }
+        sender.sendMessage(Component.text("Total matches: " + count + ", Filtered: ", NamedTextColor.YELLOW)
+                           .append(plugin.filterBadWords(Component.text(expression))));
         return true;
     }
 }

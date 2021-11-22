@@ -3,6 +3,7 @@ package com.winthier.chat.sql;
 import com.winthier.chat.ChatPlugin;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -32,32 +33,40 @@ public final class SQLBadWord {
         return Component.text(result);
     }
 
-    public static void loadAllAsync() {
-        SQLDB.get().find(SQLBadWord.class).findListAsync(rows -> {
-                List<String> words = new ArrayList<>(rows.size());
-                for (SQLBadWord row : rows) {
-                    String word = row.getWord()
-                        .replace("i", "[i1]")
-                        .replace("o", "[o0]");
-                    words.add(word);
-                }
-                List<TextReplacementConfig> configs = new ArrayList<>(words.size());
-                for (String word : words) {
-                    Pattern pattern;
-                    try {
-                        pattern = Pattern.compile(word, Pattern.CASE_INSENSITIVE);
-                    } catch (PatternSyntaxException pse) {
-                        pse.printStackTrace();
-                        continue;
-                    }
-                    TextReplacementConfig config = TextReplacementConfig.builder()
-                        .match(pattern)
-                        .replacement(SQLBadWord::replace)
-                        .build();
-                    configs.add(config);
-                }
-                ChatPlugin.getInstance().getBadWords().clear();
-                ChatPlugin.getInstance().getBadWords().addAll(configs);
-            });
+    public static void loadBadWordsAsync() {
+        SQLDB.get().find(SQLBadWord.class).findListAsync(SQLBadWord::acceptSync);
+    }
+
+    public static void loadBadWords() {
+        acceptSync(SQLDB.get().find(SQLBadWord.class).findList());
+    }
+
+    private static void acceptSync(List<SQLBadWord> rows) {
+        List<String> words = new ArrayList<>(rows.size());
+        for (SQLBadWord row : rows) {
+            String word = row.getWord()
+                .replace("i", "[i1]")
+                .replace("o", "[o0]");
+            words.add(word);
+        }
+        List<TextReplacementConfig> configList = new ArrayList<>(words.size());
+        List<Pattern> patternList = new ArrayList<>(words.size());
+        for (String word : words) {
+            Pattern pattern;
+            try {
+                pattern = Pattern.compile(word, Pattern.CASE_INSENSITIVE);
+            } catch (PatternSyntaxException pse) {
+                ChatPlugin.getInstance().getLogger().log(Level.SEVERE, "Pattern " + word, pse);
+                continue;
+            }
+            patternList.add(pattern);
+            TextReplacementConfig config = TextReplacementConfig.builder()
+                .match(pattern)
+                .replacement(SQLBadWord::replace)
+                .build();
+            configList.add(config);
+        }
+        ChatPlugin.getInstance().setBadWordConfigList(List.copyOf(configList));
+        ChatPlugin.getInstance().setBadWordList(List.copyOf(patternList));
     }
 }

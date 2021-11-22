@@ -10,7 +10,6 @@ import com.winthier.chat.Message;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
-import com.winthier.chat.util.Filter;
 import com.winthier.chat.util.Msg;
 import com.winthier.perm.rank.ExtraRank;
 import com.winthier.perm.rank.PlayerRank;
@@ -280,7 +279,7 @@ public abstract class AbstractChannel implements Channel {
         Component messageComponent = message.getMessageComponent();
         if (messageComponent != null) {
             if (languageFilter) {
-                messageComponent = Filter.filterBadWords(messageComponent);
+                messageComponent = plugin.filterBadWords(messageComponent);
             }
             return messageComponent;
         }
@@ -324,7 +323,7 @@ public abstract class AbstractChannel implements Channel {
             }
         }
         if (languageFilter) {
-            component = Filter.filterBadWords(component);
+            component = plugin.filterBadWords(component);
         }
         component = component.insertion(Msg.plain(component));
         return component;
