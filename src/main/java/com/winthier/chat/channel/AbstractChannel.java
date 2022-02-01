@@ -157,6 +157,7 @@ public abstract class AbstractChannel implements Channel {
 
     private void announce(Component msg, boolean local) {
         Message message = new Message().init(this).message(msg);
+        message.setPassive(true);
         message.setLocal(local);
         plugin.didCreateMessage(this, message);
         handleMessage(message);
@@ -169,7 +170,9 @@ public abstract class AbstractChannel implements Channel {
     protected void send(Message message, Player player) {
         Component component = makeOutput(message, player);
         player.sendMessage(component);
-        playSoundCue(player);
+        if (!message.isPassive()) {
+            playSoundCue(player);
+        }
     }
 
     protected final Component makeChannelTag(TextColor channelColor, TextColor bracketColor, BracketType bracketType) {

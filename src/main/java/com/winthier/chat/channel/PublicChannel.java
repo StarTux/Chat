@@ -79,8 +79,9 @@ public final class PublicChannel extends AbstractChannel {
 
     @Override
     public void handleMessage(Message message) {
-        String log = String.format("[%s][%s]%s: %s", getTag(), message.getSenderServer(),
-                                   message.getSenderName(), message.getMessage());
+        String log = String.format("[%s][%s]%s %s", getTag(), message.getSenderServer(),
+                                   (message.getSenderName() != null ? message.getSenderName() + ":" : ""),
+                                   message.getMessage());
         plugin.getLogger().info(log);
         Location location = message.getLocation();
         final boolean ranged = range > 0 && location != null;
