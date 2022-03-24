@@ -23,7 +23,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public final class ChatListener implements Listener {
     private final ChatPlugin plugin;
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAsyncChat(final AsyncChatEvent event) {
         event.setCancelled(true);
         final Player player = event.getPlayer();
