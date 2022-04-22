@@ -1,6 +1,5 @@
 package com.winthier.chat;
 
-import com.cavetale.dirty.Dirty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
