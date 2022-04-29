@@ -1,7 +1,6 @@
 package com.winthier.chat.sql;
 
 import com.winthier.chat.ChatPlugin;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +50,7 @@ public final class SQLSetting {
     @Column(nullable = false, length = 32) private String settingKey;
     @Column(nullable = true, length = 255) private String settingValue;
 
-    public SQLSetting(UUID uuid, String channel, String key, Object value) {
+    public SQLSetting(final UUID uuid, final String channel, final String key, final Object value) {
         setUuid(uuid);
         setChannel(channel);
         setSettingKey(key);
@@ -63,12 +61,12 @@ public final class SQLSetting {
         if (value == null) {
             setSettingValue(null);
         } else if (value instanceof String) {
-            setSettingValue((String)value);
+            setSettingValue((String) value);
         } else if (value instanceof Boolean) {
-            Boolean bv = (Boolean)value;
+            Boolean bv = (Boolean) value;
             setSettingValue(bv ? "1" : "0");
         } else if (value instanceof ChatColor) {
-            ChatColor color = (ChatColor)value;
+            ChatColor color = (ChatColor) value;
             setSettingValue(color.name().toLowerCase());
         } else {
             setSettingValue(value.toString());
@@ -131,7 +129,8 @@ public final class SQLSetting {
                 SQLDB.get().save(result);
             } catch (PersistenceException pe) {
                 clearCache(uuid);
-                ChatPlugin.getInstance().getLogger().warning(String.format("SQLSetting: Persistence Exception while storing %s,%s,%s. Clearing cache.", uuid, channel, key));
+                ChatPlugin.getInstance().getLogger()
+                    .warning(String.format("SQLSetting: Persistence Exception while storing %s,%s,%s. Clearing cache.", uuid, channel, key));
             }
         } else {
             result.setGenericValue(value);
@@ -139,7 +138,8 @@ public final class SQLSetting {
                 SQLDB.get().save(result);
             } catch (PersistenceException pe) {
                 clearCache(uuid);
-                ChatPlugin.getInstance().getLogger().warning(String.format("SQLSetting: Persistence Exception while storing %s,%s,%s. Clearing cache.", uuid, channel, key));
+                ChatPlugin.getInstance().getLogger()
+                    .warning(String.format("SQLSetting: Persistence Exception while storing %s,%s,%s. Clearing cache.", uuid, channel, key));
             }
         }
         return result;
