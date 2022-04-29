@@ -25,7 +25,10 @@ import org.bukkit.entity.Player;
 
 @Getter @Setter
 public abstract class AbstractChannel implements Channel {
-    private String title, key, tag, description;
+    private String title;
+    private String key;
+    private String tag;
+    private String description;
     private int range = 0;
     private final List<String> aliases = new ArrayList<>();
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
@@ -194,20 +197,32 @@ public abstract class AbstractChannel implements Channel {
     final Object senderTag(Message message, ChatColor senderColor, ChatColor bracketColor, BracketType bracketType, boolean useBrackets) {
         if (message.senderName == null) return "";
         if (message.sender == null) {
-            return Msg.button(senderColor, useBrackets ? bracketColor + bracketType.opening + senderColor + message.senderName + ChatColor.RESET + bracketColor + bracketType.closing : message.senderName, null, null);
+            return Msg.button(senderColor,
+                              (useBrackets
+                               ? (bracketColor + bracketType.opening + senderColor + message.senderName
+                                  + ChatColor.RESET + bracketColor + bracketType.closing)
+                               : message.senderName),
+                              null, null);
         }
         final ChatPlugin plugin = ChatPlugin.getInstance();
         String certs;
+        String brand;
         Player player = message.sender != null
             ? Bukkit.getPlayer(message.sender)
             : null;
         if (player != null) {
             final String horseCertificates = "%horse_certificates%";
             certs = PlaceholderAPI.setPlaceholders(player, horseCertificates);
-            if (certs.equals(horseCertificates)) certs = null;
+            if (certs.isEmpty() || certs.equals(horseCertificates)) certs = null;
+            final String horseBrand = "%horse_brand%";
+            brand = PlaceholderAPI.setPlaceholders(player, horseBrand);
+            if (brand.isEmpty() || brand.equals(horseBrand)) brand = null;
         } else {
             certs = null;
+            brand = null;
         }
+        final String nl = "\n&7";
+        final String sp = "&r ";
         return Msg
             .button(senderColor,
                     (useBrackets
@@ -215,17 +230,20 @@ public abstract class AbstractChannel implements Channel {
                      : message.senderDisplayName),
                     message.senderName,
                     message.senderName
-                    + (message.senderTitle != null ? "\n&5&oTitle&r " + Msg.format(message.senderTitle) : "")
-                    + (message.senderServerDisplayName != null ? "\n&5&oServer&r " + message.senderServerDisplayName : "")
-                    + "\n&5&oRank&r " + plugin.getVault()
+                    + (message.senderTitle != null ? nl + "Title" + sp + Msg.format(message.senderTitle) : "")
+                    + (message.senderServerDisplayName != null ? nl + "Server" + sp + message.senderServerDisplayName : "")
+                    + nl + "Rank" + sp + plugin.getVault()
                     .groupOf(message.sender)
-                    + "\n&5&oJobs&r " + plugin.getVault()
+                    + nl + "Jobs" + sp + plugin.getVault()
                     .groupSuffixes(message.sender).stream()
                     .collect(Collectors.joining(" "))
-                    + "\n&5&oChannel&r " + getTitle()
-                    + "\n&5&oTime&r " + timeFormat.format(new Date())
+                    + nl + "Channel" + sp + getTitle()
+                    + nl + "Time" + sp + timeFormat.format(new Date())
+                    + (brand != null
+                       ? nl + "Brand" + sp + brand
+                       : "")
                     + (certs != null
-                       ? "\n&5&oCertificates&r " + certs
+                       ? nl + "Certificates" + sp + certs
                        : ""),
                     "/msg " + message.senderName + " ");
     }
@@ -305,7 +323,7 @@ public abstract class AbstractChannel implements Channel {
         SoundCue soundCue = SoundCue.of(SQLSetting.getString(player.getUniqueId(), getKey(), "SoundCueChat", "off"));
         if (soundCue == null) return false;
         int volume = SQLSetting.getInt(player.getUniqueId(), getKey(), "SoundCueChatVolume", 10);
-        float vol = (float)volume / 10.0f;
+        float vol = (float) volume / 10.0f;
         player.playSound(player.getEyeLocation(), soundCue.sound, vol, 1.0f);
         return true;
     }
