@@ -107,9 +107,9 @@ public abstract class AbstractChannel implements Channel {
     @Override
     public final void setFocusChannel(Player player) {
         setFocusChannel(player.getUniqueId());
-        PluginPlayerEvent.Name.FOCUS_CHAT_CHANNEL.ultimate(plugin, player)
+        PluginPlayerEvent.Name.FOCUS_CHAT_CHANNEL.make(plugin, player)
             .detail(Detail.NAME, getKey())
-            .call();
+            .callEvent();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.winthier.chat.sql;
 
 import com.winthier.chat.ChatPlugin;
+import com.winthier.sql.SQLRow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -17,7 +18,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
 
 @Data @Table(name = "bad_words")
-public final class SQLBadWord {
+public final class SQLBadWord implements SQLRow {
     @Id private Integer id;
     @Column(nullable = false, unique = true) String word;
 

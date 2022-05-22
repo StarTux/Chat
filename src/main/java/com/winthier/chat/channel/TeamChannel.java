@@ -80,9 +80,9 @@ public final class TeamChannel extends AbstractChannel {
         message.setTargetName(playerTeam.key);
         plugin.didCreateMessage(this, message);
         handleMessage(message);
-        PluginPlayerEvent.Name.USE_CHAT_TEAM.ultimate(plugin, player)
+        PluginPlayerEvent.Name.USE_CHAT_TEAM.make(plugin, player)
             .detail(Detail.NAME, playerTeam.key)
-            .call();
+            .callEvent();
     }
 
     @Override

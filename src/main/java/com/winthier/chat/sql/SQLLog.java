@@ -2,10 +2,10 @@ package com.winthier.chat.sql;
 
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.channel.Channel;
+import com.winthier.sql.SQLRow;
 import java.util.Date;
 import java.util.UUID;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -14,10 +14,9 @@ import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-@Entity
 @Table(name = "logs")
 @Getter @Setter @NoArgsConstructor
-public final class SQLLog {
+public final class SQLLog implements SQLRow {
     @Id private Integer id;
     private UUID player;
     @Column(nullable = false, length = 16) private String sender;

@@ -1,5 +1,6 @@
 package com.winthier.chat.sql;
 
+import com.winthier.sql.SQLRow;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ import org.bukkit.ChatColor;
 @Table(name = "settings",
        uniqueConstraints = @UniqueConstraint(columnNames = {"uuid", "channel", "setting_key"}))
 @Data
-public final class SQLSetting {
+public final class SQLSetting implements SQLRow {
     @Value
     private static final class Key {
         private final UUID uuid;

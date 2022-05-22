@@ -89,9 +89,9 @@ public final class PartyChannel extends AbstractChannel {
         message.setTargetName(partyName);
         plugin.didCreateMessage(this, message);
         handleMessage(message);
-        PluginPlayerEvent.Name.USE_CHAT_PARTY.ultimate(plugin, player)
+        PluginPlayerEvent.Name.USE_CHAT_PARTY.make(plugin, player)
             .detail(Detail.NAME, partyName)
-            .call();
+            .callEvent();
     }
 
     @Override
@@ -221,8 +221,9 @@ public final class PartyChannel extends AbstractChannel {
             } else {
                 setPartyName(uuid, arg);
                 Msg.info(player, Component.text("You joined party " + arg, NamedTextColor.WHITE));
-                PluginPlayerEvent.Name.JOIN_CHAT_PARTY.ultimate(plugin, player)
-                    .detail(Detail.NAME, arg).call();
+                PluginPlayerEvent.Name.JOIN_CHAT_PARTY.make(plugin, player)
+                    .detail(Detail.NAME, arg)
+                    .callEvent();
             }
         } else {
             usage(player);

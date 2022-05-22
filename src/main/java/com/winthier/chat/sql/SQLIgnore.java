@@ -1,5 +1,6 @@
 package com.winthier.chat.sql;
 
+import com.winthier.sql.SQLRow;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +16,7 @@ import lombok.Value;
 @Table(name = "ignores",
        uniqueConstraints = @UniqueConstraint(columnNames = {"player", "ignoree"}))
 @Data
-public final class SQLIgnore {
+public final class SQLIgnore implements SQLRow {
     // Cache
     @Value
     private static class Ignores {

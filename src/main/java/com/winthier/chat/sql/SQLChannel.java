@@ -1,5 +1,6 @@
 package com.winthier.chat.sql;
 
+import com.winthier.sql.SQLRow;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -10,7 +11,7 @@ import lombok.Data;
 @Table(name = "channels",
        uniqueConstraints = @UniqueConstraint(columnNames = {"channel_key"}))
 @Data
-public final class SQLChannel {
+public final class SQLChannel implements SQLRow {
     // Content
     @Id private Integer id;
     @Column(nullable = false, length = 16) private String channelKey;

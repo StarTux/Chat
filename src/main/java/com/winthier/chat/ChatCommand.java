@@ -248,9 +248,9 @@ public final class ChatCommand extends AbstractChatCommand {
             listChannelsForSettings(player);
         } else {
             showSettingsMenu(player, channel);
-            PluginPlayerEvent.Name.OPEN_CHAT_SETTINGS.ultimate(plugin, player)
+            PluginPlayerEvent.Name.OPEN_CHAT_SETTINGS.make(plugin, player)
                 .detail(Detail.NAME, channel.getKey())
-                .call();
+                .callEvent();
         }
     }
 

@@ -176,10 +176,10 @@ public final class PrivateChannel extends AbstractChannel {
             setFocusChannel(player);
             SQLSetting.set(uuid, getKey(), "FocusName", target.name);
             Msg.info(player, Component.text("Now focusing " + target.name, NamedTextColor.WHITE));
-            PluginPlayerEvent.Name.FOCUS_PRIVATE_CHAT.ultimate(plugin, player)
+            PluginPlayerEvent.Name.FOCUS_PRIVATE_CHAT.make(plugin, player)
                 .detail(Detail.TARGET, target.uuid)
                 .detail(Detail.NAME, target.name)
-                .call();
+                .callEvent();
         } else if (arr.length == 2) {
             talk(player, target, arr[1]);
         }
@@ -214,16 +214,16 @@ public final class PrivateChannel extends AbstractChannel {
             setFocusChannel(player);
             SQLSetting.set(uuid, getKey(), "FocusName", target.name);
             Msg.info(player, Component.text("Now focusing " + target.name, NamedTextColor.WHITE));
-            PluginPlayerEvent.Name.FOCUS_PRIVATE_CHAT.ultimate(plugin, player)
+            PluginPlayerEvent.Name.FOCUS_PRIVATE_CHAT.make(plugin, player)
                 .detail(Detail.TARGET, target.uuid)
                 .detail(Detail.NAME, target.name)
-                .call();
+                .callEvent();
         } else {
             talk(player, target, msg);
-            PluginPlayerEvent.Name.USE_PRIVATE_CHAT_REPLY.ultimate(plugin, player)
+            PluginPlayerEvent.Name.USE_PRIVATE_CHAT_REPLY.make(plugin, player)
                 .detail(Detail.TARGET, target.uuid)
                 .detail(Detail.NAME, target.name)
-                .call();
+                .callEvent();
         }
     }
 
@@ -237,9 +237,9 @@ public final class PrivateChannel extends AbstractChannel {
         if (target.isConsole()) {
             send(new Message().init(this).console().ack(message), player);
         }
-        PluginPlayerEvent.Name.USE_PRIVATE_CHAT.ultimate(plugin, player)
+        PluginPlayerEvent.Name.USE_PRIVATE_CHAT.make(plugin, player)
             .detail(Detail.TARGET, target.uuid)
             .detail(Detail.NAME, target.name)
-            .call();
+            .callEvent();
     }
 }

@@ -64,9 +64,9 @@ public final class PublicChannel extends AbstractChannel {
         Message message = new Message().init(this).player(player, msg);
         plugin.didCreateMessage(this, message);
         handleMessage(message);
-        PluginPlayerEvent.Name.USE_CHAT_CHANNEL.ultimate(plugin, player)
+        PluginPlayerEvent.Name.USE_CHAT_CHANNEL.make(plugin, player)
             .detail(Detail.NAME, key)
-            .call();
+            .callEvent();
     }
 
     @Override
