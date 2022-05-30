@@ -69,7 +69,7 @@ public final class ChatPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         db = new SQLDatabase(this);
-        for (Class<?> clazz: SQLDB.getDatabaseClasses()) db.registerTable(clazz);
+        db.registerTables(SQLDB.getDatabaseClasses());
         db.createAllTables();
         loadChannels();
         if (getServer().getPluginManager().isPluginEnabled("Connect")) {

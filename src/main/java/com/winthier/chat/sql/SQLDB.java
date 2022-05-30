@@ -2,6 +2,7 @@ package com.winthier.chat.sql;
 
 import com.winthier.chat.ChatPlugin;
 import com.winthier.sql.SQLDatabase;
+import com.winthier.sql.SQLRow;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -14,7 +15,7 @@ public final class SQLDB {
         return ChatPlugin.getInstance().getDb();
     }
 
-    public static List<Class<?>> getDatabaseClasses() {
+    public static List<Class<? extends SQLRow>> getDatabaseClasses() {
         return List.of(SQLSetting.class,
                        SQLIgnore.class,
                        SQLLog.class,
