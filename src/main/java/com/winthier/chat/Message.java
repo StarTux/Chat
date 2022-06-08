@@ -1,5 +1,6 @@
 package com.winthier.chat;
 
+import com.cavetale.core.item.ItemKinds;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.util.Filter;
 import com.winthier.chat.util.Msg;
@@ -12,7 +13,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 @Data
 public final class Message {
@@ -84,18 +84,8 @@ public final class Message {
         }
         if (player.hasPermission("chat.item") && msg.contains("[item]")) {
             ItemStack itemStack = player.getInventory().getItemInMainHand();
-            if (itemStack != null) {
-                Component itemName;
-                if (itemStack.hasItemMeta()) {
-                    ItemMeta itemMeta = itemStack.getItemMeta();
-                    itemName = itemMeta.hasDisplayName()
-                        ? itemMeta.displayName()
-                        : Component.text(itemStack.getI18NDisplayName());
-                } else {
-                    itemName = Component.text(itemStack.getI18NDisplayName());
-                }
-                Component itemComponent = itemName.hoverEvent(itemStack.asHoverEvent());
-                itemJson = Msg.toJson(itemComponent);
+            if (itemStack != null && !itemStack.getType().isAir()) {
+                itemJson = Msg.toJson(ItemKinds.chatDescription(itemStack));
             }
         }
         if (player.hasPermission("chat.url")) {
