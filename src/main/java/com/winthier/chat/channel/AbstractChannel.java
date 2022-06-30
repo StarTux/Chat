@@ -4,6 +4,8 @@ import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.cavetale.core.font.Emoji;
 import com.cavetale.core.font.GlyphPolicy;
+import com.cavetale.core.perm.Perm;
+import com.cavetale.mytems.item.font.Glyph;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
@@ -25,16 +27,22 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import static com.cavetale.core.font.Unicode.tiny;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.JoinConfiguration.noSeparators;
+import static net.kyori.adventure.text.JoinConfiguration.separator;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 /**
  * Implements common methods and fields of all channels.
@@ -176,13 +184,11 @@ public abstract class AbstractChannel implements Channel {
     }
 
     protected final Component makeChannelTag(TextColor channelColor, TextColor bracketColor, BracketType bracketType) {
-        Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()),
-                                           Component.text(getTitle()),
-                                           Component.text(getDescription(), NamedTextColor.GRAY));
-        return Component.text()
-            .append(Component.text(bracketType.opening, bracketColor))
-            .append(Component.text(getTag(), channelColor))
-            .append(Component.text(bracketType.closing, bracketColor))
+        Component tooltip = join(separator(newline()), text(getTitle()), text(getDescription(), GRAY));
+        return text()
+            .append(text(bracketType.opening, bracketColor))
+            .append(text(getTag(), channelColor))
+            .append(text(bracketType.closing, bracketColor))
             .hoverEvent(HoverEvent.showText(tooltip))
             .clickEvent(ClickEvent.suggestCommand("/" + getAlias()))
             .build();
@@ -195,24 +201,24 @@ public abstract class AbstractChannel implements Channel {
         } else if (message.getSenderServer() != null) {
             name = message.getSenderServer();
         } else {
-            return Component.empty();
+            return empty();
         }
-        return Component.text()
-            .append(Component.text(bracketType.opening, bracketColor))
-            .append(Component.text(name, serverColor))
-            .append(Component.text(bracketType.closing, bracketColor))
-            .hoverEvent(HoverEvent.showText(Component.text(name, serverColor)))
+        return text()
+            .append(text(bracketType.opening, bracketColor))
+            .append(text(name, serverColor))
+            .append(text(bracketType.closing, bracketColor))
+            .hoverEvent(HoverEvent.showText(text(name, serverColor)))
             .clickEvent(ClickEvent.suggestCommand("/" + message.getSenderServer()))
             .build();
     }
 
     protected final Component makeTitleTag(Message message, TextColor bracketColor, BracketType bracketType) {
         Title theTitle = message.getTitle();
-        if (theTitle == null || theTitle.isPrefix() || theTitle.isEmptyTitle()) return Component.empty();
-        return Component.text()
-            .append(Component.text(bracketType.opening, bracketColor))
+        if (theTitle == null || theTitle.isPrefix() || theTitle.isEmptyTitle()) return empty();
+        return text()
+            .append(text(bracketType.opening, bracketColor))
             .append(theTitle.getTitleComponent())
-            .append(Component.text(bracketType.closing, bracketColor))
+            .append(text(bracketType.closing, bracketColor))
             .hoverEvent(HoverEvent.showText(theTitle.getTooltip()))
             .clickEvent(ClickEvent.suggestCommand("/title " + theTitle.getName()))
             .build();
@@ -224,9 +230,9 @@ public abstract class AbstractChannel implements Channel {
         if (senderDisplayName != null) {
             senderName = senderDisplayName;
         } else if (message.getSenderName() != null) {
-            senderName = Component.text(message.getSenderName());
+            senderName = text(message.getSenderName());
         } else {
-            return Component.empty();
+            return empty();
         }
         final String serverName;
         if (message.getSenderServerDisplayName() != null) {
@@ -236,41 +242,43 @@ public abstract class AbstractChannel implements Channel {
         } else {
             serverName = "";
         }
-        TextColor kcolor = TextColor.color(0xA0A0A0);
         TextColor vcolor = TextColor.color(0xFFFFFF);
         List<Component> tooltip = new ArrayList<>();
         tooltip.add(senderName);
         if (message.getSender() != null) {
+            int level = Perm.get().getLevel(message.getSender());
+            if (level > 0) {
+                tooltip.add(join(noSeparators(), text(tiny("tier "), GRAY), Glyph.toComponent("" + level)));
+            }
             StaffRank staffRank = StaffRank.ofPlayer(message.getSender());
             if (staffRank != null) {
-                tooltip.add(Component.text("Staff ", kcolor).append(Component.text(staffRank.getDisplayName(), vcolor)));
+                tooltip.add(join(noSeparators(), text(tiny("staff "), GRAY), text(staffRank.getDisplayName(), vcolor)));
             }
             PlayerRank playerRank = PlayerRank.ofPlayer(message.getSender());
             if (playerRank != null) {
-                tooltip.add(Component.text("Rank ", kcolor).append(Component.text(playerRank.getDisplayName(), vcolor)));
+                tooltip.add(join(noSeparators(), text(tiny("rank "), GRAY), text(playerRank.getDisplayName(), vcolor)));
             }
             Set<ExtraRank> extraRanks = ExtraRank.ofPlayer(message.getSender());
             if (!extraRanks.isEmpty()) {
                 String extraString = extraRanks.stream()
                     .map(ExtraRank::getDisplayName)
                     .collect(Collectors.joining(" "));
-                tooltip.add(Component.text("Extra ", kcolor).append(Component.text(extraString, vcolor)));
+                tooltip.add(join(noSeparators(), text(tiny("extra "), GRAY), text(extraString, vcolor)));
             }
         }
-        tooltip.add(Component.text("Server ", kcolor).append(Component.text(serverName, vcolor)));
-        tooltip.add(Component.text("Channel ", kcolor).append(Component.text(getTitle(), vcolor)));
-        tooltip.add(Component.text("Time ", kcolor).append(Component.text(timeFormat.format(new Date(message.getTime())), vcolor)));
-        TextComponent.Builder cb = Component.text().color(senderColor)
+        tooltip.add(join(noSeparators(), text(tiny("server "), GRAY), text(serverName, vcolor)));
+        tooltip.add(join(noSeparators(), text(tiny("channel "), GRAY), text(getTitle(), vcolor)));
+        tooltip.add(join(noSeparators(), text(tiny("time "), GRAY), text(timeFormat.format(new Date(message.getTime())), vcolor)));
+        TextComponent.Builder cb = text().color(senderColor)
             .insertion(message.getSenderName());
         if (useBrackets) {
-            cb.append(Component.text(bracketType.opening, bracketColor));
+            cb.append(text(bracketType.opening, bracketColor));
         }
         cb.append(senderName);
         if (useBrackets) {
-            cb.append(Component.text(bracketType.closing, bracketColor));
+            cb.append(text(bracketType.closing, bracketColor));
         }
-        cb = cb.hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.separator(Component.newline()),
-                                                              tooltip)));
+        cb = cb.hoverEvent(HoverEvent.showText(join(separator(newline()), tooltip)));
         if (message.getSenderName() != null) {
             cb.clickEvent(ClickEvent.suggestCommand("/msg " + message.getSenderName()));
         }
@@ -287,19 +295,19 @@ public abstract class AbstractChannel implements Channel {
             return messageComponent;
         }
         String raw = message.getMessage();
-        if (raw == null) return Component.empty();
+        if (raw == null) return empty();
         Component component;
         if (message.isEmoji()) {
             component = Emoji.replaceText(raw, GlyphPolicy.PUBLIC, true).asComponent().color(textColor);
         } else {
-            component = Component.text(raw, textColor);
+            component = text(raw, textColor);
         }
         Component itemComponent = message.getItemComponent();
         if (itemComponent != null) {
-            Component itemTag = Component.text().color(textColor)
-                .append(Component.text(brackets.opening, bracketColor))
+            Component itemTag = text().color(textColor)
+                .append(text(brackets.opening, bracketColor))
                 .append(itemComponent)
-                .append(Component.text(brackets.closing, bracketColor))
+                .append(text(brackets.closing, bracketColor))
                 .build();
             TextReplacementConfig textReplacementConfig = TextReplacementConfig.builder()
                 .once()
@@ -312,9 +320,9 @@ public abstract class AbstractChannel implements Channel {
         if (urls != null) {
             for (String url : urls) {
                 TextColor linkColor = TextColor.color(0x4040EE);
-                Component urlComponent = Component.text()
+                Component urlComponent = text()
                     .content(url).color(TextColor.color(0xC0C0FF))
-                    .hoverEvent(HoverEvent.showText(Component.text(url, linkColor, TextDecoration.UNDERLINED)))
+                    .hoverEvent(HoverEvent.showText(text(url, linkColor, TextDecoration.UNDERLINED)))
                     .clickEvent(ClickEvent.openUrl(url))
                     .build();
                 TextReplacementConfig textReplacementConfig = TextReplacementConfig.builder()
