@@ -14,7 +14,6 @@ import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
 import com.winthier.perm.rank.ExtraRank;
-import com.winthier.perm.rank.PlayerRank;
 import com.winthier.perm.rank.StaffRank;
 import com.winthier.title.Title;
 import java.text.SimpleDateFormat;
@@ -253,10 +252,6 @@ public abstract class AbstractChannel implements Channel {
             StaffRank staffRank = StaffRank.ofPlayer(message.getSender());
             if (staffRank != null) {
                 tooltip.add(join(noSeparators(), text(tiny("staff "), GRAY), text(staffRank.getDisplayName(), vcolor)));
-            }
-            PlayerRank playerRank = PlayerRank.ofPlayer(message.getSender());
-            if (playerRank != null) {
-                tooltip.add(join(noSeparators(), text(tiny("rank "), GRAY), text(playerRank.getDisplayName(), vcolor)));
             }
             Set<ExtraRank> extraRanks = ExtraRank.ofPlayer(message.getSender());
             if (!extraRanks.isEmpty()) {
