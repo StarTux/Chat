@@ -22,25 +22,31 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.JoinConfiguration.noSeparators;
+import static net.kyori.adventure.text.JoinConfiguration.separator;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.ClickEvent.suggestCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.TextDecoration.*;
 
 @RequiredArgsConstructor
 public final class ChatCommand extends AbstractChatCommand {
     private final ChatPlugin plugin;
     private List<Option> globalOptions = Arrays.asList(Option.booleanOption("LanguageFilter", "Language Filter",
                                                                             "Filter out foul language", "1"));
-    CommandNode rootNode;
+    private CommandNode rootNode;
 
     public ChatCommand enable() {
         plugin.getCommand("chat").setExecutor(this);
@@ -56,7 +62,7 @@ public final class ChatCommand extends AbstractChatCommand {
         rootNode.addChild("join").denyTabCompletion()
             .arguments("<channel>")
             .description("Join a channel")
-            .playerCaller(this::join);
+            .playerCaller(this::joinChannel);
         rootNode.addChild("leave").denyTabCompletion()
             .arguments("<channel>")
             .description("Leave a channel")
@@ -85,7 +91,7 @@ public final class ChatCommand extends AbstractChatCommand {
                 if (!channel.canTalk(player.getUniqueId())) return false;
                 channel.joinChannel(player.getUniqueId());
                 channel.setFocusChannel(player.getUniqueId());
-                Msg.info(player, Component.text("Now focusing " + channel.getTitle(), NamedTextColor.WHITE));
+                Msg.info(player, text("Now focusing " + channel.getTitle(), WHITE));
                 return true;
             }
         }
@@ -98,13 +104,13 @@ public final class ChatCommand extends AbstractChatCommand {
         return list != null ? list : super.onTabComplete(sender, command, label, args);
     }
 
-    boolean chat(CommandSender sender, String[] args) {
+    private boolean chat(CommandSender sender, String[] args) {
         if (args.length != 0) return false;
         showMenu(sender);
         return true;
     }
 
-    boolean set(Player player, String[] args) {
+    private boolean set(Player player, String[] args) {
         if (player == null) return false;
         if (args.length == 0) {
             listChannelsForSettings(player);
@@ -113,13 +119,13 @@ public final class ChatCommand extends AbstractChatCommand {
         return true;
     }
 
-    boolean list(CommandSender sender, String[] args) {
+    private boolean list(CommandSender sender, String[] args) {
         if (args.length != 0) return false;
         listChannels(sender);
         return true;
     }
 
-    boolean join(Player player, String[] args) {
+    private boolean joinChannel(Player player, String[] args) {
         if (args.length != 1) return false;
         Channel channel = plugin.findChannel(args[0]);
         if (channel == null || !channel.canJoin(player.getUniqueId())) return false;
@@ -128,7 +134,7 @@ public final class ChatCommand extends AbstractChatCommand {
         return true;
     }
 
-    boolean leave(Player player, String[] args) {
+    private boolean leave(Player player, String[] args) {
         if (args.length != 1) return false;
         Channel channel = plugin.findChannel(args[0]);
         if (channel == null || !channel.canJoin(player.getUniqueId())) return false;
@@ -137,7 +143,7 @@ public final class ChatCommand extends AbstractChatCommand {
         return true;
     }
 
-    boolean ignore(Player player, String[] args) {
+    private boolean ignore(Player player, String[] args) {
         if (args.length == 0) {
             listIgnores(player);
             return true;
@@ -149,7 +155,7 @@ public final class ChatCommand extends AbstractChatCommand {
         }
     }
 
-    boolean who(CommandSender sender, String[] args) {
+    private boolean who(CommandSender sender, String[] args) {
         Player player = sender instanceof Player ? (Player) sender : null;
         Channel channel;
         if (args.length == 0) {
@@ -173,16 +179,16 @@ public final class ChatCommand extends AbstractChatCommand {
         StringBuilder sb = new StringBuilder();
         List<Component> chatters = new ArrayList<>();
         for (Chatter chatter : channel.getOnlineMembers()) {
-            chatters.add(Component.text(chatter.getName(), NamedTextColor.WHITE));
+            chatters.add(text(chatter.getName(), WHITE));
         }
-        Msg.info(sender, Component.join(JoinConfiguration.noSeparators(), new Component[] {
-                    Component.text("Channel " + channel.getTitle() + " (" + chatters.size() + "): ", NamedTextColor.YELLOW),
-                    Component.join(JoinConfiguration.separator(Component.text(", ", NamedTextColor.DARK_GRAY)), chatters),
+        Msg.info(sender, join(noSeparators(), new Component[] {
+                    text("Channel " + channel.getTitle() + " (" + chatters.size() + "): ", YELLOW),
+                    join(separator(text(", ", DARK_GRAY)), chatters),
                 }));
         return true;
     }
 
-    boolean say(CommandSender sender, String[] args) {
+    private boolean say(CommandSender sender, String[] args) {
         if (args.length < 2) return false;
         Player player = sender instanceof Player ? (Player) sender : null;
         CommandResponder cmd = plugin.findCommand(args[0]);
@@ -214,7 +220,7 @@ public final class ChatCommand extends AbstractChatCommand {
         return false;
     }
 
-    void setOption(Player player, String[] args) {
+    private void setOption(Player player, String[] args) {
         UUID uuid = player.getUniqueId();
         if (args.length == 0) return;
         Channel channel;
@@ -235,14 +241,14 @@ public final class ChatCommand extends AbstractChatCommand {
             for (Option option : options) {
                 SQLSetting.set(uuid, chkey, option.getKey(), null);
             }
-            Msg.info(player, Component.text("Settings reset to default", NamedTextColor.GREEN));
+            Msg.info(player, text("Settings reset to default", GREEN));
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, SoundCategory.MASTER, 1.0f, 1.0f);
         } else if (args.length == 3) {
             String key = args[1];
             String value = args[2];
             if (!isKeyValuePairValid(options, key, value)) return;
             SQLSetting.set(uuid, chkey, key, value);
-            Msg.info(player, Component.text("Settings updated", NamedTextColor.GREEN));
+            Msg.info(player, text("Settings updated", GREEN));
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, SoundCategory.MASTER, 1.0f, 1.0f);
         }
         if (channel == null) {
@@ -255,85 +261,85 @@ public final class ChatCommand extends AbstractChatCommand {
         }
     }
 
-    void showMenu(CommandSender sender) {
-        Msg.info(sender, Component.text("Menu", NamedTextColor.GRAY));
+    private void showMenu(CommandSender sender) {
+        Msg.info(sender, text("Menu", GRAY));
         Player human = sender instanceof Player ? (Player) sender : null;
-        TextComponent.Builder cb = Component.text();
-        cb.append(Component.text("Channels", NamedTextColor.WHITE, TextDecoration.ITALIC));
+        TextComponent.Builder cb = text();
+        cb.append(text("Channels", WHITE, ITALIC));
         for (Channel channel : plugin.getChannels()) {
             if (human != null && !channel.canJoin(human.getUniqueId())) continue;
             if (SQLSetting.getBoolean(null, channel.getKey(), "MutePlayers", false)) continue;
-            cb.append(Component.space());
+            cb.append(space());
             TextColor channelColor = SQLSetting.getTextColor(human != null ? human.getUniqueId() : null,
-                                                             channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
+                                                             channel.getKey(), "ChannelColor", WHITE);
             Component tooltip;
             if (channel instanceof PrivateChannel) {
-                tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
-                        Component.text("/msg [user] [message]", channelColor),
-                        Component.text("Whisper someone", NamedTextColor.GRAY),
+                tooltip = join(separator(newline()), new Component[] {
+                        text("/msg [user] [message]", channelColor),
+                        text("Whisper someone", GRAY),
                     });
             } else {
-                tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
-                        Component.text("/" + channel.getAlias() + " [message]", channelColor),
-                        Component.text("Talk in " + channel.getTitle(), NamedTextColor.GRAY),
+                tooltip = join(separator(newline()), new Component[] {
+                        text("/" + channel.getAlias() + " [message]", channelColor),
+                        text("Talk in " + channel.getTitle(), GRAY),
                     });
             }
-            cb.append(Component.text()
+            cb.append(text()
                       .content("[" + channel.getTag() + "]").color(channelColor)
-                      .clickEvent(ClickEvent.suggestCommand("/" + channel.getTag().toLowerCase() + " "))
-                      .hoverEvent(HoverEvent.showText(tooltip))
+                      .clickEvent(suggestCommand("/" + channel.getTag().toLowerCase() + " "))
+                      .hoverEvent(showText(tooltip))
                       .build());
         }
-        TextColor clickColor = NamedTextColor.GREEN;
-        TextColor titleColor = NamedTextColor.WHITE;
-        TextColor descColor = NamedTextColor.GRAY;
-        cb.append(Component.newline());
-        cb.append(Component.join(JoinConfiguration.separator(Component.space()), new Component[] {
-                    Component.text("Community", NamedTextColor.GRAY, TextDecoration.ITALIC),
-                    Component.text().content("[List]").color(clickColor)
-                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
-                                               Component.text("/ch list", titleColor),
-                                               Component.text("Channel List", descColor))
+        TextColor clickColor = GREEN;
+        TextColor titleColor = WHITE;
+        TextColor descColor = GRAY;
+        cb.append(newline());
+        cb.append(join(separator(space()), new Component[] {
+                    text("Community", GRAY, ITALIC),
+                    text().content("[List]").color(clickColor)
+                    .hoverEvent(join(separator(newline()),
+                                     text("/ch list", titleColor),
+                                     text("Channel List", descColor))
                                 .asHoverEvent())
-                    .clickEvent(ClickEvent.runCommand("/ch list")).build(),
-                    Component.text().content("[Who]").color(clickColor)
-                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
-                                               Component.text("/ch who <channel>", titleColor),
-                                               Component.text("Channel User List", descColor))
+                    .clickEvent(runCommand("/ch list")).build(),
+                    text().content("[Who]").color(clickColor)
+                    .hoverEvent(join(separator(newline()),
+                                     text("/ch who <channel>", titleColor),
+                                     text("Channel User List", descColor))
                                 .asHoverEvent())
-                    .clickEvent(ClickEvent.suggestCommand("/ch who ")).build(),
-                    Component.text().content("[Reply]").color(clickColor)
-                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
-                                               Component.text("/r [message]", titleColor),
-                                               Component.text("Reply to a private message", descColor),
-                                               Component.text("or focus on reply", descColor))
+                    .clickEvent(suggestCommand("/ch who ")).build(),
+                    text().content("[Reply]").color(clickColor)
+                    .hoverEvent(join(separator(newline()),
+                                     text("/r [message]", titleColor),
+                                     text("Reply to a private message", descColor),
+                                     text("or focus on reply", descColor))
                                 .asHoverEvent())
-                    .clickEvent(ClickEvent.suggestCommand("/r ")).build(),
-                    Component.text().content("[Party]").color(clickColor)
-                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
-                                               Component.text("/party [name]", titleColor),
-                                               Component.text("Select a named party", descColor),
-                                               Component.text("or show current party", descColor))
+                    .clickEvent(suggestCommand("/r ")).build(),
+                    text().content("[Party]").color(clickColor)
+                    .hoverEvent(join(separator(newline()),
+                                     text("/party [name]", titleColor),
+                                     text("Select a named party", descColor),
+                                     text("or show current party", descColor))
                                 .asHoverEvent())
-                    .clickEvent(ClickEvent.suggestCommand("/party ")).build(),
+                    .clickEvent(suggestCommand("/party ")).build(),
                 }));
-        clickColor = NamedTextColor.YELLOW;
-        cb.append(Component.newline());
-        cb.append(Component.join(JoinConfiguration.separator(Component.space()), new Component[] {
-                    Component.text("Settings", NamedTextColor.GRAY, TextDecoration.ITALIC),
-                    Component.text().content("[Set]").color(clickColor)
-                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
-                                               Component.text("/ch set <channel>", titleColor),
-                                               Component.text("Channel Settings", descColor))
+        clickColor = YELLOW;
+        cb.append(newline());
+        cb.append(join(separator(space()), new Component[] {
+                    text("Settings", GRAY, ITALIC),
+                    text().content("[Set]").color(clickColor)
+                    .hoverEvent(join(separator(newline()),
+                                     text("/ch set <channel>", titleColor),
+                                     text("Channel Settings", descColor))
                                 .asHoverEvent())
-                    .clickEvent(ClickEvent.runCommand("/ch set")).build(),
-                    Component.text().content("[Ignore]").color(clickColor)
-                    .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()),
-                                               Component.text("/ignore [player]", titleColor),
-                                               Component.text("(Un)ignore a player", descColor),
-                                               Component.text("or list ignored players", descColor))
+                    .clickEvent(runCommand("/ch set")).build(),
+                    text().content("[Ignore]").color(clickColor)
+                    .hoverEvent(join(separator(newline()),
+                                     text("/ignore [player]", titleColor),
+                                     text("(Un)ignore a player", descColor),
+                                     text("or list ignored players", descColor))
                                 .asHoverEvent())
-                    .clickEvent(ClickEvent.suggestCommand("/ignore ")).build(),
+                    .clickEvent(suggestCommand("/ignore ")).build(),
                 }));
         sender.sendMessage(cb.build());
     }
@@ -345,34 +351,34 @@ public final class ChatCommand extends AbstractChatCommand {
         UUID uuid = player.getUniqueId();
         String alias = channel != null ? channel.getAlias() : "_";
         String chkey = channel != null ? channel.getKey() : null;
-        TextComponent.Builder cb = Component.text();
-        cb.append(Component.text().content(option.getDisplayName()).color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC)
-                  .hoverEvent(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
-                              Component.text(option.getDisplayName(), NamedTextColor.WHITE),
-                              Component.text(option.getDescription(), NamedTextColor.GRAY),
+        TextComponent.Builder cb = text();
+        cb.append(text().content(option.getDisplayName()).color(GRAY).decorate(ITALIC)
+                  .hoverEvent(join(separator(newline()), new Component[] {
+                              text(option.getDisplayName(), WHITE),
+                              text(option.getDescription(), GRAY),
                           })));
         String current = SQLSetting.getString(uuid, chkey, option.getKey(), option.getDefaultValue());
         for (Option.State state: option.getStates()) {
-            cb.append(Component.space());
+            cb.append(space());
             boolean active = Objects.equals(current, state.getValue());
             Component c;
             if (active) {
-                Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
-                        Component.text(state.getDisplayName(), state.getActiveColor()),
-                        Component.text(state.getDescription(), NamedTextColor.WHITE),
+                Component tooltip = join(separator(newline()), new Component[] {
+                        text(state.getDisplayName(), state.getActiveColor()),
+                        text(state.getDescription(), WHITE),
                     });
-                c = Component.text().content("[" + state.getDisplayName() + "]").color(state.getActiveColor())
-                    .hoverEvent(HoverEvent.showText(tooltip))
-                    .clickEvent(ClickEvent.runCommand("/ch set " + alias + " " + option.getKey() + " " + state.getValue()))
+                c = text().content("[" + state.getDisplayName() + "]").color(state.getActiveColor())
+                    .hoverEvent(showText(tooltip))
+                    .clickEvent(runCommand("/ch set " + alias + " " + option.getKey() + " " + state.getValue()))
                     .build();
             } else {
-                Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
-                        Component.text(state.getDisplayName(), state.getColor()),
-                        Component.text(state.getDescription(), NamedTextColor.WHITE),
+                Component tooltip = join(separator(newline()), new Component[] {
+                        text(state.getDisplayName(), state.getColor()),
+                        text(state.getDescription(), WHITE),
                     });
-                c = Component.text().content(state.getDisplayName()).color(state.getColor())
-                    .hoverEvent(HoverEvent.showText(tooltip))
-                    .clickEvent(ClickEvent.runCommand("/ch set " + alias + " " + option.getKey() + " " + state.getValue()))
+                c = text().content(state.getDisplayName()).color(state.getColor())
+                    .hoverEvent(showText(tooltip))
+                    .clickEvent(runCommand("/ch set " + alias + " " + option.getKey() + " " + state.getValue()))
                     .build();
             }
             cb.append(c);
@@ -380,147 +386,147 @@ public final class ChatCommand extends AbstractChatCommand {
         return cb.build();
     }
 
-    void listChannelsForSettings(Player player) {
+    private void listChannelsForSettings(Player player) {
         if (player == null) return;
-        Msg.info(player, Component.text("Settings Menu", NamedTextColor.WHITE));
+        Msg.info(player, text("Settings Menu", WHITE));
         List<Component> lines = new ArrayList<>();
         for (Option option : globalOptions) {
             lines.add(makeOptionComponent(player, null, option));
         }
-        TextComponent.Builder cb = Component.text();
-        cb.append(Component.text("Channel Settings", NamedTextColor.WHITE, TextDecoration.ITALIC));
+        TextComponent.Builder cb = text();
+        cb.append(text("Channel Settings", WHITE, ITALIC));
         for (Channel channel: plugin.getChannels()) {
             if (!channel.canJoin(player.getUniqueId())) continue;
-            cb.append(Component.space());
-            TextColor channelColor = SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
-            cb.append(Component.text().content("[" + channel.getTag() + "]").color(channelColor)
-                      .hoverEvent(HoverEvent.showText(Component.text(channel.getTitle(), channelColor)))
-                      .clickEvent(ClickEvent.runCommand("/ch set " + channel.getAlias()))
+            cb.append(space());
+            TextColor channelColor = SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", WHITE);
+            cb.append(text().content("[" + channel.getTag() + "]").color(channelColor)
+                      .hoverEvent(showText(text(channel.getTitle(), channelColor)))
+                      .clickEvent(runCommand("/ch set " + channel.getAlias()))
                       .build());
         }
         lines.add(cb.build());
-        player.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), lines));
+        player.sendMessage(join(separator(newline()), lines));
     }
 
-    void showSettingsMenu(Player player, Channel channel) {
+    private void showSettingsMenu(Player player, Channel channel) {
         UUID uuid = player.getUniqueId();
         String key = channel.getKey();
-        Msg.info(player, Component.text("Settings", NamedTextColor.WHITE));
+        Msg.info(player, text("Settings", WHITE));
         List<Component> lines = new ArrayList<>();
         final TextColor kcolor = TextColor.color(0xA0A0A0);
         for (Option option: channel.getOptions()) {
             lines.add(makeOptionComponent(player, channel, option));
         }
         List<Component> components = new ArrayList<>();
-        components.add(Component.text("Server Default", kcolor, TextDecoration.ITALIC));
-        components.add(Component.text().content("[Reset]").color(NamedTextColor.DARK_RED)
-                       .hoverEvent(HoverEvent.showText(Component.text("Reset to channel defaults", NamedTextColor.DARK_RED)))
-                       .clickEvent(ClickEvent.runCommand("/ch set " + channel.getAlias() + " reset"))
+        components.add(text("Server Default", kcolor, ITALIC));
+        components.add(text().content("[Reset]").color(DARK_RED)
+                       .hoverEvent(showText(text("Reset to channel defaults", DARK_RED)))
+                       .clickEvent(runCommand("/ch set " + channel.getAlias() + " reset"))
                        .build());
         if (player.hasPermission("chat.admin")) {
             TextColor color = TextColor.color(0xFF0000);
-            components.add(Component.text().content("[Defaults]").color(color)
-                           .hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
-                                           Component.text("Overwrite all public"),
-                                           Component.text("channel defaults with"),
-                                           Component.text("your settings"),
+            components.add(text().content("[Defaults]").color(color)
+                           .hoverEvent(showText(join(separator(newline()), new Component[] {
+                                           text("Overwrite all public"),
+                                           text("channel defaults with"),
+                                           text("your settings"),
                                        }).color(color)))
-                           .clickEvent(ClickEvent.runCommand("/chadm setdefaults " + channel.getAlias()))
+                           .clickEvent(runCommand("/chadm setdefaults " + channel.getAlias()))
                            .build());
         }
-        lines.add(Component.join(JoinConfiguration.separator(Component.space()), components));
-        lines.add(Component.join(JoinConfiguration.separator(Component.space()),
-                                 Component.text("Example", kcolor, TextDecoration.ITALIC),
-                                 channel.makeExampleOutput(player)));
+        lines.add(join(separator(space()), components));
+        lines.add(join(separator(space()),
+                       text("Example", kcolor, ITALIC),
+                       channel.makeExampleOutput(player)));
         channel.playSoundCue(player);
-        player.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), lines));
+        player.sendMessage(join(separator(newline()), lines));
     }
 
-    void listChannels(CommandSender sender) {
+    private void listChannels(CommandSender sender) {
         Player player = sender instanceof Player ? (Player) sender : null;
-        Msg.info(sender, Component.text("Channel List", NamedTextColor.WHITE));
+        Msg.info(sender, text("Channel List", WHITE));
         List<Component> lines = new ArrayList<>();
         for (Channel channel: plugin.getChannels()) {
             List<Object> json = new ArrayList<>();
             if (player != null && !channel.canJoin(player.getUniqueId())) continue;
-            TextComponent.Builder cb = Component.text().content(" ");
+            TextComponent.Builder cb = text().content(" ");
             if (player == null || channel.isJoined(player.getUniqueId())) {
                 cb.append(Mytems.ON.asComponent()
-                          .hoverEvent(HoverEvent.showText(Component.text("Leave " + channel.getTitle(), NamedTextColor.GREEN)))
-                          .clickEvent(ClickEvent.runCommand("/ch leave " + channel.getAlias())));
+                          .hoverEvent(showText(text("Leave " + channel.getTitle(), GREEN)))
+                          .clickEvent(runCommand("/ch leave " + channel.getAlias())));
             } else {
                 cb.append(Mytems.OFF.asComponent()
-                          .hoverEvent(HoverEvent.showText(Component.text("Join " + channel.getTitle(), NamedTextColor.RED)))
-                          .clickEvent(ClickEvent.runCommand("/ch join " + channel.getAlias())));
+                          .hoverEvent(showText(text("Join " + channel.getTitle(), RED)))
+                          .clickEvent(runCommand("/ch join " + channel.getAlias())));
             }
-            cb.append(Component.space());
+            cb.append(space());
             cb.append(Mytems.MONKEY_WRENCH.asComponent()
-                      .hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.separator(Component.newline()),
-                                                                     Component.text("/ch set " + channel.getAlias(), NamedTextColor.YELLOW),
-                                                                     Component.text("Open channel settings", NamedTextColor.GRAY))))
-                      .clickEvent(ClickEvent.runCommand("/ch set " + channel.getAlias())));
-            cb.append(Component.space());
+                      .hoverEvent(showText(join(separator(newline()),
+                                                text("/ch set " + channel.getAlias(), YELLOW),
+                                                text("Open channel settings", GRAY))))
+                      .clickEvent(runCommand("/ch set " + channel.getAlias())));
+            cb.append(space());
             TextColor channelColor = player != null
-                ? SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", NamedTextColor.WHITE)
-                : SQLSetting.getTextColor(null, channel.getKey(), "ChannelColor", NamedTextColor.WHITE);
-            Component tooltip = Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
-                    Component.text("/" + channel.getTag().toLowerCase() + " [message]", channelColor),
-                    Component.text("Focus " + channel.getTitle(), NamedTextColor.GRAY),
+                ? SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", WHITE)
+                : SQLSetting.getTextColor(null, channel.getKey(), "ChannelColor", WHITE);
+            Component tooltip = join(separator(newline()), new Component[] {
+                    text("/" + channel.getTag().toLowerCase() + " [message]", channelColor),
+                    text("Focus " + channel.getTitle(), GRAY),
                 });
-            cb.append(Component.text().content(channel.getTitle()).color(channelColor)
-                      .hoverEvent(HoverEvent.showText(tooltip))
-                      .clickEvent(ClickEvent.runCommand("/" + channel.getTag().toLowerCase()))
+            cb.append(text().content(channel.getTitle()).color(channelColor)
+                      .hoverEvent(showText(tooltip))
+                      .clickEvent(runCommand("/" + channel.getTag().toLowerCase()))
                       .build());
             if (player != null && channel.equals(plugin.getFocusChannel(player.getUniqueId()))) {
-                cb.append(Component.text().content("*").color(channelColor)
-                          .hoverEvent(HoverEvent.showText(Component.text("You are focusing " + channel.getTitle(), channelColor)))
+                cb.append(text().content("*").color(channelColor)
+                          .hoverEvent(showText(text("You are focusing " + channel.getTitle(), channelColor)))
                           .build());
             }
-            cb.append(Component.text(" - ", NamedTextColor.DARK_GRAY));
-            cb.append(Component.text(channel.getDescription(), NamedTextColor.GRAY));
+            cb.append(text(" - ", DARK_GRAY));
+            cb.append(text(channel.getDescription(), GRAY));
             lines.add(cb.build());
         }
-        sender.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), lines));
+        sender.sendMessage(join(separator(newline()), lines));
         if (sender instanceof Player) {
             PluginPlayerEvent.Name.LIST_CHAT_CHANNELS.call(plugin, player);
         }
     }
 
-    void listIgnores(Player player) {
+    public void listIgnores(Player player) {
         UUID uuid = player.getUniqueId();
-        TextComponent.Builder cb = Component.text();
+        TextComponent.Builder cb = text();
         List<Component> ignores = new ArrayList<>();
         for (UUID ign: SQLIgnore.listIgnores(uuid)) {
             Chatter chatter = plugin.findOfflinePlayer(ign);
             if (chatter == null) continue;
-            ignores.add(Component.text().content(chatter.getName()).color(NamedTextColor.RED)
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to unignore " + chatter.getName(), NamedTextColor.RED)))
-                        .clickEvent(ClickEvent.runCommand("/ch ignore " + chatter.getName()))
+            ignores.add(text().content(chatter.getName()).color(RED)
+                        .hoverEvent(showText(text("Click to unignore " + chatter.getName(), RED)))
+                        .clickEvent(runCommand("/ch ignore " + chatter.getName()))
                         .build());
         }
         if (ignores.isEmpty()) {
-            Msg.warn(player, Component.text("Not ignoring anyone", NamedTextColor.RED));
+            Msg.warn(player, text("Not ignoring anyone", RED));
             return;
         }
-        player.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
-                    Component.text("Ignoring " + ignores.size() + " players: ", NamedTextColor.WHITE, TextDecoration.ITALIC),
-                    Component.join(JoinConfiguration.separator(Component.text(", ", NamedTextColor.DARK_GRAY)), ignores),
+        player.sendMessage(join(separator(newline()), new Component[] {
+                    text("Ignoring " + ignores.size() + " players: ", WHITE, ITALIC),
+                    join(separator(text(", ", DARK_GRAY)), ignores),
                 }));
     }
 
-    void toggleIgnore(Player player, String name) {
+    public void toggleIgnore(Player player, String name) {
         Chatter ignoree = plugin.findOfflinePlayer(name);
         if (ignoree == null) {
-            Msg.warn(player, Component.text("Player not found: " + name, NamedTextColor.RED));
+            Msg.warn(player, text("Player not found: " + name, RED));
             return;
         }
         if (SQLIgnore.doesIgnore(player.getUniqueId(), ignoree.getUuid())) {
             SQLIgnore.ignore(player.getUniqueId(), ignoree.getUuid(), false);
-            Msg.info(player, Component.text("No longer ignoring " + ignoree.getName(), NamedTextColor.WHITE));
+            Msg.info(player, text("No longer ignoring " + ignoree.getName(), WHITE));
             plugin.getConnectListener().broadcastMeta(ConnectListener.META_IGNORE, player.getUniqueId());
         } else {
             SQLIgnore.ignore(player.getUniqueId(), ignoree.getUuid(), true);
-            Msg.info(player, Component.text("Ignoring " + ignoree.getName(), NamedTextColor.YELLOW));
+            Msg.info(player, text("Ignoring " + ignoree.getName(), YELLOW));
             plugin.getConnectListener().broadcastMeta(ConnectListener.META_IGNORE, player.getUniqueId());
         }
     }
