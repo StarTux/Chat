@@ -4,6 +4,7 @@ import com.cavetale.core.command.CommandNode;
 import com.cavetale.core.command.CommandWarn;
 import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
+import com.cavetale.mytems.Mytems;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.Option;
@@ -444,23 +445,20 @@ public final class ChatCommand extends AbstractChatCommand {
             if (player != null && !channel.canJoin(player.getUniqueId())) continue;
             TextComponent.Builder cb = Component.text().content(" ");
             if (player == null || channel.isJoined(player.getUniqueId())) {
-                cb.append(Component.text().content("\u2612").color(NamedTextColor.GREEN)
+                cb.append(Mytems.ON.asComponent()
                           .hoverEvent(HoverEvent.showText(Component.text("Leave " + channel.getTitle(), NamedTextColor.GREEN)))
-                          .clickEvent(ClickEvent.runCommand("/ch leave " + channel.getAlias()))
-                          .build());
+                          .clickEvent(ClickEvent.runCommand("/ch leave " + channel.getAlias())));
             } else {
-                cb.append(Component.text().content("\u2610").color(NamedTextColor.RED)
+                cb.append(Mytems.OFF.asComponent()
                           .hoverEvent(HoverEvent.showText(Component.text("Join " + channel.getTitle(), NamedTextColor.RED)))
-                          .clickEvent(ClickEvent.runCommand("/ch join " + channel.getAlias()))
-                          .build());
+                          .clickEvent(ClickEvent.runCommand("/ch join " + channel.getAlias())));
             }
             cb.append(Component.space());
-            cb.append(Component.text().content("\u2699").color(NamedTextColor.YELLOW)
+            cb.append(Mytems.MONKEY_WRENCH.asComponent()
                       .hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.separator(Component.newline()),
                                                                      Component.text("/ch set " + channel.getAlias(), NamedTextColor.YELLOW),
                                                                      Component.text("Open channel settings", NamedTextColor.GRAY))))
-                      .clickEvent(ClickEvent.runCommand("/ch set " + channel.getAlias()))
-                      .build());
+                      .clickEvent(ClickEvent.runCommand("/ch set " + channel.getAlias())));
             cb.append(Component.space());
             TextColor channelColor = player != null
                 ? SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", NamedTextColor.WHITE)
