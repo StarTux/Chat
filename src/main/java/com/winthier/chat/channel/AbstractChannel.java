@@ -216,9 +216,9 @@ public abstract class AbstractChannel implements Channel {
         if (theTitle == null || theTitle.isPrefix() || theTitle.isEmptyTitle()) return empty();
         return text()
             .append(text(bracketType.opening, bracketColor))
-            .append(theTitle.getTitleComponent())
+            .append(theTitle.getTitleComponent(message.getSender()))
             .append(text(bracketType.closing, bracketColor))
-            .hoverEvent(HoverEvent.showText(theTitle.getTooltip()))
+            .hoverEvent(HoverEvent.showText(theTitle.getTooltip(message.getSender())))
             .clickEvent(ClickEvent.suggestCommand("/title " + theTitle.getName()))
             .build();
     }
