@@ -4,7 +4,9 @@ import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.cavetale.core.font.Emoji;
 import com.cavetale.core.font.GlyphPolicy;
+import com.cavetale.core.perm.ExtraRank;
 import com.cavetale.core.perm.Perm;
+import com.cavetale.core.perm.StaffRank;
 import com.cavetale.mytems.item.font.Glyph;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
@@ -13,8 +15,6 @@ import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
-import com.winthier.perm.rank.ExtraRank;
-import com.winthier.perm.rank.StaffRank;
 import com.winthier.title.Title;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -38,6 +37,7 @@ import static com.cavetale.core.font.Unicode.tiny;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.JoinConfiguration.noSeparators;
 import static net.kyori.adventure.text.JoinConfiguration.separator;
@@ -251,14 +251,16 @@ public abstract class AbstractChannel implements Channel {
             }
             StaffRank staffRank = StaffRank.ofPlayer(message.getSender());
             if (staffRank != null) {
-                tooltip.add(join(noSeparators(), text(tiny("staff "), GRAY), text(staffRank.getDisplayName(), vcolor)));
+                tooltip.add(join(noSeparators(), text(tiny("staff "), GRAY), staffRank.asComponent()));
             }
             Set<ExtraRank> extraRanks = ExtraRank.ofPlayer(message.getSender());
             if (!extraRanks.isEmpty()) {
-                String extraString = extraRanks.stream()
-                    .map(ExtraRank::getDisplayName)
-                    .collect(Collectors.joining(" "));
-                tooltip.add(join(noSeparators(), text(tiny("extra "), GRAY), text(extraString, vcolor)));
+                List<Component> rankComponents = new ArrayList<>(extraRanks.size());
+                for (ExtraRank rank : extraRanks) {
+                    rankComponents.add(rank.asComponent());
+                }
+                tooltip.add(join(noSeparators(), text(tiny("extra "), GRAY),
+                                 join(separator(space()), rankComponents)));
             }
         }
         tooltip.add(join(noSeparators(), text(tiny("server "), GRAY), text(serverName, vcolor)));
