@@ -8,7 +8,7 @@ description: Cross server chat plugin for Cavetale
 author: StarTux
 website: https://cavetale.com
 
-depend: [Core, Mytems, SQL, Title, Perm]
+depend: [Core, Mytems, SQL, Title]
 softdepend: [dynmap]
 
 commands:

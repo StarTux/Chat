@@ -2,6 +2,7 @@ package com.winthier.chat.channel;
 
 import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
+import com.cavetale.core.perm.Perm;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
 import com.winthier.chat.Message;
@@ -9,7 +10,6 @@ import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
-import com.winthier.perm.Perm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -58,12 +58,12 @@ public final class PartyChannel extends AbstractChannel {
 
     @Override
     public boolean canJoin(UUID player) {
-        return Perm.has(player, permission) || Perm.has(player, "chat.channel.*");
+        return Perm.get().has(player, permission) || Perm.get().has(player, "chat.channel.*");
     }
 
     @Override
     public boolean canTalk(UUID player) {
-        return Perm.has(player, permission) || Perm.has(player, "chat.channel.*");
+        return Perm.get().has(player, permission) || Perm.get().has(player, "chat.channel.*");
     }
 
     @Override
