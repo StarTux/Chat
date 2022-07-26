@@ -18,6 +18,11 @@ public final class ConnectListener implements Listener {
     private static final String META_CHANNEL = "ChatMeta";
     public static final String META_IGNORE = "chat:ignore";
 
+    private static final class BungeePacket {
+        private PlayerCache player;
+        private String server;
+    }
+
     @EventHandler
     public void onConnectMessage(ConnectMessageEvent event) {
         switch (event.getChannel()) {
@@ -44,13 +49,13 @@ public final class ConnectListener implements Listener {
             return;
         }
         case "BUNGEE_PLAYER_JOIN": {
-            PlayerCache player = Json.deserialize(event.getPayload(), PlayerCache.class);
-            ChatPlugin.getInstance().onBungeeJoin(player.uuid, player.name, event.getCreated().getTime());
+            BungeePacket packet = Json.deserialize(event.getPayload(), BungeePacket.class);
+            ChatPlugin.getInstance().onBungeeJoin(packet.player.uuid, packet.player.name, event.getCreated().getTime());
             return;
         }
         case "BUNGEE_PLAYER_QUIT": {
-            PlayerCache player = Json.deserialize(event.getPayload(), PlayerCache.class);
-            ChatPlugin.getInstance().onBungeeQuit(player.uuid, player.name, event.getCreated().getTime());
+            BungeePacket packet = Json.deserialize(event.getPayload(), BungeePacket.class);
+            ChatPlugin.getInstance().onBungeeQuit(packet.player.uuid, packet.player.name, event.getCreated().getTime());
             return;
         }
         default: return;
