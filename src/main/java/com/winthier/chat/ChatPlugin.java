@@ -1,6 +1,10 @@
 package com.winthier.chat;
 
+import com.cavetale.core.command.RemotePlayer;
+import com.cavetale.core.connect.Connect;
 import com.cavetale.core.font.Emoji;
+import com.cavetale.core.perm.Perm;
+import com.cavetale.core.playercache.PlayerCache;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.PartyChannel;
@@ -14,12 +18,10 @@ import com.winthier.chat.connect.ConnectListener;
 import com.winthier.chat.dynmap.DynmapHandler;
 import com.winthier.chat.event.ChatMessageEvent;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
-import com.winthier.chat.playercache.PlayerCacheHandler;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLDB;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
-import com.winthier.perm.Perm;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -37,7 +39,6 @@ import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -57,7 +58,6 @@ public final class ChatPlugin extends JavaPlugin {
     private PrivateChannel privateChannel = null;
     private PartyChannel partyChannel = null;
     private TeamChannel teamChannel = null;
-    private PlayerCacheHandler playerCacheHandler = null;
     private DynmapHandler dynmapHandler = null;
     private ChatCommand chatCommand = new ChatCommand(this);
     @Setter private boolean debugMode = false;
@@ -78,12 +78,6 @@ public final class ChatPlugin extends JavaPlugin {
             getLogger().info("Connect plugin found!");
         } else {
             getLogger().warning("Connect plugin NOT found!");
-        }
-        if (getServer().getPluginManager().isPluginEnabled("PlayerCache")) {
-            playerCacheHandler = new PlayerCacheHandler();
-            getLogger().info("PlayerCache plugin found!");
-        } else {
-            getLogger().warning("PlayerCache plugin NOT found!");
         }
         if (getServer().getPluginManager().isPluginEnabled("dynmap")) {
             dynmapHandler = new DynmapHandler();
@@ -280,16 +274,6 @@ public final class ChatPlugin extends JavaPlugin {
         return null;
     }
 
-    public String getServerName() {
-        if (connectListener != null) return connectListener.getServerName();
-        return "minecraft";
-    }
-
-    public String getServerDisplayName() {
-        if (connectListener != null) return connectListener.getServerDisplayName();
-        return "Minecraft";
-    }
-
     public void didCreateMessage(Channel channel, Message message) {
         if (!ChatMessageEvent.call(channel, message)) {
             return;
@@ -326,52 +310,32 @@ public final class ChatPlugin extends JavaPlugin {
         if (name.equalsIgnoreCase(Chatter.CONSOLE.name)) {
             return Chatter.CONSOLE;
         }
-        Player player = Bukkit.getPlayerExact(name);
-        if (player != null) {
-            return new Chatter(player.getUniqueId(), player.getName());
-        }
-        if (connectListener != null) {
-            Chatter chatter = connectListener.findPlayer(name);
-            if (chatter != null) return chatter;
-        }
-        return null;
+        RemotePlayer player = Connect.get().getRemotePlayer(name);
+        return player != null
+            ? new Chatter(player.getUniqueId(), player.getName())
+            : null;
     }
 
     public List<Chatter> getOnlinePlayers() {
-        if (connectListener != null) {
-            return connectListener.getOnlinePlayers();
-        } else {
-            List<Chatter> result = new ArrayList<>();
-            for (Player player: getServer().getOnlinePlayers()) {
-                result.add(new Chatter(player.getUniqueId(), player.getName()));
-            }
-            return result;
+        List<Chatter> result = new ArrayList<>();
+        for (RemotePlayer player : Connect.get().getRemotePlayers()) {
+            result.add(new Chatter(player.getUniqueId(), player.getName()));
         }
+        return result;
     }
 
     public Chatter findOfflinePlayer(UUID uuid) {
-        if (playerCacheHandler != null) {
-            String name = playerCacheHandler.nameForUuid(uuid);
-            if (name == null) return null;
-            return new Chatter(uuid, name);
-        }
-        OfflinePlayer op = getServer().getOfflinePlayer(uuid);
-        if (op == null) return null;
-        return new Chatter(uuid, op.getName());
+        PlayerCache player = PlayerCache.forUuid(uuid);
+        return player != null
+            ? new Chatter(player.uuid, player.name)
+            : null;
     }
 
     public Chatter findOfflinePlayer(String name) {
-        if (playerCacheHandler != null) {
-            UUID uuid = playerCacheHandler.uuidForName(name);
-            if (uuid == null) return null;
-            String name2 = playerCacheHandler.nameForUuid(uuid);
-            if (name2 != null) name = name2;
-            return new Chatter(uuid, name);
-        }
-        @SuppressWarnings("deprecation")
-        OfflinePlayer op = getServer().getOfflinePlayer(name);
-        if (op == null) return null;
-        return new Chatter(op.getUniqueId(), op.getName());
+        PlayerCache player = PlayerCache.forName(name);
+        return player != null
+            ? new Chatter(player.uuid, player.name)
+            : null;
     }
 
     public boolean announce(String channel, Component message) {
@@ -406,8 +370,8 @@ public final class ChatPlugin extends JavaPlugin {
         return false;
     }
 
-    public void onBungeeJoin(UUID uuid, String name, String server, long timestamp) {
-        if (!Perm.has(uuid, "chat.joinmessage")) return;
+    public void onBungeeJoin(UUID uuid, String name, long timestamp) {
+        if (!Perm.get().has(uuid, "chat.joinmessage")) return;
         if (containsBadWord(name)) {
             getLogger().warning("Joining player name contains bad word: " + name);
             Bukkit.broadcast(Component.text("[Chat] Joining player name contains bad word: " + name, NamedTextColor.RED),
@@ -426,8 +390,8 @@ public final class ChatPlugin extends JavaPlugin {
         channel.handleMessage(message);
     }
 
-    public void onBungeeQuit(UUID uuid, String name, String server, long timestamp) {
-        if (!Perm.has(uuid, "chat.joinmessage")) return;
+    public void onBungeeQuit(UUID uuid, String name, long timestamp) {
+        if (!Perm.get().has(uuid, "chat.joinmessage")) return;
         if (containsBadWord(name)) {
             getLogger().info("Skipping name containing bad world: " + name);
             return;

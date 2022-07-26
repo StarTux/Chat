@@ -2,13 +2,13 @@ package com.winthier.chat.channel;
 
 import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
+import com.cavetale.core.perm.Perm;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Message;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLLog;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
-import com.winthier.perm.Perm;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
@@ -35,16 +35,16 @@ public final class PublicChannel extends AbstractChannel {
 
     @Override
     public boolean canJoin(UUID player) {
-        return Perm.has(player, permission)
-            || Perm.has(player, permission + ".join")
-            || Perm.has(player, "chat.channel.*");
+        return Perm.get().has(player, permission)
+            || Perm.get().has(player, permission + ".join")
+            || Perm.get().has(player, "chat.channel.*");
     }
 
     @Override
     public boolean canTalk(UUID player) {
-        return Perm.has(player, permission)
-            || Perm.has(player, permission + ".talk")
-            || Perm.has(player, "chat.channel.*");
+        return Perm.get().has(player, permission)
+            || Perm.get().has(player, permission + ".talk")
+            || Perm.get().has(player, "chat.channel.*");
     }
 
     @Override

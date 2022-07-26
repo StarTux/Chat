@@ -1,6 +1,6 @@
 package com.winthier.chat.sql;
 
-import com.winthier.chat.ChatPlugin;
+import com.cavetale.core.connect.Connect;
 import com.winthier.chat.channel.Channel;
 import com.winthier.sql.SQLRow;
 import java.util.Date;
@@ -32,7 +32,7 @@ public final class SQLLog implements SQLRow {
 
     private SQLLog(final String sender, final Channel channel, final String target, final String message) {
         setTime(new Date());
-        setServer(ChatPlugin.getInstance().getServerName());
+        setServer(Connect.get().getServerName());
         setSender(sender);
         setChannel(channel.getKey());
         setTarget(target);
@@ -41,7 +41,7 @@ public final class SQLLog implements SQLRow {
 
     private SQLLog(final Player player, final Channel channel, final String target, final String message) {
         setTime(new Date());
-        setServer(ChatPlugin.getInstance().getServerName());
+        setServer(Connect.get().getServerName());
         setPlayer(player.getUniqueId());
         setSender(player.getName());
         Location loc = player.getLocation();

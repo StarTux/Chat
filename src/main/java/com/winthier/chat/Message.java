@@ -1,5 +1,6 @@
 package com.winthier.chat;
 
+import com.cavetale.core.connect.NetworkServer;
 import com.cavetale.core.item.ItemKinds;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.util.Filter;
@@ -13,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import static com.cavetale.core.util.CamelCase.toCamelCase;
 
 @Data
 public final class Message {
@@ -52,8 +54,9 @@ public final class Message {
     public Message init(Channel theChannel) {
         this.channel = theChannel.getKey();
         this.time = System.currentTimeMillis();
-        this.senderServer = ChatPlugin.getInstance().getServerName();
-        this.senderServerDisplayName = ChatPlugin.getInstance().getServerDisplayName();
+        NetworkServer server = NetworkServer.current();
+        this.senderServer = server.registeredName;
+        this.senderServerDisplayName = toCamelCase(" ", server);
         return this;
     }
 
