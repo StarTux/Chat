@@ -86,7 +86,7 @@ public final class ChatPlugin extends JavaPlugin {
         } else {
             getLogger().warning("Dynmap plugin NOT found!");
         }
-        getServer().getPluginManager().registerEvents(chatListener, this);
+        chatListener.enable();
         new AdminCommand(this).enable();
         chatCommand.enable();
         getCommand("join").setExecutor(new JoinLeaveCommand(true));

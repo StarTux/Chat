@@ -1,11 +1,15 @@
 package com.winthier.chat;
 
+import com.cavetale.core.event.perm.PlayerPermissionUpdateEvent;
+import com.cavetale.core.font.Emoji;
 import com.winthier.chat.channel.AbstractChannel;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
 import io.papermc.paper.event.player.AsyncChatEvent;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -21,7 +25,20 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 @RequiredArgsConstructor
 public final class ChatListener implements Listener {
+    private static final String PERM_EMOJI = "chat.emoji";
     private final ChatPlugin plugin;
+
+    protected void enable() {
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+        List<String> completions = getEmojiCompletions();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission(PERM_EMOJI)) {
+                player.addAdditionalChatCompletions(completions);
+            } else {
+                player.removeAdditionalChatCompletions(completions);
+            }
+        }
+    }
 
     @EventHandler(ignoreCancelled = true)
     public void onAsyncChat(final AsyncChatEvent event) {
@@ -35,7 +52,7 @@ public final class ChatListener implements Listener {
         }
     }
 
-    void onPlayerChat(Player player, String message) {
+    private void onPlayerChat(Player player, String message) {
         if (!player.isValid()) return;
         Channel channel = plugin.getFocusChannel(player.getUniqueId());
         if (channel == null) return;
@@ -45,10 +62,24 @@ public final class ChatListener implements Listener {
         channel.playerDidUseChat(new PlayerCommandContext(player, null, event.getMessage()));
     }
 
+    private static List<String> getEmojiCompletions() {
+        List<Emoji> all = Emoji.all();
+        List<String> result = new ArrayList<>(all.size());
+        for (Emoji emoji : all) {
+            if (emoji.isPublic()) {
+                result.add(":" + emoji.name + ":");
+            }
+        }
+        return result;
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         SQLDB.load(event.getPlayer().getUniqueId());
         event.joinMessage(null);
+        if (event.getPlayer().hasPermission(PERM_EMOJI)) {
+            event.getPlayer().addAdditionalChatCompletions(getEmojiCompletions());
+        }
     }
 
     @EventHandler
@@ -78,6 +109,18 @@ public final class ChatListener implements Listener {
             message.setLocation(player.getLocation());
             message.setPassive(true);
             channel.handleMessage(message);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerPermissionUpdate(PlayerPermissionUpdateEvent event) {
+        Boolean ch = event.getPermissionChange(PERM_EMOJI);
+        if (ch == null) {
+            return;
+        } else if (ch) {
+            event.getPlayer().addAdditionalChatCompletions(getEmojiCompletions());
+        } else {
+            event.getPlayer().removeAdditionalChatCompletions(getEmojiCompletions());
         }
     }
 }
