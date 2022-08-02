@@ -363,6 +363,13 @@ public final class ChatPlugin extends JavaPlugin {
         return in;
     }
 
+    public String filterBadWords(String in) {
+        for (Pattern pattern : badWordList) {
+            in = pattern.matcher(in).replaceAll("***");
+        }
+        return in;
+    }
+
     public boolean containsBadWord(String in) {
         for (Pattern pattern : badWordList) {
             if (pattern.matcher(in).find()) return true;

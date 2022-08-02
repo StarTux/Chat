@@ -14,7 +14,6 @@ import com.winthier.chat.Message;
 import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
-import com.winthier.chat.util.Msg;
 import com.winthier.title.Title;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -331,9 +330,11 @@ public abstract class AbstractChannel implements Channel {
             }
         }
         if (languageFilter) {
-            component = plugin.filterBadWords(component);
+            component = plugin.filterBadWords(component)
+                .insertion(plugin.filterBadWords("" + message.getRawMessage()));
+        } else {
+            component = component.insertion(message.getRawMessage());
         }
-        component = component.insertion(Msg.plain(component));
         return component;
     }
 

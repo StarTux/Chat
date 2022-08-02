@@ -30,7 +30,7 @@ public final class Message {
     private String senderServerDisplayName;
     private Title title;
 
-    private String message;
+    private String message; // raw
     private String messageJson;
     private List<String> urls;
 
@@ -156,5 +156,12 @@ public final class Message {
         this.emoji = old.emoji;
         this.itemJson = old.itemJson;
         return this;
+    }
+
+    /**
+     * Properly named getter for clarity.
+     */
+    public String getRawMessage() {
+        return message;
     }
 }
