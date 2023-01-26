@@ -29,7 +29,7 @@
     <!-- Dynmap Repo -->
     <repository>
       <id>dynmap-repo</id>
-      <url>http://repo.mikeprimm.com</url>
+      <url>https://repo.mikeprimm.com</url>
     </repository>
 
   </repositories>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.19.1-R0.1-SNAPSHOT</version>
+      <version>1.19.3-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 

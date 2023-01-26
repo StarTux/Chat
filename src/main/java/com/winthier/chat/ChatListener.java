@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -110,6 +111,24 @@ public final class ChatListener implements Listener {
             message.setPassive(true);
             channel.handleMessage(message);
         }
+    }
+
+    @EventHandler
+    private void onPlayerAdvancementDone(PlayerAdvancementDoneEvent event) {
+        Component msg = event.message();
+        if (msg == null) return;
+        event.message(null);
+        Channel channel = plugin.findChannel("info");
+        if (channel == null) return;
+        Player player = event.getPlayer();
+        if (!player.getWorld().getGameRuleValue(GameRule.ANNOUNCE_ADVANCEMENTS)) return;
+        Message message = new Message().init(channel).message(msg);
+        message.setSender(player.getUniqueId());
+        message.setSenderName(player.getName());
+        message.setPassive(true);
+        message.setHideSenderTags(true);
+        plugin.didCreateMessage(channel, message);
+        channel.handleMessage(message);
     }
 
     @EventHandler
