@@ -9,7 +9,7 @@ author: StarTux
 website: https://cavetale.com
 
 depend: [Core, Mytems, SQL, Title]
-softdepend: [dynmap]
+softdepend: []
 
 commands:
 

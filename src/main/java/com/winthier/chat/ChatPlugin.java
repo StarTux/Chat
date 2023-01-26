@@ -15,7 +15,6 @@ import com.winthier.chat.channel.PublicChannel;
 import com.winthier.chat.channel.ReplyCommand;
 import com.winthier.chat.channel.TeamChannel;
 import com.winthier.chat.connect.ConnectListener;
-import com.winthier.chat.dynmap.DynmapHandler;
 import com.winthier.chat.event.ChatMessageEvent;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLChannel;
@@ -58,7 +57,6 @@ public final class ChatPlugin extends JavaPlugin {
     private PrivateChannel privateChannel = null;
     private PartyChannel partyChannel = null;
     private TeamChannel teamChannel = null;
-    private DynmapHandler dynmapHandler = null;
     private ChatCommand chatCommand = new ChatCommand(this);
     @Setter private boolean debugMode = false;
     private SQLDatabase db;
@@ -78,13 +76,6 @@ public final class ChatPlugin extends JavaPlugin {
             getLogger().info("Connect plugin found!");
         } else {
             getLogger().warning("Connect plugin NOT found!");
-        }
-        if (getServer().getPluginManager().isPluginEnabled("dynmap")) {
-            dynmapHandler = new DynmapHandler();
-            getServer().getPluginManager().registerEvents(dynmapHandler, this);
-            getLogger().info("Dynmap plugin found!");
-        } else {
-            getLogger().warning("Dynmap plugin NOT found!");
         }
         chatListener.enable();
         new AdminCommand(this).enable();
@@ -280,15 +271,6 @@ public final class ChatPlugin extends JavaPlugin {
         }
         if (!message.isLocal() && connectListener != null && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
-        }
-        if (dynmapHandler != null && SQLSetting.getBoolean(null, message.getChannel(), "PostToDynmap", false)) {
-            try {
-                dynmapHandler.postPlayerMessage(message);
-            } catch (Exception e) {
-                dynmapHandler = null;
-                getLogger().warning("dynmap error");
-                e.printStackTrace();
-            }
         }
     }
 

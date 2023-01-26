@@ -26,12 +26,6 @@
       <url>https://papermc.io/repo/repository/maven-public/</url>
     </repository>
 
-    <!-- Dynmap Repo -->
-    <repository>
-      <id>dynmap-repo</id>
-      <url>https://repo.mikeprimm.com</url>
-    </repository>
-
   </repositories>
   <dependencies>
 
@@ -56,14 +50,6 @@
       <groupId>com.winthier.title</groupId>
       <artifactId>title</artifactId>
       <version>0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- Dynmap API -->
-    <dependency>
-      <groupId>us.dynmap</groupId>
-      <artifactId>dynmap-api</artifactId>
-      <version>2.5</version>
       <scope>provided</scope>
     </dependency>
 
