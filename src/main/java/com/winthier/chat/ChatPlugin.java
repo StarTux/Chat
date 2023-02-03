@@ -396,4 +396,8 @@ public final class ChatPlugin extends JavaPlugin {
         message.setHideSenderTags(true);
         channel.handleMessage(message);
     }
+
+    public static ChatPlugin plugin() {
+        return instance;
+    }
 }

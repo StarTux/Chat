@@ -88,7 +88,7 @@ public final class PublicChannel extends AbstractChannel {
         long maxDistance = ranged ? (long) range * range : 0L;
         Player sender = message.getSender() != null ? Bukkit.getPlayer(message.getSender()) : null;
         int seenCount = 0;
-        for (Player player: Bukkit.getServer().getOnlinePlayers()) {
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
             if (!canJoin(player.getUniqueId())) continue;
             if (!isJoined(player.getUniqueId())) continue;
             if (shouldIgnore(player.getUniqueId(), message)) continue;

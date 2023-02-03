@@ -4,7 +4,6 @@ import com.cavetale.core.connect.Connect;
 import com.cavetale.core.event.connect.ConnectMessageEvent;
 import com.cavetale.core.playercache.PlayerCache;
 import com.cavetale.core.util.Json;
-import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Message;
 import com.winthier.chat.MetaMessage;
 import com.winthier.chat.sql.SQLIgnore;
@@ -12,6 +11,7 @@ import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import static com.winthier.chat.ChatPlugin.plugin;
 
 public final class ConnectListener implements Listener {
     private static final String CHANNEL = "Chat";
@@ -29,9 +29,9 @@ public final class ConnectListener implements Listener {
         case CHANNEL: {
             Message message = Message.deserialize(event.getPayload());
             if (message == null) {
-                ChatPlugin.getInstance().getLogger().warning("Failed to deserialize message: " + event.getPayload());
+                plugin().getLogger().warning("Failed to deserialize message: " + event.getPayload());
             } else {
-                ChatPlugin.getInstance().didReceiveMessage(message);
+                plugin().didReceiveMessage(message);
             }
             return;
         }
@@ -50,12 +50,14 @@ public final class ConnectListener implements Listener {
         }
         case "BUNGEE_PLAYER_JOIN": {
             BungeePacket packet = Json.deserialize(event.getPayload(), BungeePacket.class);
-            ChatPlugin.getInstance().onBungeeJoin(packet.player.uuid, packet.player.name, event.getCreated().getTime());
+            plugin().getLogger().info("BUNGEE_PLAYER_JOIN received: " + packet.player.name + " " + event.getCreated());
+            plugin().onBungeeJoin(packet.player.uuid, packet.player.name, event.getCreated().getTime());
             return;
         }
         case "BUNGEE_PLAYER_QUIT": {
             BungeePacket packet = Json.deserialize(event.getPayload(), BungeePacket.class);
-            ChatPlugin.getInstance().onBungeeQuit(packet.player.uuid, packet.player.name, event.getCreated().getTime());
+            plugin().getLogger().info("BUNGEE_PLAYER_QUIT received: " + packet.player.name + " " + event.getCreated());
+            plugin().onBungeeQuit(packet.player.uuid, packet.player.name, event.getCreated().getTime());
             return;
         }
         default: return;
