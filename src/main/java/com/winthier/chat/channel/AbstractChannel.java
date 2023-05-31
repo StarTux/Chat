@@ -7,6 +7,7 @@ import com.cavetale.core.font.GlyphPolicy;
 import com.cavetale.core.perm.ExtraRank;
 import com.cavetale.core.perm.Perm;
 import com.cavetale.core.perm.StaffRank;
+import com.cavetale.core.text.LineWrap;
 import com.cavetale.mytems.item.font.Glyph;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Chatter;
@@ -222,7 +223,8 @@ public abstract class AbstractChannel implements Channel {
             .build();
     }
 
-    protected final Component makeSenderTag(Message message, TextColor senderColor, TextColor bracketColor, BracketType bracketType, boolean useBrackets) {
+    protected final Component makeSenderTag(Message message, TextColor senderColor, TextColor bracketColor,
+                                            BracketType bracketType, boolean useBrackets, boolean languageFilter) {
         final Component senderName;
         Component senderDisplayName = message.getSenderDisplayName();
         if (senderDisplayName != null) {
@@ -243,6 +245,18 @@ public abstract class AbstractChannel implements Channel {
         TextColor vcolor = TextColor.color(0xFFFFFF);
         List<Component> tooltip = new ArrayList<>();
         tooltip.add(senderName);
+        if (message.getStatusMessage() != null) {
+            String statusMessage = languageFilter
+                ? plugin.filterBadWords(message.getStatusMessage())
+                : message.getStatusMessage();
+            tooltip.addAll(new LineWrap()
+                           .emoji(message.isEmoji())
+                           .glyphPolicy(GlyphPolicy.PUBLIC)
+                           .tooltip(false)
+                           .componentMaker(str -> text(str, GRAY))
+                           .wrap(statusMessage));
+            tooltip.add(empty());
+        }
         if (message.getSender() != null) {
             int level = Perm.get().getLevel(message.getSender());
             if (level > 0) {

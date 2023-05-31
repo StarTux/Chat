@@ -29,6 +29,7 @@ public final class Message {
     private String senderServer;
     private String senderServerDisplayName;
     private Title title;
+    private String statusMessage;
 
     private String message; // raw
     private String messageJson;

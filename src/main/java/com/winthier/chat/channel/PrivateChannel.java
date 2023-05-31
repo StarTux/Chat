@@ -136,7 +136,7 @@ public final class PrivateChannel extends AbstractChannel {
         if (showPlayerTitle) {
             cb.append(makeTitleTag(message, bracketColor, bracketType));
         }
-        cb.append(makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName));
+        cb.append(makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName, languageFilter));
         if (!tagPlayerName) {
             cb.append(Component.text(":", bracketColor));
         }

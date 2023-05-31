@@ -162,7 +162,7 @@ public final class PartyChannel extends AbstractChannel {
                 cb.append(makeTitleTag(message, bracketColor, bracketType));
             }
             // Player Name
-            Component senderTag = makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName);
+            Component senderTag = makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName, languageFilter);
             if (!Objects.equals(senderTag, Component.empty())) {
                 cb.append(senderTag);
                 if (!tagPlayerName) {
