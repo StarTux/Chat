@@ -9,6 +9,7 @@ import com.winthier.chat.MetaMessage;
 import com.winthier.chat.sql.SQLIgnore;
 import java.util.Objects;
 import java.util.UUID;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import static com.winthier.chat.ChatPlugin.plugin;
@@ -17,6 +18,10 @@ public final class ConnectListener implements Listener {
     private static final String CHANNEL = "Chat";
     private static final String META_CHANNEL = "ChatMeta";
     public static final String META_IGNORE = "chat:ignore";
+
+    public void enable() {
+        Bukkit.getPluginManager().registerEvents(this, plugin());
+    }
 
     private static final class BungeePacket {
         private PlayerCache player;

@@ -71,6 +71,7 @@ public final class ChatPlugin extends JavaPlugin {
         db.createAllTables();
         loadChannels();
         chatListener.enable();
+        connectListener.enable();
         new AdminCommand(this).enable();
         chatCommand.enable();
         getCommand("join").setExecutor(new JoinLeaveCommand(true));
