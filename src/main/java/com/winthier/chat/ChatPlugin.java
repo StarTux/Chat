@@ -52,7 +52,7 @@ public final class ChatPlugin extends JavaPlugin {
     @Getter private static ChatPlugin instance;
     private final List<CommandResponder> commandResponders = new ArrayList<>();
     private final List<Channel> channels = new ArrayList<>();
-    private ConnectListener connectListener = null;
+    private final ConnectListener connectListener = new ConnectListener();
     private ChatListener chatListener = new ChatListener(this);
     private PrivateChannel privateChannel = null;
     private PartyChannel partyChannel = null;
@@ -70,13 +70,6 @@ public final class ChatPlugin extends JavaPlugin {
         db.registerTables(SQLDB.getDatabaseClasses());
         db.createAllTables();
         loadChannels();
-        if (getServer().getPluginManager().isPluginEnabled("Connect")) {
-            connectListener = new ConnectListener();
-            getServer().getPluginManager().registerEvents(connectListener, this);
-            getLogger().info("Connect plugin found!");
-        } else {
-            getLogger().warning("Connect plugin NOT found!");
-        }
         chatListener.enable();
         new AdminCommand(this).enable();
         chatCommand.enable();
@@ -269,7 +262,7 @@ public final class ChatPlugin extends JavaPlugin {
         if (!ChatMessageEvent.call(channel, message)) {
             return;
         }
-        if (!message.isLocal() && connectListener != null && channel.getRange() == 0) {
+        if (!message.isLocal() && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
         }
     }
