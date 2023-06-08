@@ -1,6 +1,5 @@
 package com.winthier.chat.channel;
 
-import com.cavetale.core.connect.ServerCategory;
 import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.cavetale.core.font.Emoji;
@@ -55,7 +54,6 @@ public abstract class AbstractChannel implements Channel {
     protected final String tag;
     protected final String description;
     protected final int range;
-    protected final boolean rangeIsInfinite;
     protected final List<String> aliases;
     protected final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     protected final List<Option> options = new ArrayList<>();
@@ -68,10 +66,6 @@ public abstract class AbstractChannel implements Channel {
         this.description = row.getDescription();
         this.range = row.getLocalRange();
         this.aliases = new ArrayList<>(List.of(row.getAliases().split(",")));
-        this.rangeIsInfinite = switch (ServerCategory.current()) {
-        case MINIGAME, CREATIVE -> true;
-        default -> false;
-        };
         Option[] opts = {
             Option.booleanOption("ShowChannelTag", "Show Channel Tag",
                                  "Show the channel tag at the beginning of every message",

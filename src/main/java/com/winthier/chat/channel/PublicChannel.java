@@ -1,5 +1,6 @@
 package com.winthier.chat.channel;
 
+import com.cavetale.core.connect.ServerCategory;
 import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.cavetale.core.perm.Perm;
@@ -85,7 +86,13 @@ public final class PublicChannel extends AbstractChannel {
         plugin.getLogger().info(log);
         Location location = message.getLocation();
         final boolean ranged = range > 0 && location != null;
-        long maxDistance = ranged ? (long) range * range : 0L;
+        final boolean rangeIsInfinite = !ranged
+            ? false
+            : switch (ServerCategory.current()) {
+        case MINIGAME, CREATIVE -> true;
+        default -> false;
+        };
+        final long maxDistance = ranged && !rangeIsInfinite ? (long) range * range : 0L;
         Player sender = message.getSender() != null ? Bukkit.getPlayer(message.getSender()) : null;
         int seenCount = 0;
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
