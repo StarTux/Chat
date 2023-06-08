@@ -94,8 +94,10 @@ public final class PublicChannel extends AbstractChannel {
             if (shouldIgnore(player.getUniqueId(), message)) continue;
             if (ranged) {
                 if (!location.getWorld().equals(player.getWorld())) continue;
-                double dist = location.distanceSquared(player.getLocation());
-                if ((long) dist > maxDistance) continue;
+                if (!rangeIsInfinite) {
+                    double dist = location.distanceSquared(player.getLocation());
+                    if ((long) dist > maxDistance) continue;
+                }
             }
             send(message, player);
             // Being in GM3 only doesn't count you if you also have
