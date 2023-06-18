@@ -2,7 +2,7 @@ main: com.winthier.chat.ChatPlugin
 name: Chat
 
 version: 0.1
-api-version: 1.19
+api-version: '1.20'
 
 description: Cross server chat plugin for Cavetale
 author: StarTux
