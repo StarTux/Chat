@@ -138,7 +138,9 @@ public final class TeamChannel extends AbstractChannel {
         String key = getKey();
         final TextColor white = NamedTextColor.WHITE;
         TextColor channelColor = SQLSetting.getTextColor(uuid, key, "ChannelColor", white);
-        TextColor textColor = SQLSetting.getTextColor(uuid, key, "TextColor", white);
+        TextColor textColor = team.getTextColor() != null
+            ? team.getTextColor()
+            : SQLSetting.getTextColor(uuid, key, "TextColor", white);
         TextColor senderColor = SQLSetting.getTextColor(uuid, key, "SenderColor", white);
         TextColor bracketColor = SQLSetting.getTextColor(uuid, key, "BracketColor", white);
         boolean tagPlayerName = SQLSetting.getBoolean(uuid, key, "TagPlayerName", false);
