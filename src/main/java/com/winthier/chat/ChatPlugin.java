@@ -62,6 +62,7 @@ public final class ChatPlugin extends JavaPlugin {
     private SQLDatabase db;
     @Setter private List<TextReplacementConfig> badWordConfigList = List.of();
     @Setter private List<Pattern> badWordList = List.of();
+    private final Backlog backlog = new Backlog();
 
     @Override
     public void onEnable() {
@@ -78,6 +79,7 @@ public final class ChatPlugin extends JavaPlugin {
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
         getCommand("ignore").setExecutor(new IgnoreCommand());
         SQLDB.load();
+        backlog.enable();
     }
 
     @Override

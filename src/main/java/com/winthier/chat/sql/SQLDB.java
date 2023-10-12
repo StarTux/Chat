@@ -20,7 +20,8 @@ public final class SQLDB {
                        SQLIgnore.class,
                        SQLLog.class,
                        SQLChannel.class,
-                       SQLBadWord.class);
+                       SQLBadWord.class,
+                       SQLBacklog.class);
     }
 
     public static void reload() {

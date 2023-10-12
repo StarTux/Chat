@@ -1,5 +1,6 @@
 package com.winthier.chat;
 
+import com.cavetale.core.command.CommandArgCompleter;
 import com.cavetale.core.command.CommandNode;
 import com.cavetale.core.command.CommandWarn;
 import com.winthier.chat.channel.Channel;
@@ -13,11 +14,15 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import static com.winthier.chat.Backlog.backlog;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.JoinConfiguration.separator;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 @RequiredArgsConstructor
 public final class AdminCommand extends AbstractChatCommand {
@@ -50,6 +55,10 @@ public final class AdminCommand extends AbstractChatCommand {
         rootNode.addChild("badword").arguments("<expression>")
             .description("Check expression against bad word filter")
             .senderCaller(this::badWord);
+        rootNode.addChild("sendbacklog").arguments("<player>")
+            .description("Send someone their backlog")
+            .completers(CommandArgCompleter.NULL)
+            .senderCaller(this::sendBacklog);
         plugin.getCommand("chatadmin").setExecutor(this);
         return this;
     }
@@ -71,7 +80,7 @@ public final class AdminCommand extends AbstractChatCommand {
         plugin.reloadConfig();
         plugin.unloadChannels();
         plugin.loadChannels();
-        Msg.info(sender, Component.text("Configs reloaded", NamedTextColor.YELLOW));
+        Msg.info(sender, text("Configs reloaded", YELLOW));
         return true;
     }
 
@@ -79,7 +88,7 @@ public final class AdminCommand extends AbstractChatCommand {
         if (args.length != 0) return false;
         boolean v = !plugin.isDebugMode();
         plugin.setDebugMode(v);
-        Msg.info(sender, Component.text("Debug mode " + (v ? "enabled" : "disabled"), NamedTextColor.YELLOW));
+        Msg.info(sender, text("Debug mode " + (v ? "enabled" : "disabled"), YELLOW));
         return true;
     }
 
@@ -88,19 +97,19 @@ public final class AdminCommand extends AbstractChatCommand {
         String channelArg = args[0];
         Channel channel = plugin.findChannel(channelArg);
         if (channel == null) {
-            Msg.warn(sender, Component.text("Channel not found: " + channelArg, NamedTextColor.RED));
+            Msg.warn(sender, text("Channel not found: " + channelArg, RED));
             return true;
         }
         List<Component> lines = new ArrayList<>();
         for (SQLSetting sett: SQLSetting.getDefaultSettings().getMap().values()) {
             if (!channel.getKey().equals(sett.getChannel())) continue;
-            lines.add(Component.join(JoinConfiguration.separator(Component.newline()), Component.text(sett.getChannel(), NamedTextColor.GRAY),
-                                               Component.text(".", NamedTextColor.DARK_GRAY),
-                                               Component.text(sett.getSettingKey(), NamedTextColor.GRAY),
-                                               Component.text(" = ", NamedTextColor.DARK_GRAY),
-                                               Component.text(sett.getSettingValue(), NamedTextColor.YELLOW)));
+            lines.add(join(separator(newline()), text(sett.getChannel(), GRAY),
+                           text(".", DARK_GRAY),
+                           text(sett.getSettingKey(), GRAY),
+                           text(" = ", DARK_GRAY),
+                           text(sett.getSettingValue(), YELLOW)));
         }
-        sender.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), lines));
+        sender.sendMessage(join(separator(newline()), lines));
         return true;
     }
 
@@ -111,11 +120,11 @@ public final class AdminCommand extends AbstractChatCommand {
         String value = args[2];
         Channel channel = plugin.findChannel(channelArg);
         if (channel == null) {
-            Msg.warn(sender, Component.text("Channel not found: " + channelArg, NamedTextColor.RED));
+            Msg.warn(sender, text("Channel not found: " + channelArg, RED));
             return true;
         }
         SQLSetting.set(null, channel.getKey(), key, value);
-        Msg.info(sender, Component.text("Did set " + channel.getKey() + "." + key + " = " + value, NamedTextColor.YELLOW));
+        Msg.info(sender, text("Did set " + channel.getKey() + "." + key + " = " + value, YELLOW));
         return true;
     }
 
@@ -134,7 +143,7 @@ public final class AdminCommand extends AbstractChatCommand {
                 : option.getDefaultValue();
             SQLSetting.set(null, channel.getKey(), option.getKey(), value);
         }
-        Msg.info(player, Component.text("Channel defaults updated: " + channel.getTitle(), NamedTextColor.GREEN));
+        Msg.info(player, text("Channel defaults updated: " + channel.getTitle(), GREEN));
         return true;
     }
 
@@ -143,19 +152,19 @@ public final class AdminCommand extends AbstractChatCommand {
         String channelArg = args[0];
         Channel channel = plugin.findChannel(channelArg);
         if (channel == null) {
-            Msg.warn(sender, Component.text("Channel not found: " + channelArg, NamedTextColor.RED));
+            Msg.warn(sender, text("Channel not found: " + channelArg, RED));
             return true;
         }
         String msg = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-        channel.announce(Component.text(msg));
-        Msg.info(sender, Component.text("Announcement sent to " + channel.getTitle(), NamedTextColor.YELLOW));
+        channel.announce(text(msg));
+        Msg.info(sender, text("Announcement sent to " + channel.getTitle(), YELLOW));
         return true;
     }
 
     boolean initDb(CommandSender sender, String[] args) {
         if (args.length != 0) return false;
         plugin.initializeDatabase();
-        Msg.info(sender, Component.text("Database initialized", NamedTextColor.YELLOW));
+        Msg.info(sender, text("Database initialized", YELLOW));
         return true;
     }
 
@@ -165,12 +174,20 @@ public final class AdminCommand extends AbstractChatCommand {
         int count = 0;
         for (var pattern : plugin.getBadWordList()) {
             if (pattern.matcher(expression).find()) {
-                sender.sendMessage(Component.text("Match: " + pattern.toString(), NamedTextColor.YELLOW));
+                sender.sendMessage(text("Match: " + pattern.toString(), YELLOW));
                 count += 1;
             }
         }
-        sender.sendMessage(Component.text("Total matches: " + count + ", Filtered: ", NamedTextColor.YELLOW)
-                           .append(plugin.filterBadWords(Component.text(expression))));
+        sender.sendMessage(text("Total matches: " + count + ", Filtered: ", YELLOW)
+                           .append(plugin.filterBadWords(text(expression))));
+        return true;
+    }
+
+    private boolean sendBacklog(CommandSender sender, String[] args) {
+        if (args.length != 1) return false;
+        final Player target = CommandArgCompleter.requirePlayer(args[0]);
+        sender.sendMessage(text("Sending " + target.getName() + " their backlog...", YELLOW));
+        backlog().sendBacklog(target);
         return true;
     }
 }

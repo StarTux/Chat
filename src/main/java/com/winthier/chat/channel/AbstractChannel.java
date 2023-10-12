@@ -34,6 +34,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import static com.cavetale.core.font.Unicode.tiny;
+import static com.winthier.chat.Backlog.backlog;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.newline;
@@ -176,7 +177,7 @@ public abstract class AbstractChannel implements Channel {
      */
     protected void send(Message message, Player player) {
         Component component = makeOutput(message, player);
-        player.sendMessage(component);
+        backlog().send(player, component);
         if (!message.isPassive()) {
             playSoundCue(player);
         }

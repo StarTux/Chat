@@ -20,6 +20,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import static com.winthier.chat.Backlog.backlog;
 
 public final class PrivateChannel extends AbstractChannel {
     @Getter private final String permission = "chat.pm";
@@ -92,7 +93,7 @@ public final class PrivateChannel extends AbstractChannel {
     @Override
     protected void send(Message message, Player player) {
         Component component = makeOutput(message, player);
-        player.sendMessage(component);
+        backlog().send(player, component);
         if (message.getSpecial() == null) {
             playSoundCue(player);
         }
