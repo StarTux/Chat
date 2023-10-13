@@ -62,7 +62,7 @@ public final class PrivateChannel extends AbstractChannel {
         if (special != null) {
             send(message, player);
         }
-        if (special == null && !shouldIgnore(player.getUniqueId(), message)) {
+        if (special == null && !shouldIgnore(player.getUniqueId(), message) && message.getSender() != null) {
             SQLSetting.set(player.getUniqueId(), getKey(), "ReplyName", message.getSenderName());
             send(message, player);
             sendAck(message, player);
