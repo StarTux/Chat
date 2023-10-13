@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 @Data @NotNull @Name("backlog")
 public final class SQLBacklog implements SQLRow {
     @Id private Integer id;
-    private UUID player;
+    @Keyed private UUID player;
     @Keyed private Date time;
     @Text private String messageJson;
 
