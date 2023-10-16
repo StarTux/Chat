@@ -40,7 +40,7 @@ import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.JoinConfiguration.noSeparators;
+import static net.kyori.adventure.text.Component.textOfChildren;
 import static net.kyori.adventure.text.JoinConfiguration.separator;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 import static net.kyori.adventure.text.event.ClickEvent.suggestCommand;
@@ -270,11 +270,11 @@ public abstract class AbstractChannel implements Channel {
         if (message.getSender() != null) {
             int level = Perm.get().getLevel(message.getSender());
             if (level > 0) {
-                tooltip.add(join(noSeparators(), text(tiny("tier "), GRAY), Glyph.toComponent("" + level)));
+                tooltip.add(textOfChildren(text(tiny("tier "), GRAY), Glyph.toComponent("" + level)));
             }
             StaffRank staffRank = StaffRank.ofPlayer(message.getSender());
             if (staffRank != null) {
-                tooltip.add(join(noSeparators(), text(tiny("staff "), GRAY), staffRank.asComponent()));
+                tooltip.add(textOfChildren(text(tiny("staff "), GRAY), staffRank.asComponent()));
             }
             Set<ExtraRank> extraRanks = ExtraRank.ofPlayer(message.getSender());
             if (!extraRanks.isEmpty()) {
@@ -282,13 +282,13 @@ public abstract class AbstractChannel implements Channel {
                 for (ExtraRank rank : extraRanks) {
                     rankComponents.add(rank.asComponent());
                 }
-                tooltip.add(join(noSeparators(), text(tiny("extra "), GRAY),
-                                 join(separator(space()), rankComponents)));
+                tooltip.add(textOfChildren(text(tiny("extra "), GRAY),
+                                           join(separator(space()), rankComponents)));
             }
         }
-        tooltip.add(join(noSeparators(), text(tiny("server "), GRAY), text(serverName, vcolor)));
-        tooltip.add(join(noSeparators(), text(tiny("channel "), GRAY), text(getTitle(), vcolor)));
-        tooltip.add(join(noSeparators(), text(tiny("time "), GRAY), text(formatTimestamp(message.getTime()), vcolor)));
+        tooltip.add(textOfChildren(text(tiny("server "), GRAY), text(serverName, vcolor)));
+        tooltip.add(textOfChildren(text(tiny("channel "), GRAY), text(getTitle(), vcolor)));
+        tooltip.add(textOfChildren(text(tiny("time "), GRAY), text(formatTimestamp(message.getTime()), vcolor)));
         TextComponent.Builder cb = text().color(senderColor)
             .insertion(message.getSenderName());
         if (useBrackets) {
@@ -410,10 +410,28 @@ public abstract class AbstractChannel implements Channel {
     @Override
     public void unregisterCommand() { }
 
-    private Component makeJoinLeaveTag(long timestamp) {
-        List<Component> lines = new ArrayList<>();
-        lines.add(join(noSeparators(), text(tiny("time "), GRAY), text(formatTimestamp(timestamp), WHITE)));
-        return join(separator(newline()), lines);
+    private Component makeJoinLeaveTooltip(UUID uuid, String name, long timestamp) {
+        List<Component> tooltip = new ArrayList<>();
+        tooltip.add(text(name, WHITE));
+        int level = Perm.get().getLevel(uuid);
+        if (level > 0) {
+            tooltip.add(textOfChildren(text(tiny("tier "), GRAY), Glyph.toComponent("" + level)));
+        }
+        StaffRank staffRank = StaffRank.ofPlayer(uuid);
+        if (staffRank != null) {
+            tooltip.add(textOfChildren(text(tiny("staff "), GRAY), staffRank.asComponent()));
+        }
+        Set<ExtraRank> extraRanks = ExtraRank.ofPlayer(uuid);
+        if (!extraRanks.isEmpty()) {
+            List<Component> rankComponents = new ArrayList<>(extraRanks.size());
+            for (ExtraRank rank : extraRanks) {
+                rankComponents.add(rank.asComponent());
+            }
+            tooltip.add(textOfChildren(text(tiny("extra "), GRAY),
+                                       join(separator(space()), rankComponents)));
+        }
+        tooltip.add(textOfChildren(text(tiny("time "), GRAY), text(formatTimestamp(timestamp), WHITE)));
+        return join(separator(newline()), tooltip);
     }
 
     /**
@@ -426,7 +444,7 @@ public abstract class AbstractChannel implements Channel {
         }
         Message message = new Message().init(this)
             .message(text(name + " joined", GREEN, ITALIC)
-                     .hoverEvent(showText(makeJoinLeaveTag(timestamp)))
+                     .hoverEvent(showText(makeJoinLeaveTooltip(uuid, name, timestamp)))
                      .clickEvent(suggestCommand("/msg " + name)));
         message.setSender(uuid);
         message.setSenderName(name);
@@ -446,7 +464,7 @@ public abstract class AbstractChannel implements Channel {
         }
         Message message = new Message().init(this)
             .message(text(name + " disconnected", AQUA, ITALIC)
-                     .hoverEvent(showText(makeJoinLeaveTag(timestamp)))
+                     .hoverEvent(showText(makeJoinLeaveTooltip(uuid, name, timestamp)))
                      .clickEvent(suggestCommand("/msg " + name)));
         message.setSender(uuid);
         message.setSenderName(name);
