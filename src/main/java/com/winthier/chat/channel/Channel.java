@@ -32,4 +32,6 @@ public interface Channel extends CommandResponder {
     Component makeExampleOutput(Player player);
     boolean playSoundCue(Player player);
     String getPermission();
+    void onBungeeJoin(UUID uuid, String name, long timestamp);
+    void onBungeeQuit(UUID uuid, String name, long timestamp);
 }

@@ -27,8 +27,6 @@ import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -42,7 +40,11 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.JoinConfiguration.noSeparators;
 import static net.kyori.adventure.text.JoinConfiguration.separator;
+import static net.kyori.adventure.text.event.ClickEvent.openUrl;
+import static net.kyori.adventure.text.event.ClickEvent.suggestCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.TextDecoration.*;
 
 /**
  * Implements common methods and fields of all channels.
@@ -189,8 +191,8 @@ public abstract class AbstractChannel implements Channel {
             .append(text(bracketType.opening, bracketColor))
             .append(text(getTag(), channelColor))
             .append(text(bracketType.closing, bracketColor))
-            .hoverEvent(HoverEvent.showText(tooltip))
-            .clickEvent(ClickEvent.suggestCommand("/" + getAlias()))
+            .hoverEvent(showText(tooltip))
+            .clickEvent(suggestCommand("/" + getAlias()))
             .build();
     }
 
@@ -207,8 +209,8 @@ public abstract class AbstractChannel implements Channel {
             .append(text(bracketType.opening, bracketColor))
             .append(text(name, serverColor))
             .append(text(bracketType.closing, bracketColor))
-            .hoverEvent(HoverEvent.showText(text(name, serverColor)))
-            .clickEvent(ClickEvent.suggestCommand("/" + message.getSenderServer()))
+            .hoverEvent(showText(text(name, serverColor)))
+            .clickEvent(suggestCommand("/" + message.getSenderServer()))
             .build();
     }
 
@@ -219,8 +221,8 @@ public abstract class AbstractChannel implements Channel {
             .append(text(bracketType.opening, bracketColor))
             .append(theTitle.getTitleComponent(message.getSender()))
             .append(text(bracketType.closing, bracketColor))
-            .hoverEvent(HoverEvent.showText(theTitle.getTooltip(message.getSender())))
-            .clickEvent(ClickEvent.suggestCommand("/title " + theTitle.getName()))
+            .hoverEvent(showText(theTitle.getTooltip(message.getSender())))
+            .clickEvent(suggestCommand("/title " + theTitle.getName()))
             .build();
     }
 
@@ -289,9 +291,9 @@ public abstract class AbstractChannel implements Channel {
         if (useBrackets) {
             cb.append(text(bracketType.closing, bracketColor));
         }
-        cb = cb.hoverEvent(HoverEvent.showText(join(separator(newline()), tooltip)));
+        cb = cb.hoverEvent(showText(join(separator(newline()), tooltip)));
         if (message.getSenderName() != null) {
-            cb.clickEvent(ClickEvent.suggestCommand("/msg " + message.getSenderName()));
+            cb.clickEvent(suggestCommand("/msg " + message.getSenderName()));
         }
         return cb.build();
     }
@@ -333,8 +335,8 @@ public abstract class AbstractChannel implements Channel {
                 TextColor linkColor = TextColor.color(0x4040EE);
                 Component urlComponent = text()
                     .content(url).color(TextColor.color(0xC0C0FF))
-                    .hoverEvent(HoverEvent.showText(text(url, linkColor, TextDecoration.UNDERLINED)))
-                    .clickEvent(ClickEvent.openUrl(url))
+                    .hoverEvent(showText(text(url, linkColor, TextDecoration.UNDERLINED)))
+                    .clickEvent(openUrl(url))
                     .build();
                 TextReplacementConfig textReplacementConfig = TextReplacementConfig.builder()
                     .once()
@@ -400,4 +402,50 @@ public abstract class AbstractChannel implements Channel {
 
     @Override
     public void unregisterCommand() { }
+
+    private Component makeJoinLeaveTag(long timestamp) {
+        List<Component> lines = new ArrayList<>();
+        lines.add(join(noSeparators(), text(tiny("time "), GRAY), text(timeFormat.format(new Date(timestamp)), WHITE)));
+        return join(separator(newline()), lines);
+    }
+
+    /**
+     * Send player join message to this channel.
+     */
+    public void onBungeeJoin(UUID uuid, String name, long timestamp) {
+        if (plugin.containsBadWord(name)) {
+            plugin.getLogger().info("Skipping name containing bad world: " + name);
+            return;
+        }
+        Message message = new Message().init(this)
+            .message(text(name + " joined", GREEN, ITALIC)
+                     .hoverEvent(showText(makeJoinLeaveTag(timestamp)))
+                     .clickEvent(suggestCommand("/msg " + name)));
+        message.setSender(uuid);
+        message.setSenderName(name);
+        message.setLocal(true);
+        message.setPassive(true);
+        message.setHideSenderTags(true);
+        handleMessage(message);
+    }
+
+    /**
+     * Send player quit message to this channel.
+     */
+    public void onBungeeQuit(UUID uuid, String name, long timestamp) {
+        if (plugin.containsBadWord(name)) {
+            plugin.getLogger().info("Skipping name containing bad world: " + name);
+            return;
+        }
+        Message message = new Message().init(this)
+            .message(text(name + " disconnected", AQUA, ITALIC)
+                     .hoverEvent(showText(makeJoinLeaveTag(timestamp)))
+                     .clickEvent(suggestCommand("/msg " + name)));
+        message.setSender(uuid);
+        message.setSenderName(name);
+        message.setLocal(true);
+        message.setPassive(true);
+        message.setHideSenderTags(true);
+        handleMessage(message);
+    }
 }

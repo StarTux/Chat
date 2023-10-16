@@ -35,8 +35,6 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -357,43 +355,18 @@ public final class ChatPlugin extends JavaPlugin {
 
     public void onBungeeJoin(UUID uuid, String name, long timestamp) {
         if (!Perm.get().has(uuid, "chat.joinmessage")) return;
-        if (containsBadWord(name)) {
-            getLogger().warning("Joining player name contains bad word: " + name);
-            Bukkit.broadcast(Component.text("[Chat] Joining player name contains bad word: " + name, NamedTextColor.RED),
-                             "chat.admin");
-            return;
-        }
         Channel channel = findChannel("info");
-        if (channel == null) return;
-        Message message = new Message().init(channel)
-            .message(Component.text(name + " joined", NamedTextColor.GREEN, TextDecoration.ITALIC));
-        message.setSender(uuid);
-        message.setSenderName(name);
-        message.setLocal(true);
-        message.setPassive(true);
-        message.setHideSenderTags(true);
-        channel.handleMessage(message);
+        if (channel != null) channel.onBungeeJoin(uuid, name, timestamp);
     }
 
     public void onBungeeQuit(UUID uuid, String name, long timestamp) {
         if (!Perm.get().has(uuid, "chat.joinmessage")) return;
-        if (containsBadWord(name)) {
-            getLogger().info("Skipping name containing bad world: " + name);
-            return;
-        }
         Channel channel = findChannel("info");
-        if (channel == null) return;
-        Message message = new Message().init(channel)
-            .message(Component.text(name + " disconnected", NamedTextColor.AQUA, TextDecoration.ITALIC));
-        message.setSender(uuid);
-        message.setSenderName(name);
-        message.setLocal(true);
-        message.setPassive(true);
-        message.setHideSenderTags(true);
-        channel.handleMessage(message);
+        if (channel != null) channel.onBungeeQuit(uuid, name, timestamp);
     }
 
     public static ChatPlugin plugin() {
         return instance;
     }
 }
+
