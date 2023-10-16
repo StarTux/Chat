@@ -16,9 +16,11 @@ import com.winthier.chat.sql.SQLChannel;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.title.Title;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -58,7 +60,8 @@ public abstract class AbstractChannel implements Channel {
     protected final String description;
     protected final int range;
     protected final List<String> aliases;
-    protected final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+    protected final DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
+    protected final ZoneId timezone = ZoneId.of("UTC-11");
     protected final List<Option> options = new ArrayList<>();
 
     AbstractChannel(final ChatPlugin plugin, final SQLChannel row) {
@@ -226,6 +229,10 @@ public abstract class AbstractChannel implements Channel {
             .build();
     }
 
+    private String formatTimestamp(long timestamp) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), timezone).format(timeFormat);
+    }
+
     protected final Component makeSenderTag(Message message, TextColor senderColor, TextColor bracketColor,
                                             BracketType bracketType, boolean useBrackets, boolean languageFilter) {
         final Component senderName;
@@ -281,7 +288,7 @@ public abstract class AbstractChannel implements Channel {
         }
         tooltip.add(join(noSeparators(), text(tiny("server "), GRAY), text(serverName, vcolor)));
         tooltip.add(join(noSeparators(), text(tiny("channel "), GRAY), text(getTitle(), vcolor)));
-        tooltip.add(join(noSeparators(), text(tiny("time "), GRAY), text(timeFormat.format(new Date(message.getTime())), vcolor)));
+        tooltip.add(join(noSeparators(), text(tiny("time "), GRAY), text(formatTimestamp(message.getTime()), vcolor)));
         TextComponent.Builder cb = text().color(senderColor)
             .insertion(message.getSenderName());
         if (useBrackets) {
@@ -405,7 +412,7 @@ public abstract class AbstractChannel implements Channel {
 
     private Component makeJoinLeaveTag(long timestamp) {
         List<Component> lines = new ArrayList<>();
-        lines.add(join(noSeparators(), text(tiny("time "), GRAY), text(timeFormat.format(new Date(timestamp)), WHITE)));
+        lines.add(join(noSeparators(), text(tiny("time "), GRAY), text(formatTimestamp(timestamp), WHITE)));
         return join(separator(newline()), lines);
     }
 
