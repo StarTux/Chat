@@ -34,9 +34,9 @@ public final class ChatListener implements Listener {
         List<String> completions = getEmojiCompletions();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.hasPermission(PERM_EMOJI)) {
-                player.addAdditionalChatCompletions(completions);
+                player.addCustomChatCompletions(completions);
             } else {
-                player.removeAdditionalChatCompletions(completions);
+                player.removeCustomChatCompletions(completions);
             }
         }
     }
@@ -79,7 +79,7 @@ public final class ChatListener implements Listener {
         SQLDB.load(event.getPlayer().getUniqueId());
         event.joinMessage(null);
         if (event.getPlayer().hasPermission(PERM_EMOJI)) {
-            event.getPlayer().addAdditionalChatCompletions(getEmojiCompletions());
+            event.getPlayer().addCustomChatCompletions(getEmojiCompletions());
         }
     }
 
@@ -137,9 +137,9 @@ public final class ChatListener implements Listener {
         if (ch == null) {
             return;
         } else if (ch) {
-            event.getPlayer().addAdditionalChatCompletions(getEmojiCompletions());
+            event.getPlayer().addCustomChatCompletions(getEmojiCompletions());
         } else {
-            event.getPlayer().removeAdditionalChatCompletions(getEmojiCompletions());
+            event.getPlayer().removeCustomChatCompletions(getEmojiCompletions());
         }
     }
 }
