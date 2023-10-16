@@ -15,30 +15,31 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.textOfChildren;
+import static net.kyori.adventure.text.event.ClickEvent.suggestCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.TextDecoration.*;
 
 public final class TeamChannel extends AbstractChannel {
     @Getter private final String permission = "chat.channel.team";
-    private final Team exampleTeam = new Team("chat:example", Component.text("Example"));
-    private final Component usage = Component.join(JoinConfiguration.noSeparators(), new Component[] {
-            Component.text("Usage", NamedTextColor.GRAY, TextDecoration.ITALIC),
-            Component.text("/t ", NamedTextColor.GREEN),
-            Component.text("<message>", NamedTextColor.GREEN, TextDecoration.ITALIC),
-            Component.text(" - ", NamedTextColor.DARK_GRAY),
-            Component.text("Send a message", NamedTextColor.WHITE),
-            Component.newline(),
-            Component.text("/t ", NamedTextColor.GREEN),
-            Component.text(" - ", NamedTextColor.DARK_GRAY),
-            Component.text("Focus team chat", NamedTextColor.WHITE),
-        });
+    private final Team exampleTeam = new Team("chat:example", text("Example", BLUE), BLUE);
+    private final Component usage = textOfChildren(text("Usage", GRAY, ITALIC),
+                                                   text("/t ", GREEN),
+                                                   text("<message>", GREEN, ITALIC),
+                                                   text(" - ", DARK_GRAY),
+                                                   text("Send a message", WHITE),
+                                                   newline(),
+                                                   text("/t ", GREEN),
+                                                   text(" - ", DARK_GRAY),
+                                                   text("Focus team chat", WHITE));
 
     public TeamChannel(final ChatPlugin plugin, final SQLChannel row) {
         super(plugin, row);
@@ -66,12 +67,12 @@ public final class TeamChannel extends AbstractChannel {
         playerTeams.callEvent();
         Team playerTeam = playerTeams.getTeam(player);
         if (playerTeam == null) {
-            Msg.warn(player, Component.text("You're not in a team!", NamedTextColor.RED));
+            Msg.warn(player, text("You're not in a team!", RED));
             return;
         }
         if (msg == null || msg.isEmpty()) {
             setFocusChannel(player);
-            Msg.info(player, Component.text("Now focusing team ", NamedTextColor.WHITE)
+            Msg.info(player, text("Now focusing team ", WHITE)
                      .append(playerTeam.displayName));
             return;
         }
@@ -136,7 +137,7 @@ public final class TeamChannel extends AbstractChannel {
     public Component makeOutput(Message message, Player player, Team team) {
         UUID uuid = player.getUniqueId();
         String key = getKey();
-        final TextColor white = NamedTextColor.WHITE;
+        final TextColor white = WHITE;
         TextColor channelColor = SQLSetting.getTextColor(uuid, key, "ChannelColor", white);
         TextColor textColor = team.getTextColor() != null
             ? team.getTextColor()
@@ -150,7 +151,7 @@ public final class TeamChannel extends AbstractChannel {
         boolean showChannelTag = SQLSetting.getBoolean(uuid, key, "ShowChannelTag", true);
         String tmp = SQLSetting.getString(uuid, key, "BracketType", null);
         BracketType bracketType = tmp != null ? BracketType.of(tmp) : BracketType.ANGLE;
-        TextComponent.Builder cb = Component.text();
+        TextComponent.Builder cb = text();
         if (showChannelTag) {
             cb.append(makeChannelTag(channelColor, bracketColor, bracketType));
         }
@@ -166,27 +167,25 @@ public final class TeamChannel extends AbstractChannel {
             }
             // Player Name
             Component senderTag = makeSenderTag(message, senderColor, bracketColor, bracketType, tagPlayerName, languageFilter);
-            if (!Objects.equals(senderTag, Component.empty())) {
+            if (!Objects.equals(senderTag, empty())) {
                 cb.append(senderTag);
                 if (!tagPlayerName) {
-                    cb.append(Component.text(":", bracketColor));
+                    cb.append(text(":", bracketColor));
                 }
             }
         }
-        cb.append(Component.text(" "));
+        cb.append(text(" "));
         cb.append(makeMessageComponent(message, player, textColor, bracketType, bracketColor, languageFilter));
         return cb.build();
     }
 
     protected Component makeTeamTag(Team team, BracketType bracketType, TextColor bracketColor, TextColor channelColor) {
-        return Component.text()
-            .append(Component.text(bracketType.opening, bracketColor))
+        return text()
+            .append(text(bracketType.opening, bracketColor))
             .append(team.displayName)
-            .append(Component.text(bracketType.closing, bracketColor))
-            .clickEvent(ClickEvent.suggestCommand("/t "))
-            .hoverEvent(HoverEvent.showText(Component.join(JoinConfiguration.noSeparators(),
-                                                           Component.text("Team ", NamedTextColor.GRAY),
-                                                           team.displayName)))
+            .append(text(bracketType.closing, bracketColor))
+            .clickEvent(suggestCommand("/t "))
+            .hoverEvent(showText(textOfChildren(text("Team ", GRAY), team.displayName)))
             .color(channelColor)
             .build();
     }
