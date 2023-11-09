@@ -63,6 +63,11 @@ public final class ChatPlugin extends JavaPlugin {
     private final Backlog backlog = new Backlog();
 
     @Override
+    public void onLoad() {
+        new CoreChat().register();
+    }
+
+    @Override
     public void onEnable() {
         instance = this;
         db = new SQLDatabase(this);

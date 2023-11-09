@@ -36,6 +36,15 @@ public final class Backlog implements Listener {
         plugin().getDb().insertAsync(new SQLBacklog(player, message), null);
     }
 
+    public void sendNoLog(Player player, Component message) {
+        List<Component> stored = storedMessages.get(player.getUniqueId());
+        if (stored != null) {
+            stored.add(message);
+        } else {
+            player.sendMessage(message);
+        }
+    }
+
     protected void enable() {
         Bukkit.getPluginManager().registerEvents(this, plugin());
         final Date then = new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L);
