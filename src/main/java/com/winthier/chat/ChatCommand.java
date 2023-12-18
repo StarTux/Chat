@@ -439,7 +439,9 @@ public final class ChatCommand extends AbstractChatCommand {
                        text("Example", kcolor, ITALIC),
                        channel.makeExampleOutput(player)));
         channel.playSoundCue(player);
-        player.sendMessage(join(separator(newline()), lines));
+        for (Component line : lines) {
+            player.sendMessage(line);
+        }
     }
 
     private void listChannels(CommandSender sender) {
