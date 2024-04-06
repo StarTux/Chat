@@ -19,7 +19,7 @@ import lombok.Value;
 public final class SQLIgnore implements SQLRow {
     // Cache
     @Value
-    private static class Ignores {
+    private static final class Ignores {
         private final Map<UUID, SQLIgnore> map = new HashMap<>();
     }
     private static final Map<UUID, Ignores> CACHE = new HashMap<>();
