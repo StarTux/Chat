@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.command.Command;
@@ -517,19 +518,26 @@ public final class ChatCommand extends AbstractChatCommand {
     }
 
     public void toggleIgnore(Player player, String name) {
-        Chatter ignoree = plugin.findOfflinePlayer(name);
+        final Chatter ignoree = plugin.findOfflinePlayer(name);
         if (ignoree == null) {
             Msg.warn(player, text("Player not found: " + name, RED));
             return;
         }
+        final Player target = Bukkit.getPlayer(ignoree.getUuid());
         if (SQLIgnore.doesIgnore(player.getUniqueId(), ignoree.getUuid())) {
             SQLIgnore.ignore(player.getUniqueId(), ignoree.getUuid(), false);
             Msg.info(player, text("No longer ignoring " + ignoree.getName(), WHITE));
             plugin.getConnectListener().broadcastMeta(ConnectListener.META_IGNORE, player.getUniqueId());
+            if (target != null) {
+                player.showPlayer(plugin, target);
+            }
         } else {
             SQLIgnore.ignore(player.getUniqueId(), ignoree.getUuid(), true);
             Msg.info(player, text("Ignoring " + ignoree.getName(), YELLOW));
             plugin.getConnectListener().broadcastMeta(ConnectListener.META_IGNORE, player.getUniqueId());
+            if (target != null) {
+                player.hidePlayer(plugin, target);
+            }
         }
     }
 }

@@ -242,7 +242,7 @@ public final class SQLSetting implements SQLRow {
             });
     }
 
-    protected static void loadSettingsAsync(UUID uuid) {
+    public static void loadSettingsAsync(UUID uuid) {
         SQLDB.get().find(SQLSetting.class).where().eq("uuid", uuid).findListAsync(list -> {
                 Settings old = CACHE.get(uuid);
                 Settings settings = makeSettings(list);

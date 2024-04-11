@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -82,13 +83,14 @@ public final class SQLIgnore implements SQLRow {
         CACHE.clear();
     }
 
-    public static void loadIgnoresAsync(UUID uuid) {
+    public static void loadIgnoresAsync(UUID uuid, Consumer<Iterable<SQLIgnore>> callback) {
         SQLDB.get().find(SQLIgnore.class).where().eq("player", uuid).findListAsync(list -> {
                 Ignores ignores = new Ignores();
                 for (SQLIgnore ignore : list) {
                     ignores.map.put(ignore.getIgnoree(), ignore);
                 }
                 CACHE.put(uuid, ignores);
+                if (callback != null) callback.accept(ignores.map.values());
             });
     }
 

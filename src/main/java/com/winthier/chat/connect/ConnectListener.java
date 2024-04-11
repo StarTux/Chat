@@ -46,7 +46,7 @@ public final class ConnectListener implements Listener {
             switch (meta) {
             case META_IGNORE:
                 UUID uuid = Objects.requireNonNull(metaMessage.getUuid());
-                SQLIgnore.loadIgnoresAsync(uuid);
+                SQLIgnore.loadIgnoresAsync(uuid, _list -> { });
                 break;
             default:
                 throw new IllegalArgumentException("Unknown meta: " + meta);

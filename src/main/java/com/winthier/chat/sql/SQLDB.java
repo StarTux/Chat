@@ -39,20 +39,12 @@ public final class SQLDB {
         SQLIgnore.clearCache();
     }
 
-    /**
-     * Load player database in the cache, hopefully async!
-     */
-    public static void load(UUID uuid) {
-        SQLSetting.loadSettingsAsync(uuid);
-        SQLIgnore.loadIgnoresAsync(uuid);
-    }
-
     public static void load() {
         SQLSetting.loadDefaultSettingsAsync();
         SQLBadWord.loadBadWords();
         SQLIgnore.loadIgnores();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            load(player.getUniqueId());
+            SQLSetting.loadSettingsAsync(player.getUniqueId());
         }
     }
 }

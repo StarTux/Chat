@@ -7,9 +7,12 @@ import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
 import com.winthier.chat.sql.SQLDB;
+import com.winthier.chat.sql.SQLIgnore;
+import com.winthier.chat.sql.SQLSetting;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -76,7 +79,22 @@ public final class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        SQLDB.load(event.getPlayer().getUniqueId());
+        final Player player = event.getPlayer();
+        final UUID uuid = player.getUniqueId();
+        SQLSetting.loadSettingsAsync(uuid);
+        SQLIgnore.loadIgnoresAsync(uuid, list -> {
+                if (!player.isOnline()) return;
+                for (SQLIgnore row : list) {
+                    Player target = Bukkit.getPlayer(row.getIgnoree());
+                    if (target != null) player.hidePlayer(plugin, target);
+                }
+            });
+        for (Player other : Bukkit.getOnlinePlayers()) {
+            if (player.equals(other)) continue;
+            if (SQLIgnore.doesIgnore(other.getUniqueId(), player.getUniqueId())) {
+                other.hidePlayer(plugin, player);
+            }
+        }
         event.joinMessage(null);
         if (event.getPlayer().hasPermission(PERM_EMOJI)) {
             event.getPlayer().addCustomChatCompletions(getEmojiCompletions());
