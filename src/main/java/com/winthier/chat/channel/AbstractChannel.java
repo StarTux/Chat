@@ -160,17 +160,28 @@ public abstract class AbstractChannel implements Channel {
 
     @Override
     public final void announce(Component msg) {
-        announce(msg, false);
+        announce(null, msg, false);
     }
 
     @Override
     public final void announceLocal(Component msg) {
-        announce(msg, true);
+        announce(null, msg, true);
     }
 
-    private void announce(Component msg, boolean local) {
+    @Override
+    public final void announce(UUID sender, Component msg) {
+        announce(sender, msg, false);
+    }
+
+    @Override
+    public final void announceLocal(UUID sender, Component msg) {
+        announce(sender, msg, true);
+    }
+
+    private void announce(UUID sender, Component msg, boolean local) {
         Message message = new Message().init(this).message(msg);
         message.setPassive(true);
+        message.setSender(sender);
         message.setLocal(local);
         plugin.didCreateMessage(this, message);
         handleMessage(message);
