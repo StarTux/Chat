@@ -333,6 +333,20 @@ public final class ChatPlugin extends JavaPlugin {
         return true;
     }
 
+    public boolean announce(String channel, UUID sender, Component message) {
+        Channel ch = findChannel(channel);
+        if (ch == null) return false;
+        ch.announce(sender, message);
+        return true;
+    }
+
+    public boolean announceLocal(String channel, UUID sender, Component message) {
+        Channel ch = findChannel(channel);
+        if (ch == null) return false;
+        ch.announceLocal(sender, message);
+        return true;
+    }
+
     public boolean doesIgnore(UUID player, UUID ignoree) {
         return SQLIgnore.doesIgnore(player, ignoree);
     }
