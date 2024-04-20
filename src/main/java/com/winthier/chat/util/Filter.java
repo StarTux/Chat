@@ -9,7 +9,7 @@ public final class Filter {
         + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         + "abcdefghijklmnopqrstuvwxyz"
         + "0123456789-._~:/?#[]@!$&'()*+,;=";
-    static final String URL_SPECIAL = "~:/?#[]@!$&'()*+,;=";
+    static final String URL_SPECIAL = "~:/?#[]@!$&'()*+,;=%";
 
     private Filter() { }
 
