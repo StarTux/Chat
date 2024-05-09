@@ -2,8 +2,8 @@ package com.winthier.chat;
 
 import com.cavetale.core.command.CommandNode;
 import com.cavetale.core.command.CommandWarn;
-import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
+import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.mytems.Mytems;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;

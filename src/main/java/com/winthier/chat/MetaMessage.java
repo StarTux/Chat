@@ -1,7 +1,7 @@
 package com.winthier.chat;
 
-import lombok.Data;
 import java.util.UUID;
+import lombok.Data;
 
 /**
  * A package which is sent by ConnectMessage in the ChatMeta

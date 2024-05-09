@@ -1,8 +1,8 @@
 package com.winthier.chat.channel;
 
 import com.cavetale.core.connect.ServerCategory;
-import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.event.player.PluginPlayerEvent;
+import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.core.perm.Perm;
 import com.winthier.chat.ChatPlugin;
 import com.winthier.chat.Message;
