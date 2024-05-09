@@ -1,7 +1,9 @@
 package com.winthier.chat;
 
+import com.cavetale.core.chat.ChannelChatEvent;
 import com.cavetale.core.command.RemotePlayer;
 import com.cavetale.core.connect.Connect;
+import com.cavetale.core.connect.NetworkServer;
 import com.cavetale.core.font.Emoji;
 import com.cavetale.core.perm.Perm;
 import com.cavetale.core.playercache.PlayerCache;
@@ -271,15 +273,25 @@ public final class ChatPlugin extends JavaPlugin {
         if (!message.isLocal() && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
         }
+        new ChannelChatEvent(message.getSender(), message.getTarget(),
+                             NetworkServer.current(),
+                             channel.getKey(),
+                             message.getMessage(),
+                             channel.makeMessageComponent(message)).callEvent();
     }
 
     public void didReceiveMessage(Message message) {
         Channel channel = findChannel(message.getChannel());
         if (channel == null) {
             getLogger().warning("Could not find message channel: '" + message.getChannel() + "'");
-        } else {
-            channel.handleMessage(message);
+            return;
         }
+        channel.handleMessage(message);
+        new ChannelChatEvent(message.getSender(), message.getTarget(),
+                             NetworkServer.of(message.getSenderServer()),
+                             channel.getKey(),
+                             message.getMessage(),
+                             channel.makeMessageComponent(message)).callEvent();
     }
 
     /**

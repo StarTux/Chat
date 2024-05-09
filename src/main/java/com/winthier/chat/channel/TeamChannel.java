@@ -175,7 +175,7 @@ public final class TeamChannel extends AbstractChannel {
             }
         }
         cb.append(text(" "));
-        cb.append(makeMessageComponent(message, player, textColor, bracketType, bracketColor, languageFilter));
+        cb.append(makeMessageComponent(message, textColor, bracketType, bracketColor, languageFilter));
         return cb.build();
     }
 

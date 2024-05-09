@@ -36,4 +36,5 @@ public interface Channel extends CommandResponder {
     String getPermission();
     void onBungeeJoin(UUID uuid, String name, long timestamp);
     void onBungeeQuit(UUID uuid, String name, long timestamp);
+    Component makeMessageComponent(Message message);
 }

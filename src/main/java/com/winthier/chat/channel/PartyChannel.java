@@ -171,7 +171,7 @@ public final class PartyChannel extends AbstractChannel {
             }
         }
         cb.append(Component.text(" "));
-        cb.append(makeMessageComponent(message, player, textColor, bracketType, bracketColor, languageFilter));
+        cb.append(makeMessageComponent(message, textColor, bracketType, bracketColor, languageFilter));
         return cb.build();
     }
 
