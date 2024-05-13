@@ -51,6 +51,11 @@ commands:
     description: Team channel
     permission: chat.channel.team
 
+  clearscreen:
+    aliases: [cls]
+    description: Clear chat screen
+    permission: chat.chat
+
 permissions:
 
   chat.chat:

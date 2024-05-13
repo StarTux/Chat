@@ -12,6 +12,7 @@ import com.winthier.chat.channel.PlayerCommandContext;
 import com.winthier.chat.channel.PrivateChannel;
 import com.winthier.chat.connect.ConnectListener;
 import com.winthier.chat.event.ChatPlayerTalkEvent;
+import com.winthier.chat.sql.SQLBacklog;
 import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.chat.util.Msg;
@@ -80,6 +81,10 @@ public final class ChatCommand extends AbstractChatCommand {
             .arguments("<channel> <message...>")
             .description("Speak in chat")
             .senderCaller(this::say);
+        rootNode.addChild("clearscreen").denyTabCompletion()
+            .alias("cls")
+            .description("Clear your chat")
+            .playerCaller(this::clearScreen);
         return this;
     }
 
@@ -539,5 +544,18 @@ public final class ChatCommand extends AbstractChatCommand {
                 player.hidePlayer(plugin, target);
             }
         }
+    }
+
+    protected void clearScreen(Player player) {
+        for (int i = 0; i < 100; i += 1) {
+            player.sendMessage("");
+        }
+        plugin.getDb().find(SQLBacklog.class)
+            .eq("player", player.getUniqueId())
+            .deleteAsync(rowCount -> {
+                    if (rowCount == 0) return;
+                    plugin.getLogger().info("Cleared " + rowCount + " chat backlogs of " + player.getName());
+                });
+        player.sendActionBar(text("Your chat screen has been cleared", GRAY));
     }
 }

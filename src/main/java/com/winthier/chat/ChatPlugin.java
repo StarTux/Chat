@@ -83,6 +83,7 @@ public final class ChatPlugin extends JavaPlugin {
         getCommand("join").setExecutor(new JoinLeaveCommand(true));
         getCommand("leave").setExecutor(new JoinLeaveCommand(false));
         getCommand("ignore").setExecutor(new IgnoreCommand());
+        new ClearScreenCommand().enable();
         SQLDB.load();
         backlog.enable();
     }
