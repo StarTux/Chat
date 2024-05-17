@@ -25,6 +25,7 @@ import com.winthier.chat.sql.SQLIgnore;
 import com.winthier.chat.sql.SQLSetting;
 import com.winthier.sql.SQLDatabase;
 import java.io.InputStreamReader;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -274,7 +275,8 @@ public final class ChatPlugin extends JavaPlugin {
         if (!message.isLocal() && channel.getRange() == 0) {
             connectListener.broadcastMessage(message);
         }
-        new ChannelChatEvent(message.getSender(), message.getTarget(),
+        new ChannelChatEvent(Instant.ofEpochMilli(message.getTime()),
+                             message.getSender(), message.getTargetName(),
                              NetworkServer.current(),
                              channel.getKey(),
                              message.getMessage(),
@@ -288,7 +290,8 @@ public final class ChatPlugin extends JavaPlugin {
             return;
         }
         channel.handleMessage(message);
-        new ChannelChatEvent(message.getSender(), message.getTarget(),
+        new ChannelChatEvent(Instant.ofEpochMilli(message.getTime()),
+                             message.getSender(), message.getTargetName(),
                              NetworkServer.of(message.getSenderServer()),
                              channel.getKey(),
                              message.getMessage(),

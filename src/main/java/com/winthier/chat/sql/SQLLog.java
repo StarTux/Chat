@@ -1,6 +1,8 @@
 package com.winthier.chat.sql;
 
 import com.cavetale.core.connect.Connect;
+import com.cavetale.core.connect.NetworkServer;
+import com.winthier.chat.Message;
 import com.winthier.chat.channel.Channel;
 import com.winthier.sql.SQLRow;
 import java.util.Date;
@@ -13,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import static com.cavetale.core.util.CamelCase.toCamelCase;
 
 @Table(name = "logs")
 @Getter @Setter @NoArgsConstructor
@@ -60,5 +63,18 @@ public final class SQLLog implements SQLRow {
 
     public static void store(Player player, Channel channel, String target, String message) {
         SQLDB.get().saveAsync(new SQLLog(player, channel, target, message), null);
+    }
+
+    public Message toMessage() {
+        Message result = new Message();
+        result.setSender(player);
+        result.setSenderName(sender);
+        result.setTime(time.getTime());
+        result.setSenderServer(server);
+        result.setSenderServerDisplayName(toCamelCase(" ", NetworkServer.of(server)));
+        result.setChannel(channel);
+        result.setTargetName(target);
+        result.setMessage(message);
+        return result;
     }
 }
