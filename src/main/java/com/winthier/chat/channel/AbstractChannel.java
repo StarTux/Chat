@@ -469,6 +469,7 @@ public abstract class AbstractChannel implements Channel {
         message.setLocal(true);
         message.setPassive(true);
         message.setHideSenderTags(true);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
 
@@ -489,6 +490,7 @@ public abstract class AbstractChannel implements Channel {
         message.setLocal(true);
         message.setPassive(true);
         message.setHideSenderTags(true);
+        plugin.didCreateMessage(this, message);
         handleMessage(message);
     }
 }
