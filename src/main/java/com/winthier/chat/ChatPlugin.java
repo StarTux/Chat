@@ -280,7 +280,8 @@ public final class ChatPlugin extends JavaPlugin {
                              NetworkServer.current(),
                              channel.getKey(),
                              message.getMessage(),
-                             channel.makeMessageComponent(message)).callEvent();
+                             channel.makeMessageComponent(message),
+                             message.isPassive()).callEvent();
     }
 
     public void didReceiveMessage(Message message) {
@@ -295,7 +296,8 @@ public final class ChatPlugin extends JavaPlugin {
                              NetworkServer.of(message.getSenderServer()),
                              channel.getKey(),
                              message.getMessage(),
-                             channel.makeMessageComponent(message)).callEvent();
+                             channel.makeMessageComponent(message),
+                             message.isPassive()).callEvent();
     }
 
     /**

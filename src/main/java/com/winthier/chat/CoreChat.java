@@ -53,7 +53,8 @@ public final class CoreChat implements ChatHandler {
                                                         NetworkServer.of(it.getServer()),
                                                         it.getChannel(),
                                                         it.getMessage(),
-                                                        channel.makeMessageComponent(it.toMessage())));
+                                                        channel.makeMessageComponent(it.toMessage()),
+                                                        false));
                     }
                     callback.accept(result);
                 });
@@ -79,7 +80,8 @@ public final class CoreChat implements ChatHandler {
                                                         NetworkServer.of(it.getServer()),
                                                         it.getChannel(),
                                                         it.getMessage(),
-                                                        channel.makeMessageComponent(it.toMessage())));
+                                                        channel.makeMessageComponent(it.toMessage()),
+                                                        false));
                     }
                     callback.accept(result);
                 });
