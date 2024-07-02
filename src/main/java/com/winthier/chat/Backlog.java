@@ -1,5 +1,6 @@
 package com.winthier.chat;
 
+import com.cavetale.core.connect.NetworkServer;
 import com.winthier.chat.sql.SQLBacklog;
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,6 +60,9 @@ public final class Backlog implements Listener {
 
     @EventHandler
     private void onPlayerJoin(PlayerJoinEvent event) {
+        if (NetworkServer.current() == NetworkServer.VOID) {
+            return;
+        }
         sendBacklog(event.getPlayer());
     }
 
