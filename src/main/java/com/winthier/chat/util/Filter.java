@@ -8,7 +8,7 @@ public final class Filter {
     static final String URL_VALID = ""
         + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         + "abcdefghijklmnopqrstuvwxyz"
-        + "0123456789-._~:/?#[]@!$&'()*+,;=";
+        + "0123456789-._~:/?#[]@!$&'()*+,;=%";
     static final String URL_SPECIAL = "~:/?#[]@!$&'()*+,;=%";
 
     private Filter() { }
