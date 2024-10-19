@@ -119,3 +119,7 @@ permissions:
   chat.channel.team:
     default: false
     description: Use team channel
+
+  chat.backlog.onjoin:
+    default: false
+    description: Receive backlog when joining
