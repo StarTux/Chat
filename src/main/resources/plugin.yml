@@ -122,4 +122,8 @@ permissions:
 
   chat.backlog.onjoin:
     default: false
-    description: Receive backlog when joining
+    description: Receive backlog when joining or switching servers
+
+  chat.backlog.onlogin:
+    default: false
+    description: Receive backlog when logging in (the void server)

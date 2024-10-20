@@ -61,10 +61,13 @@ public final class Backlog implements Listener {
     @EventHandler
     private void onPlayerJoin(PlayerJoinEvent event) {
         if (NetworkServer.current() == NetworkServer.VOID) {
-            return;
-        }
-        if (!event.getPlayer().hasPermission("chat.backlog.onjoin")) {
-            return;
+            if (!event.getPlayer().hasPermission("chat.backlog.onlogin")) {
+                return;
+            }
+        } else {
+            if (!event.getPlayer().hasPermission("chat.backlog.onjoin")) {
+                return;
+            }
         }
         sendBacklog(event.getPlayer());
     }
