@@ -15,7 +15,7 @@ public final class SQLBacklog implements SQLRow {
     @Id private Integer id;
     @Keyed private UUID player;
     @Keyed private Date time;
-    @Text private String messageJson;
+    @MediumText private String messageJson;
 
     public SQLBacklog() { }
 
