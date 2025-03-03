@@ -1,5 +1,6 @@
 package com.winthier.chat;
 
+import com.cavetale.core.connect.NetworkServer;
 import com.cavetale.core.event.perm.PlayerPermissionUpdateEvent;
 import com.cavetale.core.font.Emoji;
 import com.winthier.chat.channel.AbstractChannel;
@@ -82,22 +83,24 @@ public final class ChatListener implements Listener {
         final Player player = event.getPlayer();
         final UUID uuid = player.getUniqueId();
         SQLSetting.loadSettingsAsync(uuid);
-        SQLIgnore.loadIgnoresAsync(uuid, list -> {
-                if (!player.isOnline()) return;
-                for (SQLIgnore row : list) {
-                    Player target = Bukkit.getPlayer(row.getIgnoree());
-                    if (target != null) player.hidePlayer(plugin, target);
-                }
-            });
-        for (Player other : Bukkit.getOnlinePlayers()) {
-            if (player.equals(other)) continue;
-            if (SQLIgnore.doesIgnore(other.getUniqueId(), player.getUniqueId())) {
-                other.hidePlayer(plugin, player);
-            }
-        }
         event.joinMessage(null);
         if (event.getPlayer().hasPermission(PERM_EMOJI)) {
             event.getPlayer().addCustomChatCompletions(getEmojiCompletions());
+        }
+        if (NetworkServer.current().isSurvival()) {
+            SQLIgnore.loadIgnoresAsync(uuid, list -> {
+                    if (!player.isOnline()) return;
+                    for (SQLIgnore row : list) {
+                        Player target = Bukkit.getPlayer(row.getIgnoree());
+                        if (target != null) player.hidePlayer(plugin, target);
+                    }
+                });
+            for (Player other : Bukkit.getOnlinePlayers()) {
+                if (player.equals(other)) continue;
+                if (SQLIgnore.doesIgnore(other.getUniqueId(), player.getUniqueId())) {
+                    other.hidePlayer(plugin, player);
+                }
+            }
         }
     }
 

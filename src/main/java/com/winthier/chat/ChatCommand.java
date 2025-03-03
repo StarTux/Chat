@@ -2,6 +2,7 @@ package com.winthier.chat;
 
 import com.cavetale.core.command.CommandNode;
 import com.cavetale.core.command.CommandWarn;
+import com.cavetale.core.connect.NetworkServer;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.mytems.Mytems;
@@ -540,7 +541,7 @@ public final class ChatCommand extends AbstractChatCommand {
             SQLIgnore.ignore(player.getUniqueId(), ignoree.getUuid(), true);
             Msg.info(player, text("Ignoring " + ignoree.getName(), YELLOW));
             plugin.getConnectListener().broadcastMeta(ConnectListener.META_IGNORE, player.getUniqueId());
-            if (target != null) {
+            if (target != null && NetworkServer.current().isSurvival()) {
                 player.hidePlayer(plugin, target);
             }
         }
