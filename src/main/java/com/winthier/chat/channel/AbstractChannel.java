@@ -2,6 +2,7 @@ package com.winthier.chat.channel;
 
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
+import com.cavetale.core.font.DefaultFont;
 import com.cavetale.core.font.Emoji;
 import com.cavetale.core.font.GlyphPolicy;
 import com.cavetale.core.perm.ExtraRank;
@@ -199,15 +200,25 @@ public abstract class AbstractChannel implements Channel {
         }
     }
 
-    protected final Component makeChannelTag(TextColor channelColor, TextColor bracketColor, BracketType bracketType) {
-        Component tooltip = join(separator(newline()), text(getTitle()), text(getDescription(), GRAY));
-        return text()
-            .append(text(bracketType.opening, bracketColor))
-            .append(text(getTag(), channelColor))
-            .append(text(bracketType.closing, bracketColor))
+    private DefaultFont getDefaultFont() {
+        try {
+            return DefaultFont.valueOf(title.toUpperCase() + "_CHAT");
+        } catch (IllegalArgumentException iae) {
+            return null;
+        }
+    }
+
+    public final Component makeChannelTag(TextColor channelColor, TextColor bracketColor, BracketType bracketType) {
+        final Component tooltip = join(separator(newline()), text(getTitle(), channelColor), text(getDescription(), GRAY));
+        final DefaultFont defaultFont = getDefaultFont();
+        final Component result = defaultFont != null
+            ? defaultFont.getComponent().color(channelColor)
+            : textOfChildren(text(bracketType.opening, bracketColor),
+                             text(getTag(), channelColor),
+                             text(bracketType.closing, bracketColor));
+        return result
             .hoverEvent(showText(tooltip))
-            .clickEvent(suggestCommand("/" + getAlias()))
-            .build();
+            .clickEvent(suggestCommand("/" + getAlias()));
     }
 
     protected final Component makeServerTag(Message message, TextColor serverColor, TextColor bracketColor, BracketType bracketType) {

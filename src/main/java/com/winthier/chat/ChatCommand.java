@@ -6,6 +6,8 @@ import com.cavetale.core.connect.NetworkServer;
 import com.cavetale.core.event.player.PluginPlayerEvent;
 import com.cavetale.core.event.player.PluginPlayerEvent.Detail;
 import com.cavetale.mytems.Mytems;
+import com.winthier.chat.channel.AbstractChannel;
+import com.winthier.chat.channel.BracketType;
 import com.winthier.chat.channel.Channel;
 import com.winthier.chat.channel.CommandResponder;
 import com.winthier.chat.channel.Option;
@@ -400,18 +402,19 @@ public final class ChatCommand extends AbstractChatCommand {
         for (Option option : globalOptions) {
             lines.add(makeOptionComponent(player, null, option));
         }
-        TextComponent.Builder cb = text();
-        cb.append(text("Channel Settings", WHITE, ITALIC));
-        for (Channel channel: plugin.getChannels()) {
-            if (!channel.canJoin(player.getUniqueId())) continue;
-            cb.append(space());
-            TextColor channelColor = SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", WHITE);
-            cb.append(text().content("[" + channel.getTag() + "]").color(channelColor)
-                      .hoverEvent(showText(text(channel.getTitle(), channelColor)))
-                      .clickEvent(runCommand("/ch set " + channel.getAlias()))
-                      .build());
+        final List<Component> channels = new ArrayList<>();
+        channels.add(text("Channel Settings", WHITE, ITALIC));
+        for (Channel chan : plugin.getChannels()) {
+            if (!chan.canJoin(player.getUniqueId())) continue;
+            if (!(chan instanceof AbstractChannel channel)) continue;
+            final TextColor channelColor = SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", WHITE);
+            final TextColor bracketColor = SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "BracketColor", WHITE);
+            final String tmp = SQLSetting.getString(player.getUniqueId(), channel.getKey(), "BracketType", null);
+            final BracketType bracketType = tmp != null ? BracketType.of(tmp) : BracketType.ANGLE;
+            channels.add(channel.makeChannelTag(channelColor, bracketColor, bracketType)
+                         .clickEvent(runCommand("/ch set " + channel.getAlias())));
         }
-        lines.add(cb.build());
+        lines.add(join(separator(space()), channels));
         player.sendMessage(join(separator(newline()), lines));
     }
 
@@ -452,48 +455,54 @@ public final class ChatCommand extends AbstractChatCommand {
     }
 
     private void listChannels(CommandSender sender) {
-        Player player = sender instanceof Player ? (Player) sender : null;
+        final Player player = sender instanceof Player ? (Player) sender : null;
         Msg.info(sender, text("Channel List", WHITE));
-        List<Component> lines = new ArrayList<>();
+        final List<Component> lines = new ArrayList<>();
         for (Channel channel: plugin.getChannels()) {
-            List<Object> json = new ArrayList<>();
+            final List<Component> line = new ArrayList<>();
             if (player != null && !channel.canJoin(player.getUniqueId())) continue;
             TextComponent.Builder cb = text().content(" ");
             if (player == null || channel.isJoined(player.getUniqueId())) {
-                cb.append(Mytems.ON.asComponent()
-                          .hoverEvent(showText(text("Leave " + channel.getTitle(), GREEN)))
-                          .clickEvent(runCommand("/ch leave " + channel.getAlias())));
+                line.add(Mytems.ON.asComponent()
+                         .hoverEvent(showText(text("Leave " + channel.getTitle(), GREEN)))
+                         .clickEvent(runCommand("/ch leave " + channel.getAlias())));
             } else {
-                cb.append(Mytems.OFF.asComponent()
+                lines.add(Mytems.OFF.asComponent()
                           .hoverEvent(showText(text("Join " + channel.getTitle(), RED)))
                           .clickEvent(runCommand("/ch join " + channel.getAlias())));
             }
-            cb.append(space());
-            cb.append(Mytems.MONKEY_WRENCH.asComponent()
+            line.add(space());
+            line.add(Mytems.MONKEY_WRENCH.asComponent()
                       .hoverEvent(showText(join(separator(newline()),
                                                 text("/ch set " + channel.getAlias(), YELLOW),
                                                 text("Open channel settings", GRAY))))
                       .clickEvent(runCommand("/ch set " + channel.getAlias())));
-            cb.append(space());
-            TextColor channelColor = player != null
+            line.add(space());
+            final TextColor channelColor = player != null
                 ? SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "ChannelColor", WHITE)
                 : SQLSetting.getTextColor(null, channel.getKey(), "ChannelColor", WHITE);
-            Component tooltip = join(separator(newline()), new Component[] {
+            final Component tooltip = join(separator(newline()), new Component[] {
                     text("/" + channel.getTag().toLowerCase() + " [message]", channelColor),
                     text("Focus " + channel.getTitle(), GRAY),
                 });
-            cb.append(text().content(channel.getTitle()).color(channelColor)
+            if (channel instanceof AbstractChannel achan) {
+                final TextColor bracketColor = SQLSetting.getTextColor(player.getUniqueId(), channel.getKey(), "BracketColor", WHITE);
+                final String tmp = SQLSetting.getString(player.getUniqueId(), channel.getKey(), "BracketType", null);
+                final BracketType bracketType = tmp != null ? BracketType.of(tmp) : BracketType.ANGLE;
+                line.add(achan.makeChannelTag(channelColor, bracketColor, bracketType));
+            }
+            line.add(text().content(channel.getTitle()).color(channelColor)
                       .hoverEvent(showText(tooltip))
                       .clickEvent(runCommand("/" + channel.getTag().toLowerCase()))
                       .build());
             if (player != null && channel.equals(plugin.getFocusChannel(player.getUniqueId()))) {
-                cb.append(text().content("*").color(channelColor)
+                line.add(text().content("*").color(channelColor)
                           .hoverEvent(showText(text("You are focusing " + channel.getTitle(), channelColor)))
                           .build());
             }
-            cb.append(text(" - ", DARK_GRAY));
-            cb.append(text(channel.getDescription(), GRAY));
-            lines.add(cb.build());
+            line.add(text(" - ", DARK_GRAY));
+            line.add(text(channel.getDescription(), GRAY));
+            lines.add(join(noSeparators(), line));
         }
         sender.sendMessage(join(separator(newline()), lines));
         if (sender instanceof Player) {

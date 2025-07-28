@@ -17,7 +17,7 @@ public enum BracketType {
         this.closing = closing;
     }
 
-    static BracketType of(String val) {
+    public static BracketType of(String val) {
         if (val == null) return BracketType.BRACKETS;
         try {
             return valueOf(val.toUpperCase());
